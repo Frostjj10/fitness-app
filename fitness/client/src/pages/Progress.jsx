@@ -48,6 +48,17 @@ export default function Progress({ user }) {
     }));
   }
 
+  async function deleteLogEntry(date, exerciseId) {
+    if (!confirm(`Delete ${exerciseId} entry for ${date}?`)) return;
+    await supabase
+      .from('weight_logs')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('date', date)
+      .eq('exercise_id', exerciseId);
+    fetchWeightLog();
+  }
+
   function getPRs() {
     const filtered = weightLog.filter(e => e.exercise_id === selectedExercise);
     if (filtered.length === 0) return { weight: 0, reps: 0, estimated1RM: 0 };
@@ -150,6 +161,7 @@ export default function Progress({ user }) {
                   <th className="px-6 py-3">Reps</th>
                   <th className="px-6 py-3">RPE</th>
                   <th className="px-6 py-3">Est. 1RM</th>
+                  <th className="px-6 py-3 w-12"></th>
                 </tr>
               </thead>
               <tbody>
@@ -161,6 +173,15 @@ export default function Progress({ user }) {
                     <td className="px-6 py-3">{entry.reps}</td>
                     <td className="px-6 py-3">{entry.rpe}/10</td>
                     <td className="px-6 py-3 text-blue-600">{entry.estimated1RM} {user.unit}</td>
+                    <td className="px-6 py-3">
+                      <button
+                        onClick={() => deleteLogEntry(entry.date, selectedExercise)}
+                        className="text-red-400 hover:text-red-700 text-sm"
+                        title="Delete entry"
+                      >
+                        ✕
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
