@@ -236,9 +236,9 @@ export default function SchedulePage({ user }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Schedule</h1>
-        <div className="text-gray-500">{formatDateLong(schedule.start_date)} — {formatDateLong(schedule.end_date)}</div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Schedule</h1>
+        <div className="text-slate-500">{formatDateLong(schedule.start_date)} — {formatDateLong(schedule.end_date)}</div>
       </div>
 
       {/* Week selector */}
@@ -247,8 +247,8 @@ export default function SchedulePage({ user }) {
           <button
             key={i}
             onClick={() => setSelectedWeek(i)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              selectedWeek === i ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+            className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+              selectedWeek === i ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             Week {week.weekNum}
