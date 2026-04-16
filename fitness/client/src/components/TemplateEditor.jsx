@@ -132,7 +132,7 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
       id: editedTemplate.id,
       name: editedTemplate.name,
       is_default: editedTemplate.is_default || editedTemplate.isDefault || false,
-      day_types: editedTemplate.dayTypes.map(dt => ({
+      day_types: (editedTemplate.dayTypes || editedTemplate.day_types || []).map(dt => ({
         label: dt.label,
         muscle_groups: dt.muscleGroups,
         exercises: (dt.exercises || []).map(ex => ({
