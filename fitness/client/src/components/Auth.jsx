@@ -71,7 +71,7 @@ export default function Auth() {
             </svg>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">FitTrack</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="text-slate-500 text-sm mt-1">
             {mode === 'login' ? 'Welcome back' : 'Start your journey'}
           </p>
         </div>

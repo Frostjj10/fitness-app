@@ -26,14 +26,14 @@ export default function RestDayCard({ day, onAddExercise, onRemoveExercise }) {
 
       {expanded && (
         <div className="p-4">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{workout ? 'Core Finisher' : 'Recovery'}</p>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{workout ? 'Core Finisher' : 'Recovery'}</p>
           {workout && workout.exercises.length > 0 ? (
             <div className="space-y-2">
               {workout.exercises.map((ex, i) => (
                 <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl p-3 border border-slate-100">
                   <div>
                     <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
-                    <div className="text-xs text-slate-400">{ex.sets}×{ex.reps} · {ex.restSeconds}s rest</div>
+                    <div className="text-xs text-slate-500">{ex.sets}×{ex.reps} · {ex.restSeconds}s rest</div>
                   </div>
                   <button onClick={() => onRemoveExercise && onRemoveExercise(ex.exerciseId)} className="text-xs text-slate-300 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition-all">✕</button>
                 </div>
@@ -42,7 +42,7 @@ export default function RestDayCard({ day, onAddExercise, onRemoveExercise }) {
           ) : (
             <p className="text-sm text-slate-300 mb-3">No core exercises</p>
           )}
-          <button onClick={() => onAddExercise && onAddExercise('core')} className="mt-3 w-full py-2 border-2 border-dashed border-slate-200 text-slate-400 rounded-xl hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-all">
+          <button onClick={() => onAddExercise && onAddExercise('core')} className="mt-3 w-full py-2 border-2 border-dashed border-slate-200 text-slate-500 rounded-xl hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-all">
             + Add Core Exercise
           </button>
         </div>

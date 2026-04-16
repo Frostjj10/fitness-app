@@ -161,7 +161,7 @@ export default function Settings({ user, onUpdate }) {
             <input type="file" accept=".json" onChange={importData} className="hidden" />
           </label>
         </div>
-        <p className="text-sm text-slate-400 mt-3">
+        <p className="text-sm text-slate-500 mt-3">
           Export your data as a JSON backup. Import to restore your workout history.
         </p>
       </div>

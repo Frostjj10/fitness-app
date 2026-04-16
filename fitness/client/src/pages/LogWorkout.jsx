@@ -200,7 +200,7 @@ export default function LogWorkout({ user }) {
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-400">Loading...</div>;
+    return <div className="text-center py-20 text-slate-500">Loading...</div>;
   }
 
   if (!schedule) {

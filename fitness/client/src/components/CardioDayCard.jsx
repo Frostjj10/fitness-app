@@ -57,11 +57,11 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
                     <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <label className="text-xs text-slate-400 font-medium">Duration ({ex.unit})</label>
+                        <label className="text-xs text-slate-500 font-medium">Duration ({ex.unit})</label>
                         <input type="number" value={getEditValues(ex.exerciseId).reps} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], reps: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />
                       </div>
                       <div>
-                        <label className="text-xs text-slate-400 font-medium">Rest (s)</label>
+                        <label className="text-xs text-slate-500 font-medium">Rest (s)</label>
                         <input type="number" value={getEditValues(ex.exerciseId).restSeconds} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" />
                       </div>
                     </div>
@@ -74,7 +74,7 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
-                      <div className="text-xs text-slate-400">{ex.sets} × {ex.reps} {ex.unit}</div>
+                      <div className="text-xs text-slate-500">{ex.sets} × {ex.reps} {ex.unit}</div>
                     </div>
                     <div className="flex gap-1">
                       <button onClick={() => startEdit(ex)} className="text-xs font-semibold text-orange-500 hover:text-orange-700 px-2 py-1 rounded-lg hover:bg-orange-50 transition-all">Edit</button>
