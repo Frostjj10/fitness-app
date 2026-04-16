@@ -13,6 +13,7 @@ export default function Dashboard({ user }) {
   const [workoutDays, setWorkoutDays] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('ppl');
+  const [selectedWeek, setSelectedWeek] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
 
