@@ -3,7 +3,6 @@ import { formatDate } from '../utils/format';
 
 export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, onUpdateExercise }) {
   const [expanded, setExpanded] = useState(false);
-  // Use an object keyed by exerciseId so each exercise has independent edit state
   const [editValuesById, setEditValuesById] = useState({});
 
   const workout = day.workout;
@@ -42,40 +41,37 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
   }
 
   return (
-    <div className="bg-white rounded-xl shadow overflow-hidden">
+    <div className="card overflow-hidden">
       <div
-        className="bg-blue-700 text-white px-4 py-2 font-medium cursor-pointer hover:bg-blue-800"
+        className="bg-gradient-to-r from-brand-700 to-brand-600 text-white px-5 py-3 cursor-pointer hover:from-brand-800 hover:to-brand-700 transition-all"
         onClick={() => setExpanded(e => !e)}
       >
         <div className="flex justify-between items-center">
           <div>
-            <div>{day.dayOfWeek}</div>
-            <div className="text-xs font-normal opacity-80">{formatDate(day.date)}</div>
+            <div className="font-bold text-sm">{day.dayOfWeek}</div>
+            <div className="text-xs text-brand-200 opacity-80">{formatDate(day.date)}</div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-normal">{workout.dayOfWeek}</div>
-            <div className="text-xs opacity-75">{workout.muscleGroups}</div>
+            <div className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-md">{workout.dayOfWeek}</div>
+            <div className="text-xs text-brand-200 mt-0.5">{workout.muscleGroups}</div>
           </div>
         </div>
       </div>
 
       {expanded ? (
         <div className="p-4">
-          <div className="text-sm text-blue-600 font-medium mb-3">{workout.muscleGroups}</div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {workout.exercises.map((ex, i) => {
               const isCardio = ex.unit === 'min';
               return (
-              <div key={i} className={`border rounded-lg p-3 ${isCardio ? 'border-orange-200 bg-orange-50' : ''}`}>
+              <div key={i} className={`rounded-xl p-3 border transition-all ${isCardio ? 'border-orange-200 bg-orange-50' : 'border-slate-100 bg-slate-50 hover:border-slate-200'}`}>
                 {editValuesById[ex.exerciseId] ? (
-                  // Inline edit mode
                   <div className="space-y-2">
-                    <div className="font-medium text-sm">{ex.name}</div>
+                    <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
                     {isCardio ? (
-                      // Cardio: only duration
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <label className="text-xs text-gray-500">Duration (min)</label>
+                          <label className="text-xs text-slate-500 font-medium">Duration (min)</label>
                           <input
                             type="number"
                             value={getEditValues(ex.exerciseId).reps}
@@ -83,16 +79,15 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                               ...prev,
                               [ex.exerciseId]: { ...prev[ex.exerciseId], reps: parseInt(e.target.value) || 0 }
                             }))}
-                            className="w-full border rounded px-2 py-1"
+                            className="input text-sm py-2"
                             min="1"
                           />
                         </div>
                       </div>
                     ) : (
-                      // Strength: sets, reps, weight, rest
                       <div className="grid grid-cols-4 gap-2 text-sm">
                         <div>
-                          <label className="text-xs text-gray-500">Sets</label>
+                          <label className="text-xs text-slate-500 font-medium">Sets</label>
                           <input
                             type="number"
                             value={getEditValues(ex.exerciseId).sets}
@@ -100,12 +95,12 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                               ...prev,
                               [ex.exerciseId]: { ...prev[ex.exerciseId], sets: parseInt(e.target.value) || 0 }
                             }))}
-                            className="w-full border rounded px-2 py-1"
+                            className="input text-sm py-2"
                             min="1"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-500">Reps</label>
+                          <label className="text-xs text-slate-500 font-medium">Reps</label>
                           <input
                             type="number"
                             value={getEditValues(ex.exerciseId).reps}
@@ -113,12 +108,12 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                               ...prev,
                               [ex.exerciseId]: { ...prev[ex.exerciseId], reps: parseInt(e.target.value) || 0 }
                             }))}
-                            className="w-full border rounded px-2 py-1"
+                            className="input text-sm py-2"
                             min="1"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-500">Weight</label>
+                          <label className="text-xs text-slate-500 font-medium">Weight</label>
                           <input
                             type="number"
                             value={getEditValues(ex.exerciseId).targetWeight}
@@ -126,12 +121,12 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                               ...prev,
                               [ex.exerciseId]: { ...prev[ex.exerciseId], targetWeight: parseFloat(e.target.value) || 0 }
                             }))}
-                            className="w-full border rounded px-2 py-1"
+                            className="input text-sm py-2"
                             min="0"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-500">Rest (s)</label>
+                          <label className="text-xs text-slate-500 font-medium">Rest (s)</label>
                           <input
                             type="number"
                             value={getEditValues(ex.exerciseId).restSeconds}
@@ -139,57 +134,50 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                               ...prev,
                               [ex.exerciseId]: { ...prev[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 }
                             }))}
-                            className="w-full border rounded px-2 py-1"
+                            className="input text-sm py-2"
                             min="0"
                           />
                         </div>
                       </div>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-1">
                       <button
                         onClick={() => saveEdit(ex.exerciseId)}
-                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                        className="px-3 py-1.5 bg-brand-600 text-white text-xs font-semibold rounded-lg hover:bg-brand-700"
                       >
                         Save
                       </button>
                       <button
                         onClick={() => cancelEdit(ex.exerciseId)}
-                        className="px-3 py-1 bg-gray-200 text-sm rounded hover:bg-gray-300"
+                        className="px-3 py-1.5 bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-300"
                       >
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  // Display mode
                   <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-sm flex items-center gap-2">
-                        {ex.name}
-                        {isCardio && <span className="text-xs bg-orange-200 text-orange-700 px-1.5 py-0.5 rounded">Cardio</span>}
-                      </div>
-                      <div className="text-xs text-gray-500">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm text-slate-900 truncate">{ex.name}</div>
+                      <div className="text-xs text-slate-500">
                         {isCardio
-                          ? `${ex.reps} min · ${ex.equipment}`
-                          : `${ex.sets}×${ex.reps} @ ${ex.targetWeight} lbs · ${ex.restSeconds}s rest · ${ex.isCompound ? 'Compound' : 'Isolation'}`
+                          ? `${ex.reps} min · ${ex.equipment || ''}`
+                          : `${ex.sets}×${ex.reps} @ ${ex.targetWeight} · ${ex.restSeconds}s · ${ex.isCompound ? 'Compound' : 'Isolation'}`
                         }
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 ml-2">
                       {!isCardio && (
                         <button
                           onClick={() => startEdit(ex)}
-                          className="text-blue-600 hover:text-blue-800 text-sm"
+                          className="text-brand-600 hover:text-brand-800 text-xs font-semibold px-2 py-1 hover:bg-brand-50 rounded-lg transition-all"
                         >
                           Edit
                         </button>
                       )}
                       <button
-                        onClick={() => {
-                          console.log('X clicked, calling onRemoveExercise with exerciseId:', ex.exerciseId);
-                          onRemoveExercise(ex.exerciseId);
-                        }}
-                        className="text-red-500 hover:text-red-700 text-sm"
+                        onClick={() => onRemoveExercise(ex.exerciseId)}
+                        className="text-red-400 hover:text-red-700 text-xs px-2 py-1 hover:bg-red-50 rounded-lg transition-all"
                       >
                         ✕
                       </button>
@@ -203,20 +191,23 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
 
           <button
             onClick={onAddExercise}
-            className="mt-4 w-full py-2 border-2 border-dashed border-blue-300 text-blue-600 rounded-lg hover:border-blue-500 hover:text-blue-700 text-sm font-medium"
+            className="mt-3 w-full py-2 border-2 border-dashed border-slate-300 text-slate-500 rounded-xl hover:border-brand-400 hover:text-brand-600 hover:bg-brand-50 text-sm font-semibold transition-all"
           >
             + Add Exercise
           </button>
         </div>
       ) : (
         <div className="p-4">
-          <div className="text-sm text-blue-600 font-medium mb-2">{workout.muscleGroups}</div>
+          <div className="text-xs font-semibold text-brand-600 mb-2">{workout.muscleGroups}</div>
           <div className="space-y-1">
             {workout.exercises.slice(0, 5).map((ex, i) => (
-              <div key={i} className="text-sm text-gray-600 truncate">{ex.name}</div>
+              <div key={i} className="text-sm text-slate-600 truncate flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />
+                {ex.name}
+              </div>
             ))}
             {workout.exercises.length > 5 && (
-              <div className="text-xs text-gray-400">+{workout.exercises.length - 5} more</div>
+              <div className="text-xs text-slate-400 font-medium">+{workout.exercises.length - 5} more</div>
             )}
           </div>
         </div>

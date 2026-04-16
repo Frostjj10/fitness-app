@@ -81,23 +81,25 @@ export default function Progress({ user }) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Progress</h1>
+      <div>
+        <h1 className="page-title">Progress</h1>
+        <p className="text-slate-500 mt-1">Track your strength gains over time</p>
+      </div>
 
       {exerciseList.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-20 card">
           <div className="text-6xl mb-4">📊</div>
-          <h2 className="text-2xl font-bold mb-2">No Data Yet</h2>
-          <p className="text-gray-500">Log your workouts to see your progress over time.</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">No Data Yet</h2>
+          <p className="text-slate-500">Log your workouts to see your progress over time.</p>
         </div>
       ) : (
         <>
-          {/* Exercise selector */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Select Exercise</label>
+          <div className="card p-5">
+            <label className="section-title mb-3 block">Select Exercise</label>
             <select
               value={selectedExercise}
               onChange={e => setSelectedExercise(e.target.value)}
-              className="w-64 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg"
+              className="input max-w-sm"
             >
               {exerciseList.map(id => {
                 const entry = weightLog.find(e => e.exercise_id === id);
@@ -110,51 +112,48 @@ export default function Progress({ user }) {
             </select>
           </div>
 
-          {/* PRs */}
-          <div className="grid grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl shadow p-6 text-center">
-              <div className="text-sm text-gray-500 mb-1">Best Weight</div>
-              <div className="text-3xl font-bold">{prs.weight} {user.unit}</div>
-              <div className="text-sm text-gray-500 mt-1">{prs.reps} reps</div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="card p-5 text-center">
+              <div className="text-xs section-title mb-1">Best Weight</div>
+              <div className="text-3xl font-extrabold text-slate-900">{prs.weight}</div>
+              <div className="text-sm text-slate-500 font-medium">{user.unit} × {prs.reps} reps</div>
             </div>
-            <div className="bg-white rounded-xl shadow p-6 text-center">
-              <div className="text-sm text-gray-500 mb-1">Est. 1RM</div>
-              <div className="text-3xl font-bold text-blue-600">{prs.estimated1RM} {user.unit}</div>
-              <div className="text-sm text-gray-500 mt-1">Epley formula</div>
+            <div className="card p-5 text-center">
+              <div className="text-xs section-title mb-1">Est. 1RM</div>
+              <div className="text-3xl font-extrabold text-brand-600">{prs.estimated1RM}</div>
+              <div className="text-sm text-slate-500 font-medium">{user.unit} · Epley</div>
             </div>
-            <div className="bg-white rounded-xl shadow p-6 text-center">
-              <div className="text-sm text-gray-500 mb-1">Total Workouts Logged</div>
-              <div className="text-3xl font-bold">{weightLog.length}</div>
-              <div className="text-sm text-gray-500 mt-1">entries</div>
+            <div className="card p-5 text-center">
+              <div className="text-xs section-title mb-1">Total Entries</div>
+              <div className="text-3xl font-extrabold text-slate-900">{weightLog.length}</div>
+              <div className="text-sm text-slate-500 font-medium">logged sets</div>
             </div>
           </div>
 
-          {/* Chart */}
           {chartData.length > 0 && (
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Weight Progress Over Time</h2>
-              <div className="h-80">
+            <div className="card p-6">
+              <h2 className="text-lg font-bold text-slate-900 mb-4">Weight Progress</h2>
+              <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#94a3b8' }} />
+                    <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="weight" stroke="#2563eb" strokeWidth={2} />
+                    <Line type="monotone" dataKey="weight" stroke="#6366f1" strokeWidth={2.5} dot={{ fill: '#6366f1', strokeWidth: 0, r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
 
-          {/* History table */}
-          <div className="bg-white rounded-xl shadow overflow-hidden">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">Recent History</h2>
+          <div className="card overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-900">Recent History</h2>
             </div>
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-gray-500 bg-gray-50">
+                <tr className="text-left text-xs section-title bg-slate-50">
                   <th className="px-6 py-3">Date</th>
                   <th className="px-6 py-3">Exercise</th>
                   <th className="px-6 py-3">Weight</th>
@@ -166,17 +165,17 @@ export default function Progress({ user }) {
               </thead>
               <tbody>
                 {chartData.slice(-10).reverse().map((entry, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="px-6 py-3">{entry.date}</td>
-                    <td className="px-6 py-3">{selectedExercise}</td>
-                    <td className="px-6 py-3 font-medium">{entry.weight} {user.unit}</td>
-                    <td className="px-6 py-3">{entry.reps}</td>
-                    <td className="px-6 py-3">{entry.rpe}/10</td>
-                    <td className="px-6 py-3 text-blue-600">{entry.estimated1RM} {user.unit}</td>
+                  <tr key={i} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-3 text-sm text-slate-600 font-medium">{entry.date}</td>
+                    <td className="px-6 py-3 text-sm text-slate-600">{selectedExercise}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-slate-900">{entry.weight} {user.unit}</td>
+                    <td className="px-6 py-3 text-sm text-slate-600">{entry.reps}</td>
+                    <td className="px-6 py-3 text-sm text-slate-600">{entry.rpe}/10</td>
+                    <td className="px-6 py-3 text-sm font-bold text-brand-600">{entry.estimated1RM} {user.unit}</td>
                     <td className="px-6 py-3">
                       <button
                         onClick={() => deleteLogEntry(entry.date, selectedExercise)}
-                        className="text-red-400 hover:text-red-700 text-sm"
+                        className="text-red-400 hover:text-red-700 text-sm transition-colors"
                         title="Delete entry"
                       >
                         ✕

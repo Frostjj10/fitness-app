@@ -62,13 +62,11 @@ export default function Settings({ user, onUpdate }) {
     const text = await file.text();
     const data = JSON.parse(text);
 
-    // Import weight logs
     if (data.weightLog?.length) {
       const logsWithUser = data.weightLog.map(log => ({ ...log, user_id: user.id }));
       await supabase.from('weight_logs').upsert(logsWithUser);
     }
 
-    // Import workout logs
     if (data.workoutLog?.length) {
       const logsWithUser = data.workoutLog.map(log => ({ ...log, user_id: user.id }));
       await supabase.from('workout_logs').upsert(logsWithUser);
@@ -78,57 +76,59 @@ export default function Settings({ user, onUpdate }) {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <h1 className="text-3xl font-bold">Settings</h1>
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h1 className="page-title">Settings</h1>
+        <p className="text-slate-500 mt-1">Manage your profile and preferences</p>
+      </div>
 
-      {/* Profile */}
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Profile</h2>
+      <div className="card p-6">
+        <div className="section-title mb-4">Profile</div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Name</label>
+            <label className="label">Name</label>
             <input
               type="text"
               value={form.name || ''}
               onChange={e => updateField('name', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Age</label>
+            <label className="label">Age</label>
             <input
               type="number"
               value={form.age || ''}
               onChange={e => updateField('age', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Weight ({form.unit})</label>
+            <label className="label">Weight ({form.unit || 'lbs'})</label>
             <input
               type="number"
               value={form.weight || ''}
               onChange={e => updateField('weight', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Unit</label>
+            <label className="label">Unit</label>
             <select
               value={form.unit || 'lbs'}
               onChange={e => updateField('unit', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="input"
             >
               <option value="lbs">lbs</option>
               <option value="kg">kg</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Goal</label>
+            <label className="label">Goal</label>
             <select
               value={form.goal || ''}
               onChange={e => updateField('goal', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="input"
             >
               <option value="">Select...</option>
               <option value="strength">Strength</option>
@@ -138,11 +138,11 @@ export default function Settings({ user, onUpdate }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Experience</label>
+            <label className="label">Experience</label>
             <select
               value={form.experience || ''}
               onChange={e => updateField('experience', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="input"
             >
               <option value="">Select...</option>
               <option value="beginner">Beginner</option>
@@ -151,41 +151,43 @@ export default function Settings({ user, onUpdate }) {
             </select>
           </div>
           <div className="col-span-2">
-            <label className="flex items-center gap-3 cursor-pointer">
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
               <input
                 type="checkbox"
                 checked={form.progressive_overload ?? true}
                 onChange={e => updateField('progressive_overload', e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
               <div>
-                <div className="text-sm font-medium">Progressive Overload Suggestions</div>
-                <div className="text-xs text-gray-500">Automatically suggest next session's weight based on your logged performance</div>
+                <div className="text-sm font-semibold text-slate-900">Progressive Overload Suggestions</div>
+                <div className="text-xs text-slate-500">Automatically suggest next session's weight based on your logged performance</div>
               </div>
-            </label>
+            </div>
           </div>
         </div>
-        <button
-          onClick={saveProfile}
-          className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Save Profile
-        </button>
-        {saved && <span className="ml-4 text-green-600">Saved!</span>}
+        <div className="flex items-center gap-4 mt-5">
+          <button onClick={saveProfile} className="btn-primary">
+            Save Profile
+          </button>
+          {saved && (
+            <span className="text-lift-600 font-semibold text-sm flex items-center gap-1">
+              <span>✓</span> Saved!
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Data */}
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Data</h2>
-        <div className="flex gap-4">
+      <div className="card p-6">
+        <div className="section-title mb-4">Data</div>
+        <div className="flex gap-3">
           <button
             onClick={exportData}
-            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg"
+            className="btn-secondary text-sm"
           >
-            Export Data
+            📤 Export Data
           </button>
-          <label className="px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer">
-            Import Data
+          <label className="btn-secondary text-sm cursor-pointer">
+            📥 Import Data
             <input
               type="file"
               accept=".json"
@@ -194,7 +196,7 @@ export default function Settings({ user, onUpdate }) {
             />
           </label>
         </div>
-        <p className="text-sm text-gray-500 mt-3">
+        <p className="text-sm text-slate-400 mt-3">
           Export your data as a JSON backup. Import to restore your workout history.
         </p>
       </div>

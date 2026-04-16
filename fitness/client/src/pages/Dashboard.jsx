@@ -29,7 +29,6 @@ export default function Dashboard({ user }) {
       .maybeSingle();
 
     if (data) {
-      // Fetch full schedule data from schedule_weeks → schedule_days → workout_exercises
       const fullSchedule = await loadFullSchedule(data.id);
       setCurrentSchedule(fullSchedule);
     }
@@ -59,7 +58,6 @@ export default function Dashboard({ user }) {
             .eq('schedule_day_id', day.id)
             .order('sort_order');
 
-          // Normalize exercises from snake_case (DB) to camelCase (code)
           const normalizedExercises = (exercises || []).map(ex => ({
             exerciseId: ex.exercise_id,
             name: ex.name,
@@ -73,7 +71,6 @@ export default function Dashboard({ user }) {
             sortOrder: ex.sort_order,
           }));
 
-          // Normalize day from snake_case to camelCase and structure workout
           return {
             dayOfWeek: day.day_of_week,
             date: day.date,
@@ -88,7 +85,6 @@ export default function Dashboard({ user }) {
         return { dayOfWeek: day.day_of_week, date: day.date, type: day.type, workout: null };
       }));
 
-      // Normalize week from snake_case to camelCase
       return {
         weekNum: week.week_num,
         startDate: week.start_date,
@@ -96,7 +92,6 @@ export default function Dashboard({ user }) {
       };
     }));
 
-    // Fetch the schedule metadata (without nested data)
     const { data: scheduleMeta } = await supabase
       .from('schedules')
       .select('*')
@@ -119,18 +114,14 @@ export default function Dashboard({ user }) {
       .select('*')
       .or(`is_default.eq.true,created_by.eq.${user.id}`);
 
-    // Start with client-side defaults (always up-to-date)
     const defaultTemplates = [...DEFAULT_TEMPLATES];
 
     if (data?.length) {
-      // Normalize templates from Supabase (snake_case) to internal format (camelCase)
       const normalized = data.map(t => {
         let dayTypes = t.dayTypes || t.day_types;
-        // Handle stringified JSON
         if (typeof dayTypes === 'string') {
           try { dayTypes = JSON.parse(dayTypes); } catch { dayTypes = []; }
         }
-        // Normalize each dayType's exercises from snake_case to camelCase
         const normalizedDayTypes = (Array.isArray(dayTypes) ? dayTypes : []).map(dt => {
           const exercises = (dt.exercises || dt.day_types || []).map(ex => ({
             exerciseId: ex.exercise_id || ex.exerciseId,
@@ -152,7 +143,6 @@ export default function Dashboard({ user }) {
         return { ...t, dayTypes: normalizedDayTypes };
       });
 
-      // Merge: use fetched templates, but fill in defaults where user hasn't customized
       const fetchedIds = new Set(normalized.map(t => t.id));
       const missingDefaults = defaultTemplates.filter(t => !fetchedIds.has(t.id));
       setTemplates([...missingDefaults, ...normalized]);
@@ -169,7 +159,6 @@ export default function Dashboard({ user }) {
 
   function handleTemplateSave(savedTemplate) {
     if (savedTemplate) {
-      // Normalize savedTemplate from Supabase (snake_case) to internal format (camelCase)
       let dayTypes = savedTemplate.dayTypes || savedTemplate.day_types;
       if (typeof dayTypes === 'string') {
         try { dayTypes = JSON.parse(dayTypes); } catch { dayTypes = []; }
@@ -223,7 +212,6 @@ export default function Dashboard({ user }) {
         templates
       );
 
-      // Save to Supabase
       const { data: scheduleData, error: scheduleError } = await supabase
         .from('schedules')
         .insert([{
@@ -241,14 +229,12 @@ export default function Dashboard({ user }) {
 
       if (scheduleError) throw scheduleError;
 
-      // Deactivate old schedules
       await supabase
         .from('schedules')
         .update({ is_active: false })
         .neq('id', schedule.id)
         .eq('user_id', user.id);
 
-      // Save schedule structure
       for (const week of schedule.schedule) {
         const { data: weekData } = await supabase
           .from('schedule_weeks')
@@ -340,28 +326,40 @@ export default function Dashboard({ user }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <div className="text-gray-500">Welcome, {user.name}</div>
+        <div>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="text-slate-500 mt-1">Welcome back, {user.name}</p>
+        </div>
+        {currentSchedule && (
+          <div className="text-sm text-slate-500 bg-white px-4 py-2 rounded-xl shadow-card">
+            Week {selectedWeek + 1} of {currentSchedule.schedule?.length || 4}
+          </div>
+        )}
       </div>
 
       {!currentSchedule ? (
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Create Your Workout Block</h2>
-          <p className="text-gray-600 mb-6">
-            Pick your workout days, choose a template, and I'll build a personalized 4-week plan.
-          </p>
+        <div className="card p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center">
+              <span className="text-xl">🎯</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Create Your Workout Block</h2>
+              <p className="text-slate-500 text-sm">Pick your workout days and template — I'll build a personalized 4-week plan.</p>
+            </div>
+          </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-3 text-blue-700">Workout Days</label>
+          <div className="mb-8">
+            <label className="section-title">Workout Days</label>
             <div className="flex flex-wrap gap-2">
               {DAYS.map(day => (
                 <button
                   key={day}
                   onClick={() => toggleDay(day)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
                     workoutDays.includes(day)
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200'
+                      ? 'bg-brand-600 text-white shadow-md'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
                   {day.slice(0, 3)}
@@ -370,29 +368,29 @@ export default function Dashboard({ user }) {
             </div>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-green-700">Template</label>
+              <label className="section-title">Template</label>
               <button
                 onClick={() => setEditorOpen(true)}
-                className="text-sm text-green-600 hover:text-green-800 font-medium"
+                className="text-sm text-brand-600 hover:text-brand-800 font-semibold"
               >
                 Customize Template
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {templates.map(t => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedTemplate(t.id)}
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
                     selectedTemplate === t.id
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-brand-500 bg-brand-50'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
-                  <div className="font-medium">{t.name}</div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="font-semibold text-slate-900">{t.name}</div>
+                  <div className="text-xs text-slate-500 mt-1">
                       {(() => {
                         const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
                         return `${dt.length} day${dt.length !== 1 ? 's' : ''} · ${dt.map(d => d.label).join(', ')}`;
@@ -406,37 +404,38 @@ export default function Dashboard({ user }) {
           <button
             onClick={generateSchedule}
             disabled={workoutDays.length === 0 || generating}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-lg font-medium"
+            className="btn-primary text-lg"
           >
-            {generating ? 'Generating...' : 'Generate 4-Week Plan'}
+            {generating ? '⏳ Generating...' : '🚀 Generate 4-Week Plan'}
           </button>
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-3 gap-6 mb-4">
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Current Block</h3>
-              <p className="text-2xl font-bold">{formatDateLong(currentSchedule.startDate)} — {formatDateLong(currentSchedule.endDate)}</p>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="card p-5">
+              <div className="text-xs section-title mb-1">Current Block</div>
+              <p className="text-sm font-bold text-slate-900">{formatDateLong(currentSchedule.startDate)}</p>
+              <p className="text-xs text-slate-400">to {formatDateLong(currentSchedule.endDate)}</p>
             </div>
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-1">This Week</h3>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-600 rounded-full" style={{ width: `${getWeekProgress()}%` }} />
+            <div className="card p-5">
+              <div className="text-xs section-title mb-1">Week Progress</div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-brand-600 rounded-full transition-all" style={{ width: `${getWeekProgress()}%` }} />
                 </div>
-                <span className="text-sm font-medium">{Math.round(getWeekProgress())}%</span>
+                <span className="text-xs font-bold text-brand-600">{Math.round(getWeekProgress())}%</span>
               </div>
             </div>
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Schedule</h3>
-              <p className="text-lg font-medium">
-                {currentSchedule.workoutDays?.join(', ') || 'None'}
-              </p>
+            <div className="card p-5">
+              <div className="text-xs section-title mb-1">Schedule</div>
+              <p className="text-sm font-bold text-slate-900">{currentSchedule.workoutDays?.join(', ') || 'None'}</p>
+              <p className="text-xs text-slate-400 capitalize">{user.goal} · {user.experience}</p>
             </div>
           </div>
+
           <button
             onClick={clearSchedule}
-            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 font-medium"
+            className="w-full mt-4 py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-slate-400 hover:text-slate-600 font-semibold text-sm"
           >
             + Create New Block
           </button>
@@ -444,41 +443,43 @@ export default function Dashboard({ user }) {
       )}
 
       {nextWorkout && (
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Next Workout</h2>
+        <div className="card p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-500">{nextWorkout.dayOfWeek}</div>
-              <div className="text-xl font-bold">{nextWorkout.muscleGroups}</div>
-              <div className="text-gray-600 mt-1">{nextWorkout.exercises?.length || 0} exercises</div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-lift-100 flex items-center justify-center text-2xl">💪</div>
+              <div>
+                <div className="text-xs section-title mb-0.5">Next Workout</div>
+                <div className="text-lg font-bold text-slate-900">{nextWorkout.dayOfWeek}</div>
+                <div className="text-sm text-brand-600 font-medium">{nextWorkout.muscleGroups}</div>
+              </div>
             </div>
-            <Link to="/log" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Start Workout
+            <Link to="/log" className="btn-primary">
+              Start Workout →
             </Link>
           </div>
         </div>
       )}
 
       {currentSchedule && (
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Quick Stats</h2>
-            <Link to="/schedule" className="text-blue-600 hover:underline text-sm">View Full Schedule</Link>
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-slate-900">Quick Stats</h2>
+            <Link to="/schedule" className="text-sm text-brand-600 hover:text-brand-800 font-semibold">View Schedule →</Link>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{currentSchedule.schedule?.length || 0}</div>
-              <div className="text-sm text-gray-500">Weeks</div>
+            <div className="text-center p-4 bg-slate-50 rounded-xl">
+              <div className="text-3xl font-extrabold text-brand-600">{currentSchedule.schedule?.length || 0}</div>
+              <div className="text-xs text-slate-500 mt-1 font-semibold">Weeks</div>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{activeDaysPerWeek}</div>
-              <div className="text-sm text-gray-500">Workout Days</div>
+            <div className="text-center p-4 bg-slate-50 rounded-xl">
+              <div className="text-3xl font-extrabold text-brand-600">{activeDaysPerWeek}</div>
+              <div className="text-xs text-slate-500 mt-1 font-semibold">Workout Days</div>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
+            <div className="text-center p-4 bg-slate-50 rounded-xl">
+              <div className="text-xl font-extrabold text-lift-600 truncate">
                 {currentSchedule.templateId ? templates.find(t => t.id === currentSchedule.templateId)?.name || 'Custom' : '—'}
               </div>
-              <div className="text-sm text-gray-500">Template</div>
+              <div className="text-xs text-slate-500 mt-1 font-semibold">Template</div>
             </div>
           </div>
         </div>

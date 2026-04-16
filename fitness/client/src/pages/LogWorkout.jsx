@@ -54,14 +54,11 @@ export default function LogWorkout({ user }) {
       .order('date', { ascending: false });
 
     if (!logs) return [];
-
-    // Build map: exerciseId -> [all entries]
     const historyMap = {};
     for (const log of logs) {
       if (!historyMap[log.exercise_id]) historyMap[log.exercise_id] = [];
       historyMap[log.exercise_id].push(log);
     }
-
     setWeightLogHistory(logs || []);
     return historyMap;
   }
@@ -90,7 +87,6 @@ export default function LogWorkout({ user }) {
             .eq('schedule_day_id', day.id)
             .order('sort_order');
 
-          // Normalize exercises from snake_case (DB) to camelCase (code)
           const normalizedExercises = (exercises || []).map(ex => ({
             exerciseId: ex.exercise_id,
             name: ex.name,
@@ -209,13 +205,14 @@ export default function LogWorkout({ user }) {
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-gray-500">Loading...</div>;
+    return <div className="text-center py-20 text-slate-400">Loading...</div>;
   }
 
   if (!schedule) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500">No active schedule. Create one from the Dashboard first.</p>
+        <div className="text-6xl mb-4">🏋️</div>
+        <p className="text-slate-500">No active schedule. Create one from the Dashboard first.</p>
       </div>
     );
   }
@@ -227,26 +224,27 @@ export default function LogWorkout({ user }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Log Workout</h1>
-          <p className="text-gray-500">Select a day and log your progress</p>
+          <h1 className="page-title">Log Workout</h1>
+          <p className="text-slate-500 mt-1">Select a day and log your progress</p>
         </div>
         {saved && (
-          <div className="text-green-600 font-medium">✓ Saved!</div>
+          <div className="text-lift-600 font-bold flex items-center gap-1 text-sm">
+            ✓ Saved!
+          </div>
         )}
       </div>
 
-      {/* Day selector */}
-      <div className="bg-white rounded-xl shadow p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Which day are you logging?</label>
+      <div className="card p-5">
+        <label className="section-title mb-3 block">Which day are you logging?</label>
         <div className="flex flex-wrap gap-2">
           {workoutDays.map(w => (
             <button
               key={w.dayOfWeek}
               onClick={() => { setSelectedDay(w.dayOfWeek); setSaved(false); }}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
                 selectedDay === w.dayOfWeek
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 hover:bg-gray-200'
+                  ? 'bg-brand-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               {w.dayOfWeek}
@@ -255,130 +253,132 @@ export default function LogWorkout({ user }) {
         </div>
       </div>
 
-      {/* Selected workout info */}
       {currentWorkout && (
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          <div className="bg-blue-700 text-white px-6 py-3">
-            <div className="font-medium">{currentWorkout.dayOfWeek}</div>
-            <div className="text-sm opacity-80">{currentWorkout.muscleGroups}</div>
+        <div className="card overflow-hidden">
+          <div className="bg-gradient-to-r from-brand-700 to-brand-600 text-white px-6 py-4">
+            <div className="font-bold text-lg">{currentWorkout.dayOfWeek}</div>
+            <div className="text-sm text-brand-200 opacity-80">{currentWorkout.muscleGroups}</div>
           </div>
 
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 text-left text-sm text-gray-500">
-                <th className="px-6 py-3">Exercise</th>
-                <th className="px-6 py-3">Target</th>
-                <th className="px-6 py-3">{user.unit}</th>
-                <th className="px-6 py-3">{currentWorkout.exercises[0]?.unit === 'min' ? 'Duration (min)' : 'Reps'}</th>
-                <th className="px-6 py-3">RPE</th>
-                <th className="px-6 py-3">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentWorkout.exercises.map((ex, i) => {
-                const entry = logEntries[ex.exerciseId] || {};
-                const isCardio = ex.unit === 'min';
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-100 text-left text-xs section-title">
+                  <th className="px-6 py-3">Exercise</th>
+                  <th className="px-6 py-3">Target</th>
+                  <th className="px-6 py-3">{user.unit}</th>
+                  <th className="px-6 py-3">{currentWorkout.exercises[0]?.unit === 'min' ? 'Duration (min)' : 'Reps'}</th>
+                  <th className="px-6 py-3">RPE</th>
+                  <th className="px-6 py-3">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentWorkout.exercises.map((ex, i) => {
+                  const entry = logEntries[ex.exerciseId] || {};
+                  const isCardio = ex.unit === 'min';
 
-                // Progressive overload recommendation
-                const rec = getProgressiveOverloadRecommendation(
-                  ex.exerciseId,
-                  ex.muscleGroup,
-                  user.unit,
-                  ex.reps,
-                  weightLogHistory
-                );
-                const useProgressive = user.progressive_overload !== false; // default true
-                const suggestedWeight = rec.suggestedWeight || ex.targetWeight;
-                const defaultWeight = useProgressive && rec.suggestedWeight
-                  ? rec.suggestedWeight
-                  : (entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight);
-                const weightChanged = useProgressive && rec.suggestedWeight && rec.suggestedWeight !== rec.lastWeight;
+                  const rec = getProgressiveOverloadRecommendation(
+                    ex.exerciseId,
+                    ex.muscleGroup,
+                    user.unit,
+                    ex.reps,
+                    weightLogHistory
+                  );
+                  const useProgressive = user.progressive_overload !== false;
+                  const suggestedWeight = rec.suggestedWeight || ex.targetWeight;
+                  const defaultWeight = useProgressive && rec.suggestedWeight
+                    ? rec.suggestedWeight
+                    : (entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight);
+                  const weightChanged = useProgressive && rec.suggestedWeight && rec.suggestedWeight !== rec.lastWeight;
 
-                return (
-                  <tr key={i} className="border-t">
-                    <td className="px-6 py-4">
-                      <div className="font-medium">{ex.name}</div>
-                      <div className="text-sm text-gray-500">{ex.muscleGroup}</div>
-                      {weightChanged && (
-                        <div className="text-xs text-blue-600 mt-0.5 font-medium">Goal: {suggestedWeight}{user.unit}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {isCardio
-                        ? `${ex.reps} min`
-                        : `${ex.sets}×${ex.reps} @ ${ex.targetWeight}${user.unit}`}
-                    </td>
-                    <td className="px-6 py-4">
-                      {isCardio ? (
-                        <span className="text-gray-400 text-sm">—</span>
-                      ) : (
-                        <div className="relative">
-                          <input
-                            type="number"
-                            defaultValue={defaultWeight}
-                            onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
-                            className={`w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${weightChanged ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}
-                          />
-                          {weightChanged && (
-                            <div className="text-xs text-blue-500 mt-0.5">+{rec.increment}{user.unit}</div>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <input
-                        type="number"
-                        defaultValue={entry.reps || lastLoggedWeights[ex.exerciseId]?.reps || ex.reps}
-                        onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)}
-                        className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        placeholder={isCardio ? 'min' : ''}
-                      />
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        defaultValue={entry.rpe || 7}
-                        onChange={e => updateEntry(ex.exerciseId, 'rpe', e.target.value)}
-                        className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      >
-                        {[1,2,3,4,5,6,7,8,9,10].map(v => (
-                          <option key={v} value={v}>{v} — {RPE_LABELS[v]}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-6 py-4">
-                      <input
-                        type="text"
-                        placeholder="Notes..."
-                        defaultValue={entry.notes}
-                        onChange={e => updateEntry(ex.exerciseId, 'notes', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr key={i} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-semibold text-slate-900">{ex.name}</div>
+                        <div className="text-xs text-slate-400">{ex.muscleGroup}</div>
+                        {weightChanged && (
+                          <div className="text-xs text-brand-600 mt-0.5 font-semibold flex items-center gap-1">
+                            <span>↑</span> Goal: {suggestedWeight}{user.unit}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {isCardio
+                          ? `${ex.reps} min`
+                          : `${ex.sets}×${ex.reps} @ ${ex.targetWeight}${user.unit}`}
+                      </td>
+                      <td className="px-6 py-4">
+                        {isCardio ? (
+                          <span className="text-slate-300 text-sm">—</span>
+                        ) : (
+                          <div>
+                            <input
+                              type="number"
+                              defaultValue={defaultWeight}
+                              onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
+                              className={`w-24 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm ${weightChanged ? 'border-brand-400 bg-brand-50' : 'border-slate-200'}`}
+                            />
+                            {weightChanged && (
+                              <div className="text-xs text-lift-600 mt-0.5 font-semibold">+{rec.increment}{user.unit}</div>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <input
+                          type="number"
+                          defaultValue={entry.reps || lastLoggedWeights[ex.exerciseId]?.reps || ex.reps}
+                          onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)}
+                          className="w-20 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                          placeholder={isCardio ? 'min' : ''}
+                        />
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          defaultValue={entry.rpe || 7}
+                          onChange={e => updateEntry(ex.exerciseId, 'rpe', e.target.value)}
+                          className="w-32 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm bg-white"
+                        >
+                          {[1,2,3,4,5,6,7,8,9,10].map(v => (
+                            <option key={v} value={v}>{v} — {RPE_LABELS[v]}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <input
+                          type="text"
+                          placeholder="Notes..."
+                          defaultValue={entry.notes}
+                          onChange={e => updateEntry(ex.exerciseId, 'notes', e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {currentWorkout && (
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end">
           <button
             onClick={saveWorkout}
             disabled={saving || saved}
-            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-lg font-medium"
+            className="btn-primary text-lg"
           >
-            {saving ? 'Saving...' : saved ? 'Saved!' : 'Complete Workout'}
+            {saving ? 'Saving...' : saved ? '✓ Saved!' : '💪 Complete Workout'}
           </button>
         </div>
       )}
 
       {!currentWorkout && workoutDays.length === 0 && (
-        <div className="text-center py-20">
+        <div className="text-center py-20 card">
           <div className="text-6xl mb-4">🏖️</div>
-          <h2 className="text-2xl font-bold mb-2">No Workouts Scheduled</h2>
-          <p className="text-gray-500">Go to Dashboard to create a schedule first.</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">No Workouts Scheduled</h2>
+          <p className="text-slate-500">Go to Dashboard to create a schedule first.</p>
         </div>
       )}
     </div>
