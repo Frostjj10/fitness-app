@@ -82,20 +82,20 @@ export default function Progress({ user }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Progress</h1>
-        <p className="text-slate-500 mt-1">Track your strength gains over time</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Progress</h1>
+        <p className="text-slate-400 mt-1 text-sm">Track your strength gains over time</p>
       </div>
 
       {exerciseList.length === 0 ? (
-        <div className="text-center py-20 card">
-          <div className="text-6xl mb-4">📊</div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">No Data Yet</h2>
-          <p className="text-slate-500">Log your workouts to see your progress over time.</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-16 text-center">
+          <div className="text-slate-200 text-5xl mb-4 font-thin">—</div>
+          <h2 className="text-xl font-bold text-slate-900 mb-1">No Data Yet</h2>
+          <p className="text-slate-400 text-sm">Log your workouts to see your progress here.</p>
         </div>
       ) : (
         <>
-          <div className="card p-5">
-            <label className="section-title mb-3 block">Select Exercise</label>
+          <div className="bg-white rounded-xl border border-slate-100 p-5">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Select Exercise</label>
             <select
               value={selectedExercise}
               onChange={e => setSelectedExercise(e.target.value)}
@@ -112,27 +112,27 @@ export default function Progress({ user }) {
             </select>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="card p-5 text-center">
-              <div className="text-xs section-title mb-1">Best Weight</div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
+              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Best Weight</div>
               <div className="text-3xl font-extrabold text-slate-900">{prs.weight}</div>
-              <div className="text-sm text-slate-500 font-medium">{user.unit} × {prs.reps} reps</div>
+              <div className="text-sm text-slate-400 font-medium">{user.unit} × {prs.reps} reps</div>
             </div>
-            <div className="card p-5 text-center">
-              <div className="text-xs section-title mb-1">Est. 1RM</div>
-              <div className="text-3xl font-extrabold text-brand-600">{prs.estimated1RM}</div>
-              <div className="text-sm text-slate-500 font-medium">{user.unit} · Epley</div>
+            <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
+              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Est. 1RM</div>
+              <div className="text-3xl font-extrabold text-orange-500">{prs.estimated1RM}</div>
+              <div className="text-sm text-slate-400 font-medium">{user.unit} · Epley</div>
             </div>
-            <div className="card p-5 text-center">
-              <div className="text-xs section-title mb-1">Total Entries</div>
+            <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
+              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Total Entries</div>
               <div className="text-3xl font-extrabold text-slate-900">{weightLog.length}</div>
-              <div className="text-sm text-slate-500 font-medium">logged sets</div>
+              <div className="text-sm text-slate-400 font-medium">logged sets</div>
             </div>
           </div>
 
           {chartData.length > 0 && (
-            <div className="card p-6">
-              <h2 className="text-lg font-bold text-slate-900 mb-4">Weight Progress</h2>
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h2 className="text-base font-bold text-slate-900 mb-4">Weight Progress</h2>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
@@ -140,20 +140,20 @@ export default function Progress({ user }) {
                     <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#94a3b8' }} />
                     <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="weight" stroke="#6366f1" strokeWidth={2.5} dot={{ fill: '#6366f1', strokeWidth: 0, r: 4 }} />
+                    <Line type="monotone" dataKey="weight" stroke="#f97316" strokeWidth={2.5} dot={{ fill: '#f97316', strokeWidth: 0, r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
 
-          <div className="card overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100">
+          <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100">
               <h2 className="text-base font-bold text-slate-900">Recent History</h2>
             </div>
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs section-title bg-slate-50">
+                <tr className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">
                   <th className="px-6 py-3">Date</th>
                   <th className="px-6 py-3">Exercise</th>
                   <th className="px-6 py-3">Weight</th>
@@ -171,11 +171,11 @@ export default function Progress({ user }) {
                     <td className="px-6 py-3 text-sm font-bold text-slate-900">{entry.weight} {user.unit}</td>
                     <td className="px-6 py-3 text-sm text-slate-600">{entry.reps}</td>
                     <td className="px-6 py-3 text-sm text-slate-600">{entry.rpe}/10</td>
-                    <td className="px-6 py-3 text-sm font-bold text-brand-600">{entry.estimated1RM} {user.unit}</td>
+                    <td className="px-6 py-3 text-sm font-bold text-orange-500">{entry.estimated1RM} {user.unit}</td>
                     <td className="px-6 py-3">
                       <button
                         onClick={() => deleteLogEntry(entry.date, selectedExercise)}
-                        className="text-red-400 hover:text-red-700 text-sm transition-colors"
+                        className="text-slate-300 hover:text-red-500 text-sm transition-colors"
                         title="Delete entry"
                       >
                         ✕
