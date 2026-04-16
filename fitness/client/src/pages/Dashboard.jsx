@@ -119,14 +119,33 @@ export default function Dashboard({ user }) {
       .or(`is_default.eq.true,created_by.eq.${user.id}`);
 
     if (data?.length) {
-      // Normalize day_types to dayTypes for internal use
+      // Normalize templates from Supabase (snake_case) to internal format (camelCase)
       const normalized = data.map(t => {
         let dayTypes = t.dayTypes || t.day_types;
         // Handle stringified JSON
         if (typeof dayTypes === 'string') {
           try { dayTypes = JSON.parse(dayTypes); } catch { dayTypes = []; }
         }
-        return { ...t, dayTypes: Array.isArray(dayTypes) ? dayTypes : [] };
+        // Normalize each dayType's exercises from snake_case to camelCase
+        const normalizedDayTypes = (Array.isArray(dayTypes) ? dayTypes : []).map(dt => {
+          const exercises = (dt.exercises || dt.day_types || []).map(ex => ({
+            exerciseId: ex.exercise_id || ex.exerciseId,
+            name: ex.name,
+            muscleGroup: ex.muscle_group || ex.muscleGroup,
+            sets: ex.sets,
+            reps: ex.reps,
+            targetWeight: ex.target_weight || ex.targetWeight,
+            restSeconds: ex.rest_seconds || ex.restSeconds,
+            isCompound: ex.is_compound ?? ex.isCompound,
+            unit: ex.unit || 'reps',
+          }));
+          return {
+            label: dt.label,
+            muscleGroups: dt.muscle_groups || dt.muscleGroups,
+            exercises,
+          };
+        });
+        return { ...t, dayTypes: normalizedDayTypes };
       });
       setTemplates(normalized);
     } else {
@@ -142,14 +161,39 @@ export default function Dashboard({ user }) {
 
   function handleTemplateSave(savedTemplate) {
     if (savedTemplate) {
+      // Normalize savedTemplate from Supabase (snake_case) to internal format (camelCase)
+      let dayTypes = savedTemplate.dayTypes || savedTemplate.day_types;
+      if (typeof dayTypes === 'string') {
+        try { dayTypes = JSON.parse(dayTypes); } catch { dayTypes = []; }
+      }
+      const normalizedDayTypes = (Array.isArray(dayTypes) ? dayTypes : []).map(dt => {
+        const exercises = (dt.exercises || dt.day_types || []).map(ex => ({
+          exerciseId: ex.exercise_id || ex.exerciseId,
+          name: ex.name,
+          muscleGroup: ex.muscle_group || ex.muscleGroup,
+          sets: ex.sets,
+          reps: ex.reps,
+          targetWeight: ex.target_weight || ex.targetWeight,
+          restSeconds: ex.rest_seconds || ex.restSeconds,
+          isCompound: ex.is_compound ?? ex.isCompound,
+          unit: ex.unit || 'reps',
+        }));
+        return {
+          label: dt.label,
+          muscleGroups: dt.muscle_groups || dt.muscleGroups,
+          exercises,
+        };
+      });
+      const normalized = { ...savedTemplate, dayTypes: normalizedDayTypes };
+
       setTemplates(prev => {
-        const idx = prev.findIndex(t => t.id === savedTemplate.id);
+        const idx = prev.findIndex(t => t.id === normalized.id);
         if (idx >= 0) {
           const updated = [...prev];
-          updated[idx] = savedTemplate;
+          updated[idx] = normalized;
           return updated;
         }
-        return [...prev, savedTemplate];
+        return [...prev, normalized];
       });
       setSelectedTemplate(savedTemplate.id);
     } else {
@@ -166,7 +210,9 @@ export default function Dashboard({ user }) {
         user,
         workoutDays,
         new Date().toISOString().split('T')[0],
-        selectedTemplate
+        selectedTemplate,
+        null,
+        templates
       );
 
       // Save to Supabase
