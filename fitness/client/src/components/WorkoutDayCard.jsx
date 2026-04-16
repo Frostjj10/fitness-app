@@ -185,11 +185,8 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
             {workout.exercises.slice(0, 3).map((ex, i) => (
               <div key={i} className="text-sm text-gray-600 truncate">{ex.name}</div>
             ))}
-            {workout.exercises.length > 3 && workout.exercises.length <= 5 && (
-              <div className="text-xs text-gray-400">+{workout.exercises.length - 3} more</div>
-            )}
             {workout.exercises.length > 5 && (
-              <div className="text-xs text-orange-500">+ Cardio finisher</div>
+              <div className="text-xs text-gray-400">+{workout.exercises.length - 5} more</div>
             )}
           </div>
         </div>
