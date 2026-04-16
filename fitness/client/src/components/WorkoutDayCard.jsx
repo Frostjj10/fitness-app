@@ -2,31 +2,42 @@ import { useState } from 'react';
 
 export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, onUpdateExercise }) {
   const [expanded, setExpanded] = useState(false);
-  const [editingEx, setEditingEx] = useState(null);
-  const [editValues, setEditValues] = useState({});
+  // Use an object keyed by exerciseId so each exercise has independent edit state
+  const [editValuesById, setEditValuesById] = useState({});
 
   const workout = day.workout;
   if (!workout) return null;
 
   function startEdit(ex) {
-    setEditingEx(ex.exerciseId);
-    setEditValues({
-      sets: ex.sets,
-      reps: ex.reps,
-      targetWeight: ex.targetWeight,
-      restSeconds: ex.restSeconds,
+    setEditValuesById(prev => ({
+      ...prev,
+      [ex.exerciseId]: {
+        sets: ex.sets,
+        reps: ex.reps,
+        targetWeight: ex.targetWeight,
+        restSeconds: ex.restSeconds,
+      },
+    }));
+  }
+
+  function cancelEdit(exerciseId) {
+    setEditValuesById(prev => {
+      const next = { ...prev };
+      delete next[exerciseId];
+      return next;
     });
   }
 
-  function cancelEdit() {
-    setEditingEx(null);
-    setEditValues({});
+  function saveEdit(exerciseId) {
+    const editValues = editValuesById[exerciseId];
+    if (editValues) {
+      onUpdateExercise(exerciseId, editValues);
+    }
+    cancelEdit(exerciseId);
   }
 
-  function saveEdit(exerciseId) {
-    onUpdateExercise(exerciseId, editValues);
-    setEditingEx(null);
-    setEditValues({});
+  function getEditValues(exerciseId) {
+    return editValuesById[exerciseId] || {};
   }
 
   return (
@@ -55,7 +66,7 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
               const isCardio = ex.unit === 'min';
               return (
               <div key={i} className={`border rounded-lg p-3 ${isCardio ? 'border-orange-200 bg-orange-50' : ''}`}>
-                {editingEx === ex.exerciseId ? (
+                {editValuesById[ex.exerciseId] ? (
                   // Inline edit mode
                   <div className="space-y-2">
                     <div className="font-medium text-sm">{ex.name}</div>
@@ -66,8 +77,11 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                           <label className="text-xs text-gray-500">Duration (min)</label>
                           <input
                             type="number"
-                            value={editValues.reps}
-                            onChange={e => setEditValues(v => ({ ...v, reps: parseInt(e.target.value) || 0 }))}
+                            value={getEditValues(ex.exerciseId).reps}
+                            onChange={e => setEditValuesById(prev => ({
+                              ...prev,
+                              [ex.exerciseId]: { ...prev[ex.exerciseId], reps: parseInt(e.target.value) || 0 }
+                            }))}
                             className="w-full border rounded px-2 py-1"
                             min="1"
                           />
@@ -80,8 +94,11 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                           <label className="text-xs text-gray-500">Sets</label>
                           <input
                             type="number"
-                            value={editValues.sets}
-                            onChange={e => setEditValues(v => ({ ...v, sets: parseInt(e.target.value) || 0 }))}
+                            value={getEditValues(ex.exerciseId).sets}
+                            onChange={e => setEditValuesById(prev => ({
+                              ...prev,
+                              [ex.exerciseId]: { ...prev[ex.exerciseId], sets: parseInt(e.target.value) || 0 }
+                            }))}
                             className="w-full border rounded px-2 py-1"
                             min="1"
                           />
@@ -90,8 +107,11 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                           <label className="text-xs text-gray-500">Reps</label>
                           <input
                             type="number"
-                            value={editValues.reps}
-                            onChange={e => setEditValues(v => ({ ...v, reps: parseInt(e.target.value) || 0 }))}
+                            value={getEditValues(ex.exerciseId).reps}
+                            onChange={e => setEditValuesById(prev => ({
+                              ...prev,
+                              [ex.exerciseId]: { ...prev[ex.exerciseId], reps: parseInt(e.target.value) || 0 }
+                            }))}
                             className="w-full border rounded px-2 py-1"
                             min="1"
                           />
@@ -100,8 +120,11 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                           <label className="text-xs text-gray-500">Weight</label>
                           <input
                             type="number"
-                            value={editValues.targetWeight}
-                            onChange={e => setEditValues(v => ({ ...v, targetWeight: parseFloat(e.target.value) || 0 }))}
+                            value={getEditValues(ex.exerciseId).targetWeight}
+                            onChange={e => setEditValuesById(prev => ({
+                              ...prev,
+                              [ex.exerciseId]: { ...prev[ex.exerciseId], targetWeight: parseFloat(e.target.value) || 0 }
+                            }))}
                             className="w-full border rounded px-2 py-1"
                             min="0"
                           />
@@ -110,8 +133,11 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                           <label className="text-xs text-gray-500">Rest (s)</label>
                           <input
                             type="number"
-                            value={editValues.restSeconds}
-                            onChange={e => setEditValues(v => ({ ...v, restSeconds: parseInt(e.target.value) || 0 }))}
+                            value={getEditValues(ex.exerciseId).restSeconds}
+                            onChange={e => setEditValuesById(prev => ({
+                              ...prev,
+                              [ex.exerciseId]: { ...prev[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 }
+                            }))}
                             className="w-full border rounded px-2 py-1"
                             min="0"
                           />
@@ -126,7 +152,7 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                         Save
                       </button>
                       <button
-                        onClick={cancelEdit}
+                        onClick={() => cancelEdit(ex.exerciseId)}
                         className="px-3 py-1 bg-gray-200 text-sm rounded hover:bg-gray-300"
                       >
                         Cancel
@@ -185,7 +211,7 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
         <div className="p-4">
           <div className="text-sm text-blue-600 font-medium mb-2">{workout.muscleGroups}</div>
           <div className="space-y-1">
-            {workout.exercises.slice(0, 3).map((ex, i) => (
+            {workout.exercises.slice(0, 5).map((ex, i) => (
               <div key={i} className="text-sm text-gray-600 truncate">{ex.name}</div>
             ))}
             {workout.exercises.length > 5 && (

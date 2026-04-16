@@ -2,26 +2,36 @@ import { useState } from 'react';
 
 export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, onUpdateExercise }) {
   const [expanded, setExpanded] = useState(false);
-  const [editingEx, setEditingEx] = useState(null);
-  const [editValues, setEditValues] = useState({});
+  const [editValuesById, setEditValuesById] = useState({});
 
   const workout = day.workout;
   if (!workout) return null;
 
   function startEdit(ex) {
-    setEditingEx(ex.exerciseId);
-    setEditValues({ reps: ex.reps, restSeconds: ex.restSeconds });
+    setEditValuesById(prev => ({
+      ...prev,
+      [ex.exerciseId]: { reps: ex.reps, restSeconds: ex.restSeconds },
+    }));
   }
 
-  function cancelEdit() {
-    setEditingEx(null);
-    setEditValues({});
+  function cancelEdit(exerciseId) {
+    setEditValuesById(prev => {
+      const next = { ...prev };
+      delete next[exerciseId];
+      return next;
+    });
   }
 
   function saveEdit(exerciseId) {
-    onUpdateExercise(exerciseId, editValues);
-    setEditingEx(null);
-    setEditValues({});
+    const editValues = editValuesById[exerciseId];
+    if (editValues) {
+      onUpdateExercise(exerciseId, editValues);
+    }
+    cancelEdit(exerciseId);
+  }
+
+  function getEditValues(exerciseId) {
+    return editValuesById[exerciseId] || {};
   }
 
   return (
@@ -48,7 +58,7 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
           <div className="space-y-3">
             {workout.exercises.map((ex, i) => (
               <div key={i} className="border rounded-lg p-3">
-                {editingEx === ex.exerciseId ? (
+                {editValuesById[ex.exerciseId] ? (
                   <div className="space-y-2">
                     <div className="font-medium text-sm">{ex.name}</div>
                     <div className="grid grid-cols-3 gap-2 text-sm">
@@ -56,8 +66,11 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
                         <label className="text-xs text-gray-500">Duration ({ex.unit})</label>
                         <input
                           type="number"
-                          value={editValues.reps}
-                          onChange={e => setEditValues(v => ({ ...v, reps: parseInt(e.target.value) || 0 }))}
+                          value={getEditValues(ex.exerciseId).reps}
+                          onChange={e => setEditValuesById(prev => ({
+                            ...prev,
+                            [ex.exerciseId]: { ...prev[ex.exerciseId], reps: parseInt(e.target.value) || 0 }
+                          }))}
                           className="w-full border rounded px-2 py-1"
                           min="1"
                         />
@@ -66,15 +79,18 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
                         <label className="text-xs text-gray-500">Rest (s)</label>
                         <input
                           type="number"
-                          value={editValues.restSeconds}
-                          onChange={e => setEditValues(v => ({ ...v, restSeconds: parseInt(e.target.value) || 0 }))}
+                          value={getEditValues(ex.exerciseId).restSeconds}
+                          onChange={e => setEditValuesById(prev => ({
+                            ...prev,
+                            [ex.exerciseId]: { ...prev[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 }
+                          }))}
                           className="w-full border rounded px-2 py-1"
                         />
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => saveEdit(ex.exerciseId)} className="px-3 py-1 bg-orange-500 text-white text-sm rounded">Save</button>
-                      <button onClick={cancelEdit} className="px-3 py-1 bg-gray-200 text-sm rounded">Cancel</button>
+                      <button onClick={() => cancelEdit(ex.exerciseId)} className="px-3 py-1 bg-gray-200 text-sm rounded">Cancel</button>
                     </div>
                   </div>
                 ) : (
