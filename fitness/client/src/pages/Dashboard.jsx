@@ -118,6 +118,9 @@ export default function Dashboard({ user }) {
       .select('*')
       .or(`is_default.eq.true,created_by.eq.${user.id}`);
 
+    // Start with client-side defaults (always up-to-date)
+    const defaultTemplates = [...DEFAULT_TEMPLATES];
+
     if (data?.length) {
       // Normalize templates from Supabase (snake_case) to internal format (camelCase)
       const normalized = data.map(t => {
@@ -147,9 +150,13 @@ export default function Dashboard({ user }) {
         });
         return { ...t, dayTypes: normalizedDayTypes };
       });
-      setTemplates(normalized);
+
+      // Merge: use fetched templates, but fill in defaults where user hasn't customized
+      const fetchedIds = new Set(normalized.map(t => t.id));
+      const missingDefaults = defaultTemplates.filter(t => !fetchedIds.has(t.id));
+      setTemplates([...missingDefaults, ...normalized]);
     } else {
-      setTemplates([...DEFAULT_TEMPLATES]);
+      setTemplates(defaultTemplates);
     }
   }
 

@@ -48,7 +48,7 @@ export function buildMesocycle(user, workoutDays, startDate, templateId = 'ppl',
       // Workout day — map to template day type (rotating)
       const workoutIndex = workoutDays.indexOf(dayOfWeek);
       const templateDay = dayTypes[workoutIndex % dayTypes.length];
-      const workout = buildWorkoutFromTemplateDay(templateDay, user, week.weekNum, true); // true = add cardio finisher
+      const workout = buildWorkoutFromTemplateDay(templateDay, user, week.weekNum, false); // false = no cardio finisher
 
       workout.dayOfWeek = dayOfWeek;
       workout.date = date;
