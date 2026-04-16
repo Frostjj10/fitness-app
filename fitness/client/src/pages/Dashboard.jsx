@@ -282,8 +282,8 @@ export default function Dashboard({ user }) {
                 >
                   <div className="font-medium">{t.name}</div>
                   <div className="text-xs text-gray-500 mt-1">
-                    {t.dayTypes?.length || 0} day{t.dayTypes?.length > 1 ? 's' : ''} ·{' '}
-                    {t.dayTypes?.map(d => d.label).join(', ')}
+                      {(t.dayTypes || t.day_types || []).length || 0} day{(t.dayTypes || t.day_types || []).length > 1 ? 's' : ''} ·{' '}
+                      {(t.dayTypes || t.day_types || []).map(d => d.label).join(', ')}
                   </div>
                 </button>
               ))}
