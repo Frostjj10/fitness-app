@@ -1,7 +1,7 @@
- {
-    "buildCommand": "cd client && npm install && npm run build",
-    "outputDirectory": "client/dist",                                                                                      
-    "rewrites": [
+{                                                                                                                        
+    "buildCommand": "cd fitness/client && npm install && npm run build",                                                   
+    "outputDirectory": "fitness/client/dist",                                                                              
+    "rewrites": [                                                                                                          
       { "source": "/(.*)", "destination": "/index.html" }                                                                  
     ]                                                                                                                      
-  }
+}
