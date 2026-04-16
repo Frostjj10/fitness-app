@@ -170,15 +170,27 @@ export default function SchedulePage({ user }) {
   }
 
   async function handleRemoveExercise(dayOfWeek, exerciseId) {
+    if (!exerciseId) {
+      console.warn('handleRemoveExercise: no exerciseId provided for dayOfWeek', dayOfWeek);
+      return;
+    }
     const week = schedule.schedule[selectedWeek];
     const day = week.days.find(d => d.dayOfWeek === dayOfWeek);
-    if (!day?.id) return;
+    if (!day?.id) {
+      console.warn('handleRemoveExercise: day not found for', dayOfWeek, 'or no day.id');
+      return;
+    }
 
-    await supabase
+    const { error } = await supabase
       .from('workout_exercises')
       .delete()
       .eq('schedule_day_id', day.id)
       .eq('exercise_id', exerciseId);
+
+    if (error) {
+      console.error('handleRemoveExercise error:', error);
+      return;
+    }
 
     const fullSchedule = await loadFullSchedule(schedule.id);
     setSchedule(fullSchedule);

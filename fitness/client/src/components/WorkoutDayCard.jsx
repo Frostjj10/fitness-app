@@ -158,7 +158,10 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                         </button>
                       )}
                       <button
-                        onClick={() => onRemoveExercise(ex.exerciseId)}
+                        onClick={() => {
+                          console.log('X clicked, calling onRemoveExercise with exerciseId:', ex.exerciseId);
+                          onRemoveExercise(ex.exerciseId);
+                        }}
                         className="text-red-500 hover:text-red-700 text-sm"
                       >
                         ✕
