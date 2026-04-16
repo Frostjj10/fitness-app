@@ -17,6 +17,25 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
     setAllExercises(data.all || []);
   }, [isOpen]);
 
+  function resolveExercises(exercises) {
+    if (!allExercises.length) return exercises;
+    const exMap = {};
+    for (const ex of allExercises) exMap[ex.id] = ex;
+    return exercises.map(ex => {
+      const def = exMap[ex.exerciseId];
+      if (def) {
+        return {
+          ...ex,
+          name: ex.name || def.name,
+          muscleGroup: ex.muscleGroup || def.muscleGroup,
+          primaryMuscle: ex.primaryMuscle || def.primary,
+          equipment: ex.equipment || def.equipment,
+        };
+      }
+      return ex;
+    });
+  }
+
   function handleClose() {
     setView('select');
     setSelectedTemplate(null);
@@ -341,11 +360,13 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
                     {/* Exercise list */}
                     <div className="space-y-2">
-                      {(dayType.exercises || []).map((ex, ei) => (
+                      {(dayType.exercises || []).map((ex, ei) => {
+                        const resolved = resolveExercises([ex])[0];
+                        return (
                         <div key={ei} className="flex items-center gap-2 bg-white rounded-lg p-2">
                           <div className="flex-1">
-                            <div className="text-sm font-medium">{ex.name}</div>
-                            <div className="text-xs text-gray-400">{ex.muscleGroup} · {ex.equipment}</div>
+                            <div className="text-sm font-medium">{resolved?.name || ex.name || 'Unknown'}</div>
+                            <div className="text-xs text-gray-400">{(resolved?.muscleGroup || ex.muscleGroup || '—')} · {(resolved?.equipment || ex.equipment || '—')}</div>
                           </div>
                           <input
                             type="number"
@@ -388,7 +409,8 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                             ✕
                           </button>
                         </div>
-                      ))}
+                      );
+                    })}
                     </div>
 
                     <button
