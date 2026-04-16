@@ -118,7 +118,20 @@ export default function Dashboard({ user }) {
       .select('*')
       .or(`is_default.eq.true,created_by.eq.${user.id}`);
 
-    setTemplates(data?.length ? data : [...DEFAULT_TEMPLATES]);
+    if (data?.length) {
+      // Normalize day_types to dayTypes for internal use
+      const normalized = data.map(t => {
+        let dayTypes = t.dayTypes || t.day_types;
+        // Handle stringified JSON
+        if (typeof dayTypes === 'string') {
+          try { dayTypes = JSON.parse(dayTypes); } catch { dayTypes = []; }
+        }
+        return { ...t, dayTypes: Array.isArray(dayTypes) ? dayTypes : [] };
+      });
+      setTemplates(normalized);
+    } else {
+      setTemplates([...DEFAULT_TEMPLATES]);
+    }
   }
 
   function toggleDay(day) {
@@ -326,8 +339,10 @@ export default function Dashboard({ user }) {
                 >
                   <div className="font-medium">{t.name}</div>
                   <div className="text-xs text-gray-500 mt-1">
-                      {(t.dayTypes || t.day_types || []).length || 0} day{(t.dayTypes || t.day_types || []).length > 1 ? 's' : ''} ·{' '}
-                      {(t.dayTypes || t.day_types || []).map(d => d.label).join(', ')}
+                      {(() => {
+                        const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
+                        return `${dt.length} day${dt.length !== 1 ? 's' : ''} · ${dt.map(d => d.label).join(', ')}`;
+                      })()}
                   </div>
                 </button>
               ))}

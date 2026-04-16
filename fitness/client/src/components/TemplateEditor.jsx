@@ -24,23 +24,35 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
     onClose();
   }
 
-  function startEdit(tpl) {                                                                                                
-      setSelectedTemplate(tpl);                             
+  function startEdit(tpl) {
+      setSelectedTemplate(tpl);
       // Normalize day_types to dayTypes for internal use
-      const normalized = JSON.parse(JSON.stringify(tpl));                                                                  
-      if (normalized.day_types && !normalized.dayTypes) {
-        normalized.dayTypes = normalized.day_types;                                                                        
-        delete normalized.day_types;                        
-      }                                                                                                                    
-      // Also normalize nested day_types in dayTypes
-      if (normalized.dayTypes) {                                                                                           
-        normalized.dayTypes = normalized.dayTypes.map(dt => {
-          if (dt.day_types && !dt.exercises) {
-            return { ...dt, exercises: dt.day_types };                                                                     
-          }
-          return dt;                                                                                                       
-        });                                                 
+      const normalized = JSON.parse(JSON.stringify(tpl));
+
+      // Handle day_types as string (JSON serialized) or object
+      if (normalized.day_types) {
+        if (typeof normalized.day_types === 'string') {
+          try { normalized.day_types = JSON.parse(normalized.day_types); } catch { normalized.day_types = []; }
+        }
+        if (!normalized.dayTypes) {
+          normalized.dayTypes = normalized.day_types;
+          delete normalized.day_types;
+        }
       }
+
+      // Also normalize nested day_types in dayTypes
+      if (normalized.dayTypes && Array.isArray(normalized.dayTypes)) {
+        normalized.dayTypes = normalized.dayTypes.map(dt => {
+          if (dt.day_types) {
+            if (typeof dt.day_types === 'string') {
+              try { dt.day_types = JSON.parse(dt.day_types); } catch { dt.day_types = []; }
+            }
+            return { ...dt, exercises: dt.day_types };
+          }
+          return dt;
+        });
+      }
+
       setEditedTemplate(normalized);
       setView('edit');
     }
@@ -228,10 +240,16 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                       <div>
                         <div className="font-medium">{t.name}</div>
                         <div className="text-xs text-gray-500 mt-1">
-                          {(t.dayTypes || t.day_types || []).length} day{(t.dayTypes || t.day_types || []).length > 1 ? 's' : ''}
+                          {(() => {
+                            const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
+                            return `${dt.length} day${dt.length !== 1 ? 's' : ''}`;
+                          })()}
                         </div>
                         <div className="text-xs text-gray-400 mt-1">
-                          {(t.dayTypes || t.day_types || []).map(d => d.label).join(', ')}
+                          {(() => {
+                            const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
+                            return dt.map(d => d.label).join(', ');
+                          })()}
                         </div>
                       </div>
                       {(t.is_default || t.isDefault) && (
