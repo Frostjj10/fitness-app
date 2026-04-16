@@ -66,6 +66,7 @@ export default function LogWorkout({ user }) {
       }
     }
     setLastLoggedWeights(latestWeights);
+  }
 
   async function loadFullSchedule(scheduleId) {
     const { data: weeks } = await supabase
