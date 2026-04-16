@@ -376,7 +376,7 @@ export default function Dashboard({ user }) {
             <div className="bg-white rounded-xl shadow p-6">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Schedule</h3>
               <p className="text-lg font-medium">
-                {currentSchedule.workout_days?.join(', ') || 'None'}
+                {currentSchedule.workoutDays?.join(', ') || 'None'}
               </p>
             </div>
           </div>
@@ -422,7 +422,7 @@ export default function Dashboard({ user }) {
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold text-green-600">
-                {currentSchedule.template_id ? templates.find(t => t.id === currentSchedule.template_id)?.name || 'Custom' : '—'}
+                {currentSchedule.templateId ? templates.find(t => t.id === currentSchedule.templateId)?.name || 'Custom' : '—'}
               </div>
               <div className="text-sm text-gray-500">Template</div>
             </div>

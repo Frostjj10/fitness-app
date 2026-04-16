@@ -167,6 +167,9 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
           sets: ex.sets,
           reps: ex.reps,
           rest_seconds: ex.restSeconds,
+          target_weight: ex.targetWeight || 0,
+          is_compound: ex.isCompound || false,
+          unit: ex.unit || 'reps',
         })),
       })),
     };

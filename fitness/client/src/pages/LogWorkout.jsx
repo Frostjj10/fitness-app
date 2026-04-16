@@ -125,15 +125,15 @@ export default function LogWorkout({ user }) {
 
     try {
       const entries = workout.exercises.map(ex => {
-        const entry = logEntries[ex.exercise_id] || {};
+        const entry = logEntries[ex.exerciseId] || {};
         const isCardio = ex.unit === 'min';
         return {
           user_id: user.id,
           date,
-          exercise_id: ex.exercise_id,
+          exercise_id: ex.exerciseId,
           exercise_name: ex.name,
-          muscle_group: ex.muscle_group,
-          weight: isCardio ? 0 : (parseFloat(entry.weight) || ex.target_weight || ex.targetWeight),
+          muscle_group: ex.muscleGroup,
+          weight: isCardio ? 0 : (parseFloat(entry.weight) || ex.targetWeight),
           reps: isCardio ? (parseInt(entry.duration) || ex.reps) : (parseInt(entry.reps) || ex.reps),
           rpe: parseInt(entry.rpe) || 7,
           notes: entry.notes || '',
@@ -252,18 +252,18 @@ export default function LogWorkout({ user }) {
             </thead>
             <tbody>
               {currentWorkout.exercises.map((ex, i) => {
-                const entry = logEntries[ex.exercise_id] || {};
+                const entry = logEntries[ex.exerciseId] || {};
                 const isCardio = ex.unit === 'min';
                 return (
                   <tr key={i} className="border-t">
                     <td className="px-6 py-4">
                       <div className="font-medium">{ex.name}</div>
-                      <div className="text-sm text-gray-500">{ex.muscle_group}</div>
+                      <div className="text-sm text-gray-500">{ex.muscleGroup}</div>
                     </td>
                     <td className="px-6 py-4 text-gray-500">
                       {isCardio
                         ? `${ex.reps} min`
-                        : `${ex.sets}×${ex.reps} @ ${ex.target_weight || ex.targetWeight}${user.unit}`}
+                        : `${ex.sets}×${ex.reps} @ ${ex.targetWeight}${user.unit}`}
                     </td>
                     <td className="px-6 py-4">
                       {isCardio ? (
@@ -271,8 +271,8 @@ export default function LogWorkout({ user }) {
                       ) : (
                         <input
                           type="number"
-                          defaultValue={entry.weight || ex.target_weight || ex.targetWeight}
-                          onChange={e => updateEntry(ex.exercise_id, 'weight', e.target.value)}
+                          defaultValue={entry.weight || ex.targetWeight}
+                          onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
                           className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                       )}
@@ -281,7 +281,7 @@ export default function LogWorkout({ user }) {
                       <input
                         type="number"
                         defaultValue={entry.reps || ex.reps}
-                        onChange={e => updateEntry(ex.exercise_id, isCardio ? 'duration' : 'reps', e.target.value)}
+                        onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)}
                         className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         placeholder={isCardio ? 'min' : ''}
                       />
@@ -289,7 +289,7 @@ export default function LogWorkout({ user }) {
                     <td className="px-6 py-4">
                       <select
                         defaultValue={entry.rpe || 7}
-                        onChange={e => updateEntry(ex.exercise_id, 'rpe', e.target.value)}
+                        onChange={e => updateEntry(ex.exerciseId, 'rpe', e.target.value)}
                         className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                       >
                         {[1,2,3,4,5,6,7,8,9,10].map(v => (
@@ -302,7 +302,7 @@ export default function LogWorkout({ user }) {
                         type="text"
                         placeholder="Notes..."
                         defaultValue={entry.notes}
-                        onChange={e => updateEntry(ex.exercise_id, 'notes', e.target.value)}
+                        onChange={e => updateEntry(ex.exerciseId, 'notes', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                       />
                     </td>

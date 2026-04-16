@@ -185,9 +185,17 @@ export default function SchedulePage({ user }) {
     const day = week.days.find(d => d.dayOfWeek === dayOfWeek);
     if (!day?.id) return;
 
+    // Convert camelCase updates to snake_case for Supabase
+    const dbUpdates = {
+      sets: updates.sets,
+      reps: updates.reps,
+      target_weight: updates.targetWeight,
+      rest_seconds: updates.restSeconds,
+    };
+
     await supabase
       .from('workout_exercises')
-      .update(updates)
+      .update(dbUpdates)
       .eq('schedule_day_id', day.id)
       .eq('exercise_id', exerciseId);
 
