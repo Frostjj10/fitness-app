@@ -54,13 +54,8 @@ export default function LogWorkout({ user }) {
       .order('date', { ascending: false });
 
     if (!logs) return [];
-    const historyMap = {};
-    for (const log of logs) {
-      if (!historyMap[log.exercise_id]) historyMap[log.exercise_id] = [];
-      historyMap[log.exercise_id].push(log);
-    }
     setWeightLogHistory(logs || []);
-    return historyMap;
+    return logs;
   }
 
   async function loadFullSchedule(scheduleId) {
@@ -211,8 +206,12 @@ export default function LogWorkout({ user }) {
   if (!schedule) {
     return (
       <div className="text-center py-20">
-        <div className="text-6xl mb-4">🏋️</div>
-        <p className="text-slate-500">No active schedule. Create one from the Dashboard first.</p>
+        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M14.5 4l-5 6-3 5 6.5 6L20 10l-5.5-6z"/>
+          </svg>
+        </div>
+        <p className="text-slate-500 font-medium">No active schedule. Create one from the Dashboard first.</p>
       </div>
     );
   }
@@ -228,7 +227,7 @@ export default function LogWorkout({ user }) {
           <p className="text-slate-500 mt-1">Select a day and log your progress</p>
         </div>
         {saved && (
-          <div className="text-lift-600 font-bold flex items-center gap-1 text-sm">
+          <div className="text-orange-500 font-bold flex items-center gap-1 text-sm">
             ✓ Saved!
           </div>
         )}
@@ -243,7 +242,7 @@ export default function LogWorkout({ user }) {
               onClick={() => { setSelectedDay(w.dayOfWeek); setSaved(false); }}
               className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
                 selectedDay === w.dayOfWeek
-                  ? 'bg-brand-600 text-white shadow-md'
+                  ? 'bg-slate-900 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -255,9 +254,9 @@ export default function LogWorkout({ user }) {
 
       {currentWorkout && (
         <div className="card overflow-hidden">
-          <div className="bg-gradient-to-r from-brand-700 to-brand-600 text-white px-6 py-4">
+          <div className="bg-gradient-to-r from-slate-800 to-slate-700 text-white px-6 py-4">
             <div className="font-bold text-lg">{currentWorkout.dayOfWeek}</div>
-            <div className="text-sm text-brand-200 opacity-80">{currentWorkout.muscleGroups}</div>
+            <div className="text-sm text-slate-300">{currentWorkout.muscleGroups}</div>
           </div>
 
           <div className="overflow-x-auto">
@@ -295,14 +294,14 @@ export default function LogWorkout({ user }) {
                     <tr key={i} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900">{ex.name}</div>
-                        <div className="text-xs text-slate-400">{ex.muscleGroup}</div>
+                        <div className="text-xs text-slate-500">{ex.muscleGroup}</div>
                         {weightChanged && (
-                          <div className="text-xs text-brand-600 mt-0.5 font-semibold flex items-center gap-1">
-                            <span>↑</span> Goal: {suggestedWeight}{user.unit}
+                          <div className="text-xs text-orange-500 mt-0.5 font-bold flex items-center gap-1">
+                            Goal: {suggestedWeight}{user.unit}
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
+                      <td className="px-6 py-4 text-sm text-slate-600">
                         {isCardio
                           ? `${ex.reps} min`
                           : `${ex.sets}×${ex.reps} @ ${ex.targetWeight}${user.unit}`}
@@ -316,10 +315,10 @@ export default function LogWorkout({ user }) {
                               type="number"
                               defaultValue={defaultWeight}
                               onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
-                              className={`w-24 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm ${weightChanged ? 'border-brand-400 bg-brand-50' : 'border-slate-200'}`}
+                              className={`w-24 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm ${weightChanged ? 'border-orange-400 bg-orange-50' : 'border-slate-200'}`}
                             />
                             {weightChanged && (
-                              <div className="text-xs text-lift-600 mt-0.5 font-semibold">+{rec.increment}{user.unit}</div>
+                              <div className="text-xs text-orange-500 mt-0.5 font-bold">+{rec.increment}{user.unit}</div>
                             )}
                           </div>
                         )}
@@ -329,7 +328,7 @@ export default function LogWorkout({ user }) {
                           type="number"
                           defaultValue={entry.reps || lastLoggedWeights[ex.exerciseId]?.reps || ex.reps}
                           onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)}
-                          className="w-20 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                          className="w-20 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm"
                           placeholder={isCardio ? 'min' : ''}
                         />
                       </td>
@@ -337,7 +336,7 @@ export default function LogWorkout({ user }) {
                         <select
                           defaultValue={entry.rpe || 7}
                           onChange={e => updateEntry(ex.exerciseId, 'rpe', e.target.value)}
-                          className="w-32 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm bg-white"
+                          className="w-32 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm bg-white"
                         >
                           {[1,2,3,4,5,6,7,8,9,10].map(v => (
                             <option key={v} value={v}>{v} — {RPE_LABELS[v]}</option>
@@ -350,7 +349,7 @@ export default function LogWorkout({ user }) {
                           placeholder="Notes..."
                           defaultValue={entry.notes}
                           onChange={e => updateEntry(ex.exerciseId, 'notes', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm"
                         />
                       </td>
                     </tr>
@@ -367,18 +366,23 @@ export default function LogWorkout({ user }) {
           <button
             onClick={saveWorkout}
             disabled={saving || saved}
-            className="btn-primary text-lg"
+            className="px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 text-sm"
           >
-            {saving ? 'Saving...' : saved ? '✓ Saved!' : '💪 Complete Workout'}
+            {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Complete Workout'}
           </button>
         </div>
       )}
 
       {!currentWorkout && workoutDays.length === 0 && (
-        <div className="text-center py-20 card">
-          <div className="text-6xl mb-4">🏖️</div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">No Workouts Scheduled</h2>
-          <p className="text-slate-500">Go to Dashboard to create a schedule first.</p>
+        <div className="text-center py-20 card p-16">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-1">No Workouts Scheduled</h2>
+          <p className="text-slate-500 text-sm">Go to Dashboard to create a schedule first.</p>
         </div>
       )}
     </div>

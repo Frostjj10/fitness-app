@@ -17,11 +17,11 @@
 
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 active:scale-[0.98] transition-all shadow-sm;
+    @apply px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-700 active:scale-[0.98] transition-all;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-white text-brand-600 font-semibold rounded-xl hover:bg-brand-50 active:scale-[0.98] transition-all shadow-sm border border-brand-200;
+    @apply px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl hover:bg-slate-50 active:scale-[0.98] transition-all border border-slate-200;
   }
 
   .btn-ghost {
@@ -29,7 +29,7 @@
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-shadow-lg border border-slate-100;
+    @apply bg-white rounded-2xl border border-slate-100;
   }
 
   .input {
@@ -41,7 +41,7 @@
   }
 
   .section-title {
-    @apply text-xs font-semibold uppercase tracking-widest text-slate-300 mb-3;
+    @apply text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3;
   }
 
   .page-title {
