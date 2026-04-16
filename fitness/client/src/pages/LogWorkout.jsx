@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { getProgressiveOverloadRecommendation } from '../utils/progressiveOverload';
 
 const RPE_LABELS = ['', 'Very Easy', 'Easy', 'Light', 'Moderate', 'Medium', 'Somewhat Hard', 'Hard', 'Very Hard', 'Extremely Hard', 'Max'];
 
@@ -8,6 +9,7 @@ export default function LogWorkout({ user }) {
   const [selectedDay, setSelectedDay] = useState(null);
   const [logEntries, setLogEntries] = useState({});
   const [lastLoggedWeights, setLastLoggedWeights] = useState({});
+  const [weightLogHistory, setWeightLogHistory] = useState([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -40,32 +42,28 @@ export default function LogWorkout({ user }) {
       const todayWorkout = workoutDays.find(w => w.date === today);
       setSelectedDay(todayWorkout ? todayWorkout.dayOfWeek : (workoutDays[0]?.dayOfWeek || null));
     }
-    await loadLastLoggedWeights();
+    await loadWeightHistory();
     setLoading(false);
   }
 
-  async function loadLastLoggedWeights() {
-    // Fetch the most recent weight logged for each exercise_id
+  async function loadWeightHistory() {
     const { data: logs } = await supabase
       .from('weight_logs')
-      .select('exercise_id, weight, reps, date')
+      .select('exercise_id, weight, reps, rpe, date, muscle_group')
       .eq('user_id', user.id)
       .order('date', { ascending: false });
 
-    if (!logs) return;
+    if (!logs) return [];
 
-    // Build a map of exerciseId -> most recent log entry
-    const latestWeights = {};
+    // Build map: exerciseId -> [all entries]
+    const historyMap = {};
     for (const log of logs) {
-      if (!latestWeights[log.exercise_id]) {
-        latestWeights[log.exercise_id] = {
-          weight: log.weight,
-          reps: log.reps,
-          date: log.date,
-        };
-      }
+      if (!historyMap[log.exercise_id]) historyMap[log.exercise_id] = [];
+      historyMap[log.exercise_id].push(log);
     }
-    setLastLoggedWeights(latestWeights);
+
+    setWeightLogHistory(logs || []);
+    return historyMap;
   }
 
   async function loadFullSchedule(scheduleId) {
@@ -280,11 +278,30 @@ export default function LogWorkout({ user }) {
               {currentWorkout.exercises.map((ex, i) => {
                 const entry = logEntries[ex.exerciseId] || {};
                 const isCardio = ex.unit === 'min';
+
+                // Progressive overload recommendation
+                const rec = getProgressiveOverloadRecommendation(
+                  ex.exerciseId,
+                  ex.muscleGroup,
+                  user.unit,
+                  ex.reps,
+                  weightLogHistory
+                );
+                const useProgressive = user.progressive_overload !== false; // default true
+                const suggestedWeight = rec.suggestedWeight || ex.targetWeight;
+                const defaultWeight = useProgressive && rec.suggestedWeight
+                  ? rec.suggestedWeight
+                  : (entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight);
+                const weightChanged = useProgressive && rec.suggestedWeight && rec.suggestedWeight !== rec.lastWeight;
+
                 return (
                   <tr key={i} className="border-t">
                     <td className="px-6 py-4">
                       <div className="font-medium">{ex.name}</div>
                       <div className="text-sm text-gray-500">{ex.muscleGroup}</div>
+                      {weightChanged && (
+                        <div className="text-xs text-blue-600 mt-0.5 font-medium">Goal: {suggestedWeight}{user.unit}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-gray-500">
                       {isCardio
@@ -295,12 +312,17 @@ export default function LogWorkout({ user }) {
                       {isCardio ? (
                         <span className="text-gray-400 text-sm">—</span>
                       ) : (
-                        <input
-                          type="number"
-                          defaultValue={entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight}
-                          onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
-                          className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        />
+                        <div className="relative">
+                          <input
+                            type="number"
+                            defaultValue={defaultWeight}
+                            onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
+                            className={`w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${weightChanged ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}
+                          />
+                          {weightChanged && (
+                            <div className="text-xs text-blue-500 mt-0.5">+{rec.increment}{user.unit}</div>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4">

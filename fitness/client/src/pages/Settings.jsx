@@ -20,6 +20,7 @@ export default function Settings({ user, onUpdate }) {
         goal: form.goal,
         experience: form.experience,
         intensity: form.intensity,
+        progressive_overload: form.progressive_overload ?? true,
       })
       .eq('id', user.id)
       .select()
@@ -148,6 +149,20 @@ export default function Settings({ user, onUpdate }) {
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
             </select>
+          </div>
+          <div className="col-span-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.progressive_overload ?? true}
+                onChange={e => updateField('progressive_overload', e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <div>
+                <div className="text-sm font-medium">Progressive Overload Suggestions</div>
+                <div className="text-xs text-gray-500">Automatically suggest next session's weight based on your logged performance</div>
+              </div>
+            </label>
           </div>
         </div>
         <button
