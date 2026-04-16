@@ -1,0 +1,20 @@
+[
+  {
+    "id": "block-1776352328055",
+    "startDate": "2026-04-16",
+    "endDate": "2026-05-13",
+    "isActive": false
+  },
+  {
+    "id": "block-1776352729009",
+    "startDate": "2026-04-16",
+    "endDate": "2026-05-13",
+    "isActive": false
+  },
+  {
+    "id": "block-1776353397047",
+    "startDate": "2026-04-16",
+    "endDate": "2026-05-13",
+    "isActive": true
+  }
+]

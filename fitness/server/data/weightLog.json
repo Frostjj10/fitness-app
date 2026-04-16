@@ -1,0 +1,62 @@
+[
+  {
+    "date": "2026-04-16",
+    "exerciseId": "bench-press",
+    "exerciseName": "Bench Press",
+    "muscleGroup": "chest",
+    "weight": 135,
+    "reps": 8,
+    "rpe": 8,
+    "notes": ""
+  },
+  {
+    "date": "2026-04-16",
+    "exerciseId": "overhead-press",
+    "exerciseName": "Overhead Press",
+    "muscleGroup": "shoulders",
+    "weight": 85,
+    "reps": 8,
+    "rpe": 6,
+    "notes": ""
+  },
+  {
+    "date": "2026-04-16",
+    "exerciseId": "lateral-raise",
+    "exerciseName": "Lateral Raise",
+    "muscleGroup": "shoulders",
+    "weight": 20,
+    "reps": 12,
+    "rpe": 8,
+    "notes": ""
+  },
+  {
+    "date": "2026-04-16",
+    "exerciseId": "cable-crossover",
+    "exerciseName": "Cable Crossover",
+    "muscleGroup": "chest",
+    "weight": 45,
+    "reps": 12,
+    "rpe": 4,
+    "notes": ""
+  },
+  {
+    "date": "2026-04-16",
+    "exerciseId": "tricep-pushdown",
+    "exerciseName": "Tricep Pushdown",
+    "muscleGroup": "triceps",
+    "weight": 50,
+    "reps": 12,
+    "rpe": 9,
+    "notes": ""
+  },
+  {
+    "date": "2026-04-16",
+    "exerciseId": "cycling",
+    "exerciseName": "Stationary Cycling",
+    "muscleGroup": "cardio",
+    "weight": 0,
+    "reps": 20,
+    "rpe": 10,
+    "notes": ""
+  }
+]

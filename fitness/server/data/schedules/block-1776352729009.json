@@ -1,0 +1,886 @@
+{
+  "id": "block-1776352729009",
+  "userId": "85c26a7d-b9d6-4132-a8b0-54ae7d9ab399",
+  "startDate": "2026-04-16",
+  "endDate": "2026-05-13",
+  "goal": "strength",
+  "workoutDays": [
+    "Monday",
+    "Wednesday",
+    "Friday",
+    "Saturday"
+  ],
+  "templateId": "ppl",
+  "schedule": [
+    {
+      "weekNum": 1,
+      "startDate": "2026-04-16",
+      "days": [
+        {
+          "dayOfWeek": "Monday",
+          "date": "2026-04-20",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Monday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "rowing",
+                "name": "Rowing Machine",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-20"
+          }
+        },
+        {
+          "dayOfWeek": "Tuesday",
+          "date": "2026-04-21",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "russian-twist",
+                "name": "Russian Twist",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "ab-wheel",
+                "name": "Ab Wheel Rollout",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Wednesday",
+          "date": "2026-04-22",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Wednesday",
+            "muscleGroups": "back, biceps, rear delts",
+            "exercises": [
+              {
+                "exerciseId": "ski-erg",
+                "name": "Ski Erg",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-22"
+          }
+        },
+        {
+          "dayOfWeek": "Thursday",
+          "date": "2026-04-16",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "pallof-press",
+                "name": "Pallof Press",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "cable",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "plank",
+                "name": "Plank Hold",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Friday",
+          "date": "2026-04-17",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Friday",
+            "muscleGroups": "quads, hamstrings, glutes, calves",
+            "exercises": [
+              {
+                "exerciseId": "treadmill",
+                "name": "Treadmill Running",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-17"
+          }
+        },
+        {
+          "dayOfWeek": "Saturday",
+          "date": "2026-04-18",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Saturday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "rowing",
+                "name": "Rowing Machine",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-18"
+          }
+        },
+        {
+          "dayOfWeek": "Sunday",
+          "date": "2026-04-19",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "russian-twist",
+                "name": "Russian Twist",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "plank",
+                "name": "Plank Hold",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "weekNum": 2,
+      "startDate": "2026-04-23",
+      "days": [
+        {
+          "dayOfWeek": "Monday",
+          "date": "2026-04-27",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Monday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "rowing",
+                "name": "Rowing Machine",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-27"
+          }
+        },
+        {
+          "dayOfWeek": "Tuesday",
+          "date": "2026-04-28",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "plank",
+                "name": "Plank Hold",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              },
+              {
+                "exerciseId": "dead-bug",
+                "name": "Dead Bug",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Wednesday",
+          "date": "2026-04-29",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Wednesday",
+            "muscleGroups": "back, biceps, rear delts",
+            "exercises": [
+              {
+                "exerciseId": "cycling",
+                "name": "Stationary Cycling",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-29"
+          }
+        },
+        {
+          "dayOfWeek": "Thursday",
+          "date": "2026-04-23",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "bird-dog",
+                "name": "Bird Dog",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "dead-bug",
+                "name": "Dead Bug",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Friday",
+          "date": "2026-04-24",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Friday",
+            "muscleGroups": "quads, hamstrings, glutes, calves",
+            "exercises": [
+              {
+                "exerciseId": "ski-erg",
+                "name": "Ski Erg",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-24"
+          }
+        },
+        {
+          "dayOfWeek": "Saturday",
+          "date": "2026-04-25",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Saturday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "stair-climber",
+                "name": "Stair Climber",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-04-25"
+          }
+        },
+        {
+          "dayOfWeek": "Sunday",
+          "date": "2026-04-26",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "plank",
+                "name": "Plank Hold",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              },
+              {
+                "exerciseId": "side-plank",
+                "name": "Side Plank",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "weekNum": 3,
+      "startDate": "2026-04-30",
+      "days": [
+        {
+          "dayOfWeek": "Monday",
+          "date": "2026-05-04",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Monday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "elliptical",
+                "name": "Elliptical",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-04"
+          }
+        },
+        {
+          "dayOfWeek": "Tuesday",
+          "date": "2026-05-05",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "side-plank",
+                "name": "Side Plank",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              },
+              {
+                "exerciseId": "plank",
+                "name": "Plank Hold",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Wednesday",
+          "date": "2026-05-06",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Wednesday",
+            "muscleGroups": "back, biceps, rear delts",
+            "exercises": [
+              {
+                "exerciseId": "ski-erg",
+                "name": "Ski Erg",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-06"
+          }
+        },
+        {
+          "dayOfWeek": "Thursday",
+          "date": "2026-04-30",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "dead-bug",
+                "name": "Dead Bug",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "cable-crunch",
+                "name": "Cable Crunch",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "cable",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Friday",
+          "date": "2026-05-01",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Friday",
+            "muscleGroups": "quads, hamstrings, glutes, calves",
+            "exercises": [
+              {
+                "exerciseId": "elliptical",
+                "name": "Elliptical",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-01"
+          }
+        },
+        {
+          "dayOfWeek": "Saturday",
+          "date": "2026-05-02",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Saturday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "elliptical",
+                "name": "Elliptical",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-02"
+          }
+        },
+        {
+          "dayOfWeek": "Sunday",
+          "date": "2026-05-03",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "bird-dog",
+                "name": "Bird Dog",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "plank",
+                "name": "Plank Hold",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "weekNum": 4,
+      "startDate": "2026-05-07",
+      "days": [
+        {
+          "dayOfWeek": "Monday",
+          "date": "2026-05-11",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Monday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "rowing",
+                "name": "Rowing Machine",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-11"
+          }
+        },
+        {
+          "dayOfWeek": "Tuesday",
+          "date": "2026-05-12",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "cable-crunch",
+                "name": "Cable Crunch",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "cable",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "bicycle-crunch",
+                "name": "Bicycle Crunch",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Wednesday",
+          "date": "2026-05-13",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Wednesday",
+            "muscleGroups": "back, biceps, rear delts",
+            "exercises": [
+              {
+                "exerciseId": "elliptical",
+                "name": "Elliptical",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-13"
+          }
+        },
+        {
+          "dayOfWeek": "Thursday",
+          "date": "2026-05-07",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "plank",
+                "name": "Plank Hold",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              },
+              {
+                "exerciseId": "side-plank",
+                "name": "Side Plank",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "sec"
+              }
+            ]
+          }
+        },
+        {
+          "dayOfWeek": "Friday",
+          "date": "2026-05-08",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Friday",
+            "muscleGroups": "quads, hamstrings, glutes, calves",
+            "exercises": [
+              {
+                "exerciseId": "ski-erg",
+                "name": "Ski Erg",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-08"
+          }
+        },
+        {
+          "dayOfWeek": "Saturday",
+          "date": "2026-05-09",
+          "type": "workout",
+          "workout": {
+            "dayOfWeek": "Saturday",
+            "muscleGroups": "chest, shoulders, triceps",
+            "exercises": [
+              {
+                "exerciseId": "stair-climber",
+                "name": "Stair Climber",
+                "muscleGroup": "cardio",
+                "primaryMuscle": "cardio",
+                "equipment": "machine",
+                "sets": 1,
+                "reps": 20,
+                "targetWeight": 0,
+                "restSeconds": 0,
+                "isCompound": false,
+                "unit": "min"
+              }
+            ],
+            "date": "2026-05-09"
+          }
+        },
+        {
+          "dayOfWeek": "Sunday",
+          "date": "2026-05-10",
+          "type": "rest",
+          "workout": {
+            "dayOfWeek": "Core",
+            "muscleGroups": "core, abs",
+            "exercises": [
+              {
+                "exerciseId": "dead-bug",
+                "name": "Dead Bug",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "bodyweight",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              },
+              {
+                "exerciseId": "cable-crunch",
+                "name": "Cable Crunch",
+                "muscleGroup": "core",
+                "primaryMuscle": "core",
+                "equipment": "cable",
+                "sets": 3,
+                "reps": 15,
+                "targetWeight": 0,
+                "restSeconds": 45,
+                "isCompound": false,
+                "unit": "reps"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "isActive": false,
+  "createdAt": "2026-04-16T15:18:49.009Z"
+}
