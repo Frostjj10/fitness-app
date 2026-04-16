@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { formatDateLong } from '../utils/format';
 import RestDayCard from '../components/RestDayCard';
 import WorkoutDayCard from '../components/WorkoutDayCard';
 import CardioDayCard from '../components/CardioDayCard';
@@ -237,7 +238,7 @@ export default function SchedulePage({ user }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Schedule</h1>
-        <div className="text-gray-500">{schedule.start_date} — {schedule.end_date}</div>
+        <div className="text-gray-500">{formatDateLong(schedule.start_date)} — {formatDateLong(schedule.end_date)}</div>
       </div>
 
       {/* Week selector */}

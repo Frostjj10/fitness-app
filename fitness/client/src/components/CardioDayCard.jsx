@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatDate } from '../utils/format';
 
 export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, onUpdateExercise }) {
   const [expanded, setExpanded] = useState(false);
@@ -43,7 +44,7 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
         <div className="flex justify-between items-center">
           <div>
             <div>{day.dayOfWeek}</div>
-            <div className="text-xs font-normal opacity-80">{day.date}</div>
+            <div className="text-xs font-normal opacity-80">{formatDate(day.date)}</div>
           </div>
           <div className="text-right">
             <div className="text-sm font-normal">Cardio</div>

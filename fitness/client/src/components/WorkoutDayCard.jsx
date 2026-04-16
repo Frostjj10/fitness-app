@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatDate } from '../utils/format';
 
 export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, onUpdateExercise }) {
   const [expanded, setExpanded] = useState(false);
@@ -49,11 +50,11 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
         <div className="flex justify-between items-center">
           <div>
             <div>{day.dayOfWeek}</div>
-            <div className="text-xs font-normal opacity-80">{day.date}</div>
+            <div className="text-xs font-normal opacity-80">{formatDate(day.date)}</div>
           </div>
           <div className="text-right">
             <div className="text-sm font-normal">{workout.dayOfWeek}</div>
-            <div className="text-xs opacity-75">{workout.exercises.length} exercises</div>
+            <div className="text-xs opacity-75">{workout.muscleGroups}</div>
           </div>
         </div>
       </div>

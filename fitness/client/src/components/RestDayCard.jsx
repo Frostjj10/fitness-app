@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatDate } from '../utils/format';
 
 export default function RestDayCard({ day, onAddExercise, onRemoveExercise }) {
   const [expanded, setExpanded] = useState(false);
@@ -14,7 +15,7 @@ export default function RestDayCard({ day, onAddExercise, onRemoveExercise }) {
         <div className="flex justify-between items-center">
           <div>
             <div>{day.dayOfWeek}</div>
-            <div className="text-xs font-normal opacity-80">{day.date}</div>
+            <div className="text-xs font-normal opacity-80">{formatDate(day.date)}</div>
           </div>
           <div className="text-right">
             <div className="text-sm font-normal">Rest</div>
@@ -61,7 +62,7 @@ export default function RestDayCard({ day, onAddExercise, onRemoveExercise }) {
         </div>
       ) : (
         <div className="p-4 text-center">
-          <div className="text-sm text-gray-500">{day.date}</div>
+          <div className="text-sm text-gray-500">{formatDate(day.date)}</div>
           <div className="mt-2 text-slate-500 text-lg">😴</div>
           <div className="text-sm text-slate-400 mt-1">Recovery day</div>
           {hasCore && (

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { buildMesocycle } from '../utils/scheduler';
 import { DEFAULT_TEMPLATES } from '../utils/ppl';
+import { formatDateLong } from '../utils/format';
 import TemplateEditor from '../components/TemplateEditor';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -415,7 +416,7 @@ export default function Dashboard({ user }) {
           <div className="grid grid-cols-3 gap-6 mb-4">
             <div className="bg-white rounded-xl shadow p-6">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Current Block</h3>
-              <p className="text-2xl font-bold">{currentSchedule.startDate} — {currentSchedule.endDate}</p>
+              <p className="text-2xl font-bold">{formatDateLong(currentSchedule.startDate)} — {formatDateLong(currentSchedule.endDate)}</p>
             </div>
             <div className="bg-white rounded-xl shadow p-6">
               <h3 className="text-sm font-medium text-gray-500 mb-1">This Week</h3>
