@@ -7,6 +7,7 @@ export default function LogWorkout({ user }) {
   const [schedule, setSchedule] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [logEntries, setLogEntries] = useState({});
+  const [lastLoggedWeights, setLastLoggedWeights] = useState({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -39,8 +40,32 @@ export default function LogWorkout({ user }) {
       const todayWorkout = workoutDays.find(w => w.date === today);
       setSelectedDay(todayWorkout ? todayWorkout.dayOfWeek : (workoutDays[0]?.dayOfWeek || null));
     }
+    await loadLastLoggedWeights();
     setLoading(false);
   }
+
+  async function loadLastLoggedWeights() {
+    // Fetch the most recent weight logged for each exercise_id
+    const { data: logs } = await supabase
+      .from('weight_logs')
+      .select('exercise_id, weight, reps, date')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false });
+
+    if (!logs) return;
+
+    // Build a map of exerciseId -> most recent log entry
+    const latestWeights = {};
+    for (const log of logs) {
+      if (!latestWeights[log.exercise_id]) {
+        latestWeights[log.exercise_id] = {
+          weight: log.weight,
+          reps: log.reps,
+          date: log.date,
+        };
+      }
+    }
+    setLastLoggedWeights(latestWeights);
 
   async function loadFullSchedule(scheduleId) {
     const { data: weeks } = await supabase
@@ -271,7 +296,7 @@ export default function LogWorkout({ user }) {
                       ) : (
                         <input
                           type="number"
-                          defaultValue={entry.weight || ex.targetWeight}
+                          defaultValue={entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight}
                           onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
                           className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         />
@@ -280,7 +305,7 @@ export default function LogWorkout({ user }) {
                     <td className="px-6 py-4">
                       <input
                         type="number"
-                        defaultValue={entry.reps || ex.reps}
+                        defaultValue={entry.reps || lastLoggedWeights[ex.exerciseId]?.reps || ex.reps}
                         onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)}
                         className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         placeholder={isCardio ? 'min' : ''}

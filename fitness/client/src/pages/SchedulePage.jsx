@@ -54,6 +54,10 @@ export default function SchedulePage({ user }) {
         .eq('schedule_week_id', week.id)
         .order('day_of_week');
 
+      // Sort days by weekday order (Monday=0, Tuesday=1, ... Sunday=6)
+      const DAY_ORDER = { monday: 0, tuesday: 1, wednesday: 2, thursday: 3, friday: 4, saturday: 5, sunday: 6 };
+      days.sort((a, b) => (DAY_ORDER[a.day_of_week] ?? 7) - (DAY_ORDER[b.day_of_week] ?? 7));
+
       const daysWithWorkouts = await Promise.all(days.map(async (day) => {
         if (day.type === 'workout' && day.id) {
           const { data: exercises } = await supabase
@@ -239,14 +243,16 @@ export default function SchedulePage({ user }) {
         ))}
       </div>
 
-      {/* 7-day grid */}
+      {/* 7-day grid - ordered Monday to Sunday */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {currentWeek.days?.map((day, i) => {
-          if (day.type === 'rest') return <RestDayCard key={i} day={day} onAddExercise={(pplType) => handleAddExercise(day.dayOfWeek, pplType)} onRemoveExercise={(exerciseId) => handleRemoveExercise(day.dayOfWeek, exerciseId)} />;
+        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(dayName => {
+          const day = currentWeek.days?.find(d => d.dayOfWeek === dayName);
+          if (!day) return null;
+          if (day.type === 'rest') return <RestDayCard key={dayName} day={day} onAddExercise={(pplType) => handleAddExercise(day.dayOfWeek, pplType)} onRemoveExercise={(exerciseId) => handleRemoveExercise(day.dayOfWeek, exerciseId)} />;
           if (day.type === 'cardio') {
             return (
               <CardioDayCard
-                key={i}
+                key={dayName}
                 day={day}
                 onAddExercise={() => handleAddExercise(day.dayOfWeek)}
                 onRemoveExercise={(exerciseId) => handleRemoveExercise(day.dayOfWeek, exerciseId)}
@@ -256,7 +262,7 @@ export default function SchedulePage({ user }) {
           }
           return (
             <WorkoutDayCard
-              key={i}
+              key={dayName}
               day={day}
               onAddExercise={() => handleAddExercise(day.dayOfWeek)}
               onRemoveExercise={(exerciseId) => handleRemoveExercise(day.dayOfWeek, exerciseId)}
