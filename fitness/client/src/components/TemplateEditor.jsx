@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { getExercisePickerData, DEFAULT_TEMPLATES } from '../utils/ppl';
 import ExercisePicker from './ExercisePicker';
 
-export default function TemplateEditor({ isOpen, onClose, onSave, templates = [] }) {
+export default function TemplateEditor({ isOpen, onClose, onSave, templates = [], userId }) {
   const [view, setView] = useState('select'); // 'select' | 'edit'
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [editedTemplate, setEditedTemplate] = useState(null);
@@ -180,7 +180,7 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
     if (isNew) {
       const { data } = await supabase
         .from('templates')
-        .insert([templateToSave])
+        .insert([{ ...templateToSave, created_by: userId }])
         .select()
         .single();
       saved = data;

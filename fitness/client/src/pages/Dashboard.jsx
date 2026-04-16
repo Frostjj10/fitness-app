@@ -481,6 +481,7 @@ export default function Dashboard({ user }) {
         onClose={() => setEditorOpen(false)}
         onSave={handleTemplateSave}
         templates={templates}
+        userId={user.id}
       />
     </div>
   );
