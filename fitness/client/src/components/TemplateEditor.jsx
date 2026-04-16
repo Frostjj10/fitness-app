@@ -45,30 +45,50 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
   function startEdit(tpl) {
       setSelectedTemplate(tpl);
-      // Normalize day_types to dayTypes for internal use
+      // Deep clone to avoid mutating the original
       const normalized = JSON.parse(JSON.stringify(tpl));
 
-      // Handle day_types as string (JSON serialized) or object
+      // Handle top-level day_types (JSONB string or object)
       if (normalized.day_types) {
         if (typeof normalized.day_types === 'string') {
           try { normalized.day_types = JSON.parse(normalized.day_types); } catch { normalized.day_types = []; }
         }
+        // Promote to dayTypes if not already set
         if (!normalized.dayTypes) {
           normalized.dayTypes = normalized.day_types;
-          delete normalized.day_types;
         }
+        delete normalized.day_types;
       }
 
-      // Also normalize nested day_types in dayTypes
+      // Normalize each dayType: ensure exercises have camelCase keys
       if (normalized.dayTypes && Array.isArray(normalized.dayTypes)) {
         normalized.dayTypes = normalized.dayTypes.map(dt => {
-          if (dt.day_types) {
-            if (typeof dt.day_types === 'string') {
-              try { dt.day_types = JSON.parse(dt.day_types); } catch { dt.day_types = []; }
-            }
-            return { ...dt, exercises: dt.day_types };
+          // Parse stringified inner day_types if needed
+          let innerExercises = dt.exercises || dt.day_types || [];
+          if (typeof innerExercises === 'string') {
+            try { innerExercises = JSON.parse(innerExercises); } catch { innerExercises = []; }
           }
-          return dt;
+
+          // Normalize each exercise: snake_case DB fields → camelCase
+          const normalizedExercises = innerExercises.map(ex => ({
+            exerciseId: ex.exercise_id || ex.exerciseId,
+            name: ex.name || '',
+            muscleGroup: ex.muscle_group || ex.muscleGroup || '',
+            primaryMuscle: ex.primary || ex.primaryMuscle || '',
+            equipment: ex.equipment || '',
+            sets: ex.sets || 3,
+            reps: ex.reps || 10,
+            targetWeight: ex.target_weight || ex.targetWeight || 0,
+            restSeconds: ex.rest_seconds || ex.restSeconds || 60,
+            isCompound: ex.is_compound ?? ex.isCompound ?? false,
+            unit: ex.unit || 'reps',
+          }));
+
+          return {
+            label: dt.label || '',
+            muscleGroups: dt.muscle_groups || dt.muscleGroups || '',
+            exercises: normalizedExercises,
+          };
         });
       }
 

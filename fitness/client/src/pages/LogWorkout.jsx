@@ -143,7 +143,7 @@ export default function LogWorkout({ user }) {
 
   async function saveWorkout() {
     const workout = getCurrentWorkout();
-    if (!workout) return;
+    if (!workout || !workout.exercises?.length) return;
     setSaving(true);
 
     const today = new Date().toLocaleDateString('en-CA');

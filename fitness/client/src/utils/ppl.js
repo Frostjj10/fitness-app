@@ -376,6 +376,7 @@ export function buildWorkoutFromTemplateDay(templateDay, user, weekNum, addCardi
       targetWeight,
       restSeconds,
       isCompound: ex.difficulty >= 6,
+      unit: ex.unit || tplEx.unit || 'reps',
     });
   }
 

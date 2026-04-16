@@ -36,6 +36,7 @@ export function buildMesocycle(user, workoutDays, startDate, templateId = 'ppl',
 
   const schedule = weeks.map(week => {
     const weekStartStr = week.startDate;
+    let workoutPosition = 0; // tracks position across workout days within this week
     const days = DAYS_OF_WEEK.map(dayOfWeek => {
       const date = getDateForDay(weekStartStr, dayOfWeek);
 
@@ -45,9 +46,9 @@ export function buildMesocycle(user, workoutDays, startDate, templateId = 'ppl',
         return { dayOfWeek, date, type: 'rest', workout: coreWorkout };
       }
 
-      // Workout day — map to template day type (rotating)
-      const workoutIndex = workoutDays.indexOf(dayOfWeek);
-      const templateDay = dayTypes[workoutIndex % dayTypes.length];
+      // Workout day — use position index so each workout day in the week gets a different template day
+      const templateDay = dayTypes[workoutPosition % dayTypes.length];
+      workoutPosition++;
       const workout = buildWorkoutFromTemplateDay(templateDay, user, week.weekNum, false); // false = no cardio finisher
 
       workout.dayOfWeek = dayOfWeek;
