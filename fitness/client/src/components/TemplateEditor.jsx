@@ -24,11 +24,26 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
     onClose();
   }
 
-  function startEdit(tpl) {
-    setSelectedTemplate(tpl);
-    setEditedTemplate(JSON.parse(JSON.stringify(tpl)));
-    setView('edit');
-  }
+  function startEdit(tpl) {                                                                                                
+      setSelectedTemplate(tpl);                             
+      // Normalize day_types to dayTypes for internal use
+      const normalized = JSON.parse(JSON.stringify(tpl));                                                                  
+      if (normalized.day_types && !normalized.dayTypes) {
+        normalized.dayTypes = normalized.day_types;                                                                        
+        delete normalized.day_types;                        
+      }                                                                                                                    
+      // Also normalize nested day_types in dayTypes
+      if (normalized.dayTypes) {                                                                                           
+        normalized.dayTypes = normalized.dayTypes.map(dt => {
+          if (dt.day_types && !dt.exercises) {
+            return { ...dt, exercises: dt.day_types };                                                                     
+          }
+          return dt;                                                                                                       
+        });                                                 
+      }
+      setEditedTemplate(normalized);
+      setView('edit');
+    }
 
   function createNew() {
     const newTpl = {
