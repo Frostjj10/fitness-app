@@ -105,12 +105,19 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
   function handleExerciseSelect(ex) {
     if (pickerDayIndex === null) return;
+    // Ensure exercise has required identity fields
+    if (!ex.id && !ex.name) {
+      console.error('handleExerciseSelect called with invalid exercise:', ex);
+      return;
+    }
+    // Use id if available, otherwise generate a temporary id based on name
+    const exerciseId = ex.id || `custom-${ex.name?.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
     const exerciseEntry = {
-      exerciseId: ex.id,
-      name: ex.name,
-      muscleGroup: ex.muscleGroup,
-      primaryMuscle: ex.primary,
-      equipment: ex.equipment,
+      exerciseId: exerciseId,
+      name: ex.name || 'Unknown Exercise',
+      muscleGroup: ex.muscleGroup || 'custom',
+      primaryMuscle: ex.primary || ex.muscleGroup || 'custom',
+      equipment: ex.equipment || 'other',
       sets: 3,
       reps: 10,
       restSeconds: 60,
@@ -154,6 +161,16 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
   async function handleSave() {
     if (!editedTemplate) return;
 
+    // Debug: verify exercises have required fields before saving
+    const dayTypesSource = editedTemplate.dayTypes || editedTemplate.day_types || [];
+    for (const dt of dayTypesSource) {
+      for (const ex of (dt.exercises || [])) {
+        if (!ex.exerciseId) {
+          console.error('Exercise missing exerciseId before save:', ex, 'in dayType:', dt);
+        }
+      }
+    }
+
     // Convert camelCase to snake_case for API
     const templateToSave = {
       id: editedTemplate.id,
@@ -162,15 +179,20 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
       day_types: (editedTemplate.dayTypes || editedTemplate.day_types || []).map(dt => ({
         label: dt.label,
         muscle_groups: dt.muscleGroups,
-        exercises: (dt.exercises || []).map(ex => ({
-          exercise_id: ex.exerciseId,
-          sets: ex.sets,
-          reps: ex.reps,
-          rest_seconds: ex.restSeconds,
-          target_weight: ex.targetWeight || 0,
-          is_compound: ex.isCompound || false,
-          unit: ex.unit || 'reps',
-        })),
+        exercises: (dt.exercises || []).map((ex, exIdx) => {
+          // Ensure exercise_id is always set
+          const exerciseId = ex.exerciseId || `missing-id-${exIdx}-${Date.now()}`;
+          return {
+            exercise_id: exerciseId,
+            name: ex.name || 'Unknown',
+            sets: ex.sets,
+            reps: ex.reps,
+            rest_seconds: ex.restSeconds,
+            target_weight: ex.targetWeight || 0,
+            is_compound: ex.isCompound || false,
+            unit: ex.unit || 'reps',
+          };
+        }),
       })),
     };
 
