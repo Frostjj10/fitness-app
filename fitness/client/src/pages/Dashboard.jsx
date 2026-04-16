@@ -57,15 +57,59 @@ export default function Dashboard({ user }) {
             .select('*')
             .eq('schedule_day_id', day.id)
             .order('sort_order');
-          return { ...day, workout: { ...day, exercises: exercises || [] } };
+
+          // Normalize exercises from snake_case (DB) to camelCase (code)
+          const normalizedExercises = (exercises || []).map(ex => ({
+            exerciseId: ex.exercise_id,
+            name: ex.name,
+            muscleGroup: ex.muscle_group,
+            sets: ex.sets,
+            reps: ex.reps,
+            targetWeight: ex.target_weight,
+            restSeconds: ex.rest_seconds,
+            isCompound: ex.is_compound,
+            unit: ex.unit || 'reps',
+            sortOrder: ex.sort_order,
+          }));
+
+          // Normalize day from snake_case to camelCase and structure workout
+          return {
+            dayOfWeek: day.day_of_week,
+            date: day.date,
+            type: day.type,
+            workout: {
+              dayOfWeek: day.workout_label,
+              muscleGroups: day.muscle_groups,
+              exercises: normalizedExercises,
+            },
+          };
         }
-        return { ...day, workout: null };
+        return { dayOfWeek: day.day_of_week, date: day.date, type: day.type, workout: null };
       }));
 
-      return { ...week, days: daysWithWorkouts };
+      // Normalize week from snake_case to camelCase
+      return {
+        weekNum: week.week_num,
+        startDate: week.start_date,
+        days: daysWithWorkouts,
+      };
     }));
 
-    return { id: scheduleId, schedule: scheduleWithWeeks };
+    // Fetch the schedule metadata (without nested data)
+    const { data: scheduleMeta } = await supabase
+      .from('schedules')
+      .select('*')
+      .eq('id', scheduleId)
+      .single();
+
+    return {
+      id: scheduleId,
+      startDate: scheduleMeta?.start_date,
+      endDate: scheduleMeta?.end_date,
+      workoutDays: scheduleMeta?.workout_days || [],
+      templateId: scheduleMeta?.template_id,
+      schedule: scheduleWithWeeks,
+    };
   }
 
   async function fetchTemplates() {
@@ -303,7 +347,7 @@ export default function Dashboard({ user }) {
           <div className="grid grid-cols-3 gap-6 mb-4">
             <div className="bg-white rounded-xl shadow p-6">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Current Block</h3>
-              <p className="text-2xl font-bold">{currentSchedule.start_date} — {currentSchedule.end_date}</p>
+              <p className="text-2xl font-bold">{currentSchedule.startDate} — {currentSchedule.endDate}</p>
             </div>
             <div className="bg-white rounded-xl shadow p-6">
               <h3 className="text-sm font-medium text-gray-500 mb-1">This Week</h3>

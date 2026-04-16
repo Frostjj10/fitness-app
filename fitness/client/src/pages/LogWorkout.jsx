@@ -65,12 +65,40 @@ export default function LogWorkout({ user }) {
             .select('*')
             .eq('schedule_day_id', day.id)
             .order('sort_order');
-          return { ...day, workout: { ...day, exercises: exercises || [] } };
+
+          // Normalize exercises from snake_case (DB) to camelCase (code)
+          const normalizedExercises = (exercises || []).map(ex => ({
+            exerciseId: ex.exercise_id,
+            name: ex.name,
+            muscleGroup: ex.muscle_group,
+            sets: ex.sets,
+            reps: ex.reps,
+            targetWeight: ex.target_weight,
+            restSeconds: ex.rest_seconds,
+            isCompound: ex.is_compound,
+            unit: ex.unit || 'reps',
+            sortOrder: ex.sort_order,
+          }));
+
+          return {
+            dayOfWeek: day.day_of_week,
+            date: day.date,
+            type: day.type,
+            workout: {
+              dayOfWeek: day.workout_label,
+              muscleGroups: day.muscle_groups,
+              exercises: normalizedExercises,
+            },
+          };
         }
-        return { ...day, workout: null };
+        return { dayOfWeek: day.day_of_week, date: day.date, type: day.type, workout: null };
       }));
 
-      return { ...week, days: daysWithWorkouts };
+      return {
+        weekNum: week.week_num,
+        startDate: week.start_date,
+        days: daysWithWorkouts,
+      };
     }));
 
     return { id: scheduleId, schedule: scheduleWithWeeks };

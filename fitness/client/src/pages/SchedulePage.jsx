@@ -61,15 +61,56 @@ export default function SchedulePage({ user }) {
             .select('*')
             .eq('schedule_day_id', day.id)
             .order('sort_order');
-          return { ...day, workout: { ...day, exercises: exercises || [] } };
+
+          // Normalize exercises from snake_case (DB) to camelCase (code)
+          const normalizedExercises = (exercises || []).map(ex => ({
+            exerciseId: ex.exercise_id,
+            name: ex.name,
+            muscleGroup: ex.muscle_group,
+            sets: ex.sets,
+            reps: ex.reps,
+            targetWeight: ex.target_weight,
+            restSeconds: ex.rest_seconds,
+            isCompound: ex.is_compound,
+            unit: ex.unit || 'reps',
+            sortOrder: ex.sort_order,
+          }));
+
+          return {
+            dayOfWeek: day.day_of_week,
+            date: day.date,
+            type: day.type,
+            workout: {
+              dayOfWeek: day.workout_label,
+              muscleGroups: day.muscle_groups,
+              exercises: normalizedExercises,
+            },
+          };
         }
-        return { ...day, workout: null };
+        return { dayOfWeek: day.day_of_week, date: day.date, type: day.type, workout: null };
       }));
 
-      return { ...week, days: daysWithWorkouts };
+      return {
+        weekNum: week.week_num,
+        startDate: week.start_date,
+        days: daysWithWorkouts,
+      };
     }));
 
-    return { id: scheduleId, schedule: scheduleWithWeeks };
+    // Fetch schedule metadata
+    const { data: scheduleMeta } = await supabase
+      .from('schedules')
+      .select('*')
+      .eq('id', scheduleId)
+      .single();
+
+    return {
+      id: scheduleId,
+      start_date: scheduleMeta?.start_date,
+      end_date: scheduleMeta?.end_date,
+      workout_days: scheduleMeta?.workout_days || [],
+      schedule: scheduleWithWeeks,
+    };
   }
 
   function getPplType(workoutLabel) {
