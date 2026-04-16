@@ -36,9 +36,13 @@ export default {
         },
       },
       boxShadow: {
-        card: '0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07)',
-        'card-hover': '0 4px 12px 0 rgb(0 0 0 / 0.10), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
-        'card-lift': '0 10px 30px -4px rgb(0 0 0 / 0.12)',
+        'shadow-sm': '0 1px 2px 0 rgb(0 0 0 / 0.04)',
+        'shadow': '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
+        'shadow-lg': '0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.06)',
+        'shadow-xl': '0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.06)',
+        'shadow-2xl': '0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.06)',
+        'shadow-orange': '0 4px 14px 0 rgb(249 115 22 / 0.25)',
+        'shadow-lift': '0 4px 14px 0 rgb(34 197 94 / 0.25)',
       },
       borderRadius: {
         '2xl': '1rem',
