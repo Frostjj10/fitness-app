@@ -26,7 +26,10 @@ export default function Settings({ user, onUpdate }) {
       .select()
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error('Profile save error:', error);
+      alert('Failed to save: ' + error.message);
+    } else if (data) {
       onUpdate(data);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
