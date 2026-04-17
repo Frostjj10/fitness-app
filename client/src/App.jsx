@@ -78,8 +78,8 @@ export default function App() {
     return <Auth />;
   }
 
-  // Logged in but no profile yet — show onboarding
-  if (!profile) {
+  // Logged in but no profile OR profile incomplete (no goal set) — show onboarding
+  if (!profile || !profile.goal) {
     return <Onboarding user={authUser} onComplete={handleProfileComplete} />;
   }
 

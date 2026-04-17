@@ -18,6 +18,7 @@ export default function Dashboard({ user }) {
   const [generating, setGenerating] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [generatedFlash, setGeneratedFlash] = useState(null); // id of most recently generated template
   const [generatorParams, setGeneratorParams] = useState({
     daysPerWeek: 4,
     splitType: 'auto',
@@ -391,25 +392,43 @@ export default function Dashboard({ user }) {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {templates.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedTemplate(t.id)}
-                  className={`p-4 sm:p-5 rounded-xl border-2 text-left transition-all ${
-                    selectedTemplate === t.id
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="font-bold text-sm">{t.name}</div>
-                  <div className={`text-xs mt-1 ${selectedTemplate === t.id ? 'text-slate-400' : 'text-slate-500'}`}>
+              {templates.map(t => {
+                const isGenerated = t.id.startsWith('generated-');
+                const isFlash = generatedFlash === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedTemplate(t.id)}
+                    className={`p-4 sm:p-5 rounded-xl border-2 text-left transition-all ${
+                      selectedTemplate === t.id
+                        ? isGenerated
+                          ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-200'
+                          : 'border-slate-900 bg-slate-900 text-white'
+                        : isFlash
+                        ? 'border-orange-300 bg-orange-50'
+                        : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-bold text-sm flex-1">{t.name}</div>
+                      {isGenerated && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0 ${selectedTemplate === t.id ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-600'}`}>
+                          Generated
+                        </span>
+                      )}
+                    </div>
+                    <div className={`text-xs mt-1 ${selectedTemplate === t.id ? (isGenerated ? 'text-orange-400' : 'text-slate-400') : 'text-slate-500'}`}>
                       {(() => {
                         const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
                         return `${dt.length} days`;
                       })()}
-                  </div>
-                </button>
-              ))}
+                    </div>
+                    {isFlash && (
+                      <div className="text-xs text-orange-500 font-semibold mt-1">✓ Template created!</div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -601,7 +620,9 @@ export default function Dashboard({ user }) {
                     return [...filtered, template];
                   });
                   setSelectedTemplate(template.id);
+                  setGeneratedFlash(template.id);
                   setGeneratorOpen(false);
+                  setTimeout(() => setGeneratedFlash(null), 3000);
                 }}
                 className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25"
               >

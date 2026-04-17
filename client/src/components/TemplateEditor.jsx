@@ -299,7 +299,7 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
               {view === 'select' ? 'Workout Templates' : `Edit: ${editedTemplate?.name}`}
             </h2>
             <p className="text-sm text-gray-500">
-              {view === 'select' ? 'Choose a template to customize or create your own' : 'Edit day types and exercises'}
+              {view === 'select' ? 'Choose a template to customize or create your own' : (editedTemplate?.id || '').startsWith('generated-') ? 'Generated template — click Save to keep it' : 'Edit day types and exercises'}
             </p>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
@@ -311,11 +311,13 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
             <div className="space-y-4">
               {/* Template cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {templates.map(t => (
+                {templates.map(t => {
+                  const isGenerated = (t.id || '').startsWith('generated-');
+                  return (
                   <div
                     key={t.id}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      t.is_default || t.isDefault ? 'border-blue-200 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                      t.is_default || t.isDefault ? 'border-blue-200 bg-blue-50' : isGenerated ? 'border-orange-200 bg-orange-50' : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => startEdit(t)}
                   >
@@ -335,12 +337,15 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                           })()}
                         </div>
                       </div>
-                      {(t.is_default || t.isDefault) && (
+                      {t.is_default || t.isDefault ? (
                         <span className="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded">Default</span>
-                      )}
+                      ) : isGenerated ? (
+                        <span className="text-xs bg-orange-200 text-orange-800 px-2 py-0.5 rounded">Generated</span>
+                      ) : null}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Create new */}
