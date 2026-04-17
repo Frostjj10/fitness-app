@@ -81,7 +81,7 @@ const SPLIT_MUSCLE_MAP = {
   'full-body': [
     { label: 'Full Body A', muscleGroups: ['chest', 'back', 'quads'], primary: 'chest' },
     { label: 'Full Body B', muscleGroups: ['back', 'shoulders', 'hamstrings'], primary: 'back' },
-    { label: 'Full Body C', muscleGroups: ['chest', 'shoulders', 'legs'], primary: 'shoulders' },
+    { label: 'Full Body C', muscleGroups: ['chest', 'shoulders', 'quads'], primary: 'shoulders' },
   ],
   'upper-lower': [
     { label: 'Upper A', muscleGroups: ['chest', 'back', 'shoulders'], primary: 'chest' },
@@ -181,10 +181,13 @@ function buildExercisesForDay(mgConfig, user, availableEquipment) {
   for (const mg of muscleGroups) {
     const category = getCategoryForMuscleGroup(mg);
 
-    // Pick 1 compound exercise
-    const compounds = category.compound.filter(
+    // Pick 1 compound exercise (fall back to no equipment filter if none match)
+    let compounds = category.compound.filter(
       e => e.difficulty >= 6 && e.difficulty <= maxDiff && equipSet.has(e.equipment)
     );
+    if (compounds.length === 0) {
+      compounds = category.compound.filter(e => e.difficulty >= 6 && e.difficulty <= maxDiff);
+    }
 
     if (compounds.length > 0) {
       // Prefer exercise that matches the target muscle group
@@ -196,10 +199,13 @@ function buildExercisesForDay(mgConfig, user, availableEquipment) {
       exercises.push(buildExerciseEntry(compound, params, user));
     }
 
-    // Pick 1-2 isolation exercises for this muscle group
-    const isolations = category.isolation.filter(
+    // Pick 1-2 isolation exercises for this muscle group (fall back to no filter if none match)
+    let isolations = category.isolation.filter(
       e => e.difficulty <= maxDiff && equipSet.has(e.equipment)
     );
+    if (isolations.length === 0) {
+      isolations = category.isolation.filter(e => e.difficulty <= maxDiff);
+    }
     const mgIsolations = isolations.filter(e => e.muscleGroup === mg);
     const selectedIsolations = mgIsolations.length > 0
       ? pickRandom(mgIsolations, Math.min(2, mgIsolations.length))
@@ -224,7 +230,8 @@ function buildExercisesForDay(mgConfig, user, availableEquipment) {
 // Append core finisher exercises
 function appendCoreFinisher(user, availableEquipment) {
   const caps = DIFFICULTY_CAPS[user.experience] || DIFFICULTY_CAPS.intermediate;
-  const maxDiff = caps.cardio;
+  // Core exercises are skill-based (not cardio), so use strength cap (capped at 8)
+  const maxDiff = Math.min(caps.strength, 8);
   const equipSet = new Set(availableEquipment || ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight']);
 
   const pool = CORE_EXERCISES.filter(

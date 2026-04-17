@@ -242,7 +242,9 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
       })),
     };
 
-    const isNew = !selectedTemplate || !templates.find(t => t.id === editedTemplate.id);
+    // Generated templates (prefix 'generated-') never exist in Supabase, always INSERT them
+    const isGenerated = (editedTemplate.id || '').startsWith('generated-');
+    const isNew = isGenerated || !selectedTemplate || !templates.find(t => t.id === editedTemplate.id);
 
     let saved;
     if (isNew) {
