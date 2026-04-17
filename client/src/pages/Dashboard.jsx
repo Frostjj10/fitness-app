@@ -5,6 +5,7 @@ import { buildMesocycle } from '../utils/scheduler';
 import { DEFAULT_TEMPLATES } from '../utils/ppl';
 import { formatDateLong } from '../utils/format';
 import TemplateEditor from '../components/TemplateEditor';
+import { generateTemplate } from '../utils/templateBuilder';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -16,6 +17,12 @@ export default function Dashboard({ user }) {
   const [selectedWeek, setSelectedWeek] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
+  const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [generatorParams, setGeneratorParams] = useState({
+    daysPerWeek: 4,
+    splitType: 'auto',
+    equipment: ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'],
+  });
 
   useEffect(() => {
     fetchCurrentSchedule();
@@ -368,12 +375,20 @@ export default function Dashboard({ user }) {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Template</p>
-              <button
-                onClick={() => setEditorOpen(true)}
-                className="text-xs text-orange-500 hover:text-orange-600 font-semibold"
-              >
-                Edit
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setGeneratorOpen(true)}
+                  className="text-xs text-orange-500 hover:text-orange-600 font-semibold"
+                >
+                  Smart Generate
+                </button>
+                <button
+                  onClick={() => setEditorOpen(true)}
+                  className="text-xs text-orange-500 hover:text-orange-600 font-semibold"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {templates.map(t => (
@@ -492,7 +507,110 @@ export default function Dashboard({ user }) {
         onSave={handleTemplateSave}
         templates={templates}
         userId={user.id}
+        user={user}
       />
+
+      {/* Smart Generator Modal */}
+      {generatorOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-slate-900">Smart Generate</h2>
+              <button onClick={() => setGeneratorOpen(false)} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
+            </div>
+
+            <div className="space-y-5">
+              {/* Days per week */}
+              <div>
+                <label className="label">Training Days per Week</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="2"
+                    max="6"
+                    value={generatorParams.daysPerWeek}
+                    onChange={e => setGeneratorParams(p => ({ ...p, daysPerWeek: parseInt(e.target.value) }))}
+                    className="flex-1 accent-orange-500"
+                  />
+                  <span className="w-8 text-center font-bold text-slate-900">{generatorParams.daysPerWeek}</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  {generatorParams.daysPerWeek <= 3 ? 'Full Body split recommended' :
+                   generatorParams.daysPerWeek === 4 ? 'Upper/Lower split recommended' : 'Push/Pull/Legs split recommended'}
+                </p>
+              </div>
+
+              {/* Split type */}
+              <div>
+                <label className="label">Training Split</label>
+                <select
+                  value={generatorParams.splitType}
+                  onChange={e => setGeneratorParams(p => ({ ...p, splitType: e.target.value }))}
+                  className="input"
+                >
+                  <option value="auto">Auto (recommended)</option>
+                  <option value="full-body">Full Body</option>
+                  <option value="upper-lower">Upper / Lower</option>
+                  <option value="ppl">Push / Pull / Legs</option>
+                </select>
+              </div>
+
+              {/* Equipment */}
+              <div>
+                <label className="label">Available Equipment</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'].map(eq => (
+                    <label key={eq} className="flex items-center gap-2 text-sm text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={generatorParams.equipment.includes(eq)}
+                        onChange={e => {
+                          setGeneratorParams(p => ({
+                            ...p,
+                            equipment: e.target.checked
+                              ? [...p.equipment, eq]
+                              : p.equipment.filter(x => x !== eq),
+                          }));
+                        }}
+                        className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span className="capitalize">{eq}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* User profile summary */}
+              <div className="bg-slate-50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
+                <div className="font-semibold text-slate-700 mb-2">Your Profile</div>
+                <div>Goal: <span className="text-slate-700 capitalize">{user.goal}</span></div>
+                <div>Experience: <span className="text-slate-700 capitalize">{user.experience}</span></div>
+                <div>Weight: <span className="text-slate-700">{user.weight} {user.unit}</span></div>
+              </div>
+
+              <button
+                onClick={() => {
+                  const template = generateTemplate({
+                    user,
+                    daysPerWeek: generatorParams.daysPerWeek,
+                    availableEquipment: generatorParams.equipment,
+                    splitType: generatorParams.splitType,
+                  });
+                  setTemplates(prev => {
+                    const filtered = prev.filter(t => !t.id.startsWith('generated-'));
+                    return [...filtered, template];
+                  });
+                  setSelectedTemplate(template.id);
+                  setGeneratorOpen(false);
+                }}
+                className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25"
+              >
+                Generate Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
