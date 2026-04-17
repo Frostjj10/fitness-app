@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { getExercisePickerData, DEFAULT_TEMPLATES } from '../utils/ppl';
-import { generateTemplate } from '../utils/templateBuilder';
+import { generateTemplate, GENERATOR_OPTIONS } from '../utils/templateBuilder';
 import ExercisePicker from './ExercisePicker';
 
 export default function TemplateEditor({ isOpen, onClose, onSave, templates = [], userId, user }) {
@@ -16,6 +16,10 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
     daysPerWeek: 4,
     splitType: 'auto',
     equipment: ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'],
+    sessionLength: 'medium',
+    cardioLevel: 'moderate',
+    includeMobility: false,
+    priorityMuscles: [],
   });
 
   useEffect(() => {
@@ -594,6 +598,93 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                   </div>
                 </div>
 
+                {/* Session length */}
+                <div>
+                  <label className="label">Session Length</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {GENERATOR_OPTIONS.sessionLength.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setAiGenParams(p => ({ ...p, sessionLength: opt.value }))}
+                        className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all text-center ${
+                          aiGenParams.sessionLength === opt.value
+                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <div>{opt.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cardio level */}
+                <div>
+                  <label className="label">Cardio</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {GENERATOR_OPTIONS.cardioLevel.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setAiGenParams(p => ({ ...p, cardioLevel: opt.value }))}
+                        className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all text-center ${
+                          aiGenParams.cardioLevel === opt.value
+                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="capitalize">{opt.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Priority muscles */}
+                <div>
+                  <label className="label">Priority Muscles <span className="font-normal text-slate-400">(optional)</span></label>
+                  <p className="text-xs text-slate-500 mb-2">Adds extra isolation volume to selected muscle groups</p>
+                  <div className="flex flex-wrap gap-2">
+                    {GENERATOR_OPTIONS.priorityMuscles.map(opt => {
+                      const isSelected = aiGenParams.priorityMuscles.includes(opt.value);
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => setAiGenParams(p => ({
+                            ...p,
+                            priorityMuscles: isSelected
+                              ? p.priorityMuscles.filter(m => m !== opt.value)
+                              : [...p.priorityMuscles, opt.value],
+                          }))}
+                          className={`py-1.5 px-3 rounded-full text-xs font-semibold border transition-all ${
+                            isSelected
+                              ? 'border-orange-500 bg-orange-500 text-white'
+                              : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Mobility toggle */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-700">Mobility Warm-Up</div>
+                    <div className="text-xs text-slate-500">Include dynamic warm-up circuit</div>
+                  </div>
+                  <button
+                    onClick={() => setAiGenParams(p => ({ ...p, includeMobility: !p.includeMobility }))}
+                    className={`w-12 h-7 rounded-full transition-all relative ${
+                      aiGenParams.includeMobility ? 'bg-orange-500' : 'bg-slate-200'
+                    }`}
+                  >
+                    <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all ${
+                      aiGenParams.includeMobility ? 'left-6' : 'left-1'
+                    }`} />
+                  </button>
+                </div>
+
                 {/* User profile summary */}
                 {user && (
                   <div className="bg-slate-50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
@@ -601,22 +692,32 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                     <div>Goal: <span className="text-slate-700 capitalize">{user.goal}</span></div>
                     <div>Experience: <span className="text-slate-700 capitalize">{user.experience}</span></div>
                     <div>Weight: <span className="text-slate-700">{user.weight} {user.unit}</span></div>
+                    <div>Intensity: <span className="text-slate-700">{user.intensity}/10</span></div>
                   </div>
                 )}
 
                 <button
                   onClick={() => {
+                    if (aiGenParams.equipment.length === 0) {
+                      alert('Please select at least one equipment option.');
+                      return;
+                    }
                     try {
                       const template = generateTemplate({
                         user,
                         daysPerWeek: aiGenParams.daysPerWeek,
                         availableEquipment: aiGenParams.equipment,
                         splitType: aiGenParams.splitType,
+                        sessionLength: aiGenParams.sessionLength,
+                        cardioLevel: aiGenParams.cardioLevel,
+                        includeMobility: aiGenParams.includeMobility,
+                        priorityMuscles: aiGenParams.priorityMuscles,
                       });
                       setAiGenOpen(false);
                       startEdit(template);
                     } catch (err) {
-                      alert(err.message || 'Template generation failed. Try adding more equipment options.');
+                      console.error('Template generation failed:', err);
+                      alert(err.message || 'Template generation failed. Try selecting more equipment.');
                     }
                   }}
                   className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25"

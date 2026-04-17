@@ -6,21 +6,21 @@ import {
   CORE_EXERCISES,
 } from './ppl';
 
-// Difficulty caps by experience
+// ─── Difficulty caps by experience ───────────────────────────────────────────
 const DIFFICULTY_CAPS = {
   beginner: { strength: 6, cardio: 5 },
   intermediate: { strength: 8, cardio: 7 },
   advanced: { strength: 10, cardio: 10 },
 };
 
-// Experience multipliers for weight estimation
+// ─── Experience multipliers for weight estimation ─────────────────────────────
 const EXP_MULTIPLIERS = {
   beginner: 0.55,
   intermediate: 0.75,
   advanced: 0.90,
 };
 
-// Goal-based training parameters
+// ─── Core training parameters by goal ───────────────────────────────────────
 const GOAL_PARAMS = {
   strength: {
     setsRange: [4, 5],
@@ -52,65 +52,31 @@ const GOAL_PARAMS = {
   },
 };
 
-// Split configurations by days per week
+// ─── Session length targets (minutes) ─────────────────────────────────────────
+const SESSION_LENGTH_PARAMS = {
+  short:   { targetMin: 35, targetMax: 50,  perExerciseMin: 4, perExerciseMax: 6  },
+  medium:  { targetMin: 50, targetMax: 70,  perExerciseMin: 5, perExerciseMax: 8  },
+  long:    { targetMin: 65, targetMax: 90,  perExerciseMin: 6, perExerciseMax: 10 },
+};
+
+// ─── Cardio level configs ─────────────────────────────────────────────────────
+const CARDIO_LEVELS = {
+  none:     { appendToWorkout: false, hiitDays: 0, lissDays: 0 },
+  light:    { appendToWorkout: true,  hiitDays: 0, lissDays: 1 },
+  moderate: { appendToWorkout: true,  hiitDays: 1, lissDays: 2 },
+  intense:  { appendToWorkout: true,  hiitDays: 2, lissDays: 2 },
+};
+
+// ─── Split configurations by days per week ───────────────────────────────────
 const SPLIT_CONFIGS = {
-  '2': {
-    type: 'full-body',
-    days: ['Full Body A', 'Full Body B'],
-  },
-  '3': {
-    type: 'full-body',
-    days: ['Full Body A', 'Full Body B', 'Full Body C'],
-  },
-  '4': {
-    type: 'upper-lower',
-    days: ['Upper A', 'Lower A', 'Upper B', 'Lower B'],
-  },
-  '5': {
-    type: 'ppl',
-    days: ['Push', 'Pull', 'Legs', 'Push', 'Pull'],
-  },
-  '6': {
-    type: 'ppl',
-    days: ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs'],
-  },
+  '2': { type: 'full-body', days: ['Full Body A', 'Full Body B'] },
+  '3': { type: 'full-body', days: ['Full Body A', 'Full Body B', 'Full Body C'] },
+  '4': { type: 'upper-lower', days: ['Upper A', 'Lower A', 'Upper B', 'Lower B'] },
+  '5': { type: 'ppl',        days: ['Push', 'Pull', 'Legs', 'Push', 'Pull'] },
+  '6': { type: 'ppl',        days: ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs'] },
 };
 
-// Muscle group map per split type
-const SPLIT_MUSCLE_MAP = {
-  'full-body': [
-    { label: 'Full Body A', muscleGroups: ['chest', 'back', 'quads'], primary: 'chest' },
-    { label: 'Full Body B', muscleGroups: ['back', 'shoulders', 'hamstrings'], primary: 'back' },
-    { label: 'Full Body C', muscleGroups: ['chest', 'shoulders', 'quads'], primary: 'shoulders' },
-  ],
-  'upper-lower': [
-    { label: 'Upper A', muscleGroups: ['chest', 'back', 'shoulders'], primary: 'chest' },
-    { label: 'Lower A', muscleGroups: ['quads', 'hamstrings', 'glutes'], primary: 'quads' },
-    { label: 'Upper B', muscleGroups: ['chest', 'back', 'shoulders', 'biceps'], primary: 'back' },
-    { label: 'Lower B', muscleGroups: ['quads', 'hamstrings', 'calves'], primary: 'hamstrings' },
-  ],
-  'ppl': [
-    { label: 'Push', muscleGroups: ['chest', 'shoulders', 'triceps'], primary: 'chest' },
-    { label: 'Pull', muscleGroups: ['back', 'biceps', 'rear delts'], primary: 'back' },
-    { label: 'Legs', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves'], primary: 'quads' },
-  ],
-};
-
-// Priority for exercise ordering (lower = earlier)
-const MUSCLE_PRIORITY = {
-  chest: 1,
-  back: 2,
-  shoulders: 3,
-  quadriceps: 4,
-  hamstrings: 5,
-  glutes: 6,
-  calves: 7,
-  biceps: 8,
-  triceps: 9,
-  forearms: 10,
-};
-
-// Map muscle group string to exercise category
+// ─── Muscle group → exercise category mapping ────────────────────────────────
 function getCategoryForMuscleGroup(mg) {
   const push = ['chest', 'shoulders', 'triceps'];
   const pull = ['back', 'biceps', 'rear delts', 'forearms'];
@@ -119,100 +85,121 @@ function getCategoryForMuscleGroup(mg) {
   return LEG_EXERCISES;
 }
 
-// Estimate target weight based on user profile and exercise
-export function estimateTargetWeight(user, exercise) {
-  const bw = parseFloat(user.weight) || (user.unit === 'kg' ? 75 : 165);
-  const params = GOAL_PARAMS[user.goal] || GOAL_PARAMS.hypertrophy;
-  const expMult = EXP_MULTIPLIERS[user.experience] || 0.75;
+// ─── Priority map for exercise ordering ──────────────────────────────────────
+const MUSCLE_PRIORITY = {
+  chest: 1, back: 2, shoulders: 3, quadriceps: 4,
+  hamstrings: 5, glutes: 6, calves: 7, biceps: 8,
+  triceps: 9, forearms: 10,
+};
 
-  let weight = bw * (exercise.difficulty / 10) * params.loadCoeff * expMult;
+// ─── All equipment list ───────────────────────────────────────────────────────
+const ALL_EQUIPMENT = ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'];
 
-  const increment = user.unit === 'kg' ? 2.5 : 5;
-  weight = Math.round(weight / increment) * increment;
-  return Math.max(weight, 0);
-}
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
-// Pick a random element from an array
 function pickRandom(arr, count = 1) {
   if (count === 1) return arr[Math.floor(Math.random() * arr.length)];
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
-// Build a single exercise entry
-function buildExerciseEntry(exercise, params, user) {
-  const isCompound = exercise.difficulty >= 6;
-  const { setsRange, repRange, restCompound, restIsolation } = params;
-
-  const [minSets, maxSets] = setsRange;
-  const [minReps, maxReps] = repRange;
-  const [minRest, maxRest] = isCompound ? restCompound : restIsolation;
-
-  const sets = isCompound ? maxSets : Math.round((minSets + maxSets) / 2);
-  const reps = isCompound ? minReps : Math.round((minReps + maxReps) / 2);
-  const restSeconds = Math.round((minRest + maxRest) / 2);
-  const targetWeight = estimateTargetWeight(user, exercise);
-
-  return {
-    exerciseId: exercise.id,
-    name: exercise.name,
-    muscleGroup: exercise.muscleGroup,
-    primaryMuscle: exercise.primary,
-    equipment: exercise.equipment,
-    sets,
-    reps,
-    targetWeight,
-    restSeconds,
-    isCompound,
-    unit: exercise.unit || 'reps',
-  };
+function shuffleArray(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
 }
 
-// Build exercise list for a given day configuration
-function buildExercisesForDay(mgConfig, user, availableEquipment) {
+function estimateTargetWeight(user, exercise) {
+  const bw = parseFloat(user.weight) || (user.unit === 'kg' ? 75 : 165);
+  const params = GOAL_PARAMS[user.goal] || GOAL_PARAMS.hypertrophy;
+  const expMult = EXP_MULTIPLIERS[user.experience] || 0.75;
+  let weight = bw * (exercise.difficulty / 10) * params.loadCoeff * expMult;
+  const increment = user.unit === 'kg' ? 2.5 : 5;
+  weight = Math.round(weight / increment) * increment;
+  return Math.max(weight, 0);
+}
+
+// ─── Exercise selection for a single muscle group ─────────────────────────────
+function selectExercisesForMuscleGroup(mg, category, params, user, equipSet, maxDiff, sessionLen) {
+  const { perExerciseMin, perExerciseMax } = sessionLen;
+  const targetCount = Math.floor(Math.random() * (perExerciseMax - perExerciseMin + 1)) + perExerciseMin;
+
+  const allCompounds = category.compound.filter(e => e.difficulty >= 6 && e.difficulty <= maxDiff);
+  const allIsolations = category.isolation.filter(e => e.difficulty <= maxDiff);
+
+  const availableCompounds = allCompounds.filter(e => equipSet.has(e.equipment));
+  const availableIsolations = allIsolations.filter(e => equipSet.has(e.equipment));
+
+  const compounds = availableCompounds.length > 0 ? availableCompounds : allCompounds;
+  const isolations = availableIsolations.length > 0 ? availableIsolations : allIsolations;
+
+  const isCompound = (e) => e.difficulty >= 6;
+
+  // Try to get at least one compound for major muscle groups (chest, back, quads)
+  const majorMGs = ['chest', 'back', 'quads'];
+  const preferCompound = majorMGs.includes(mg);
+
+  const selected = [];
+
+  // Compound (1 if preferred, or skip if it's a minor group)
+  if (preferCompound || compounds.length > 0) {
+    const pool = compounds.length > 0 ? compounds : allCompounds;
+    const preferred = pool.filter(e => e.primary === mg || e.muscleGroup === mg);
+    const pick = preferred.length > 0 ? pickRandom(preferred) : pickRandom(pool);
+    selected.push(pick);
+  }
+
+  // Isolations to fill the session (1-3 based on session length)
+  const remainingSlots = Math.max(0, targetCount - selected.length);
+  if (remainingSlots > 0) {
+    const mgIsolations = isolations.filter(e => e.muscleGroup === mg);
+    const pool = mgIsolations.length > 0 ? mgIsolations : isolations;
+    const count = Math.min(remainingSlots, pool.length);
+    if (pool.length > 0) {
+      const picks = pickRandom(pool, count);
+      selected.push(...(Array.isArray(picks) ? picks : [picks]));
+    }
+  }
+
+  return selected;
+}
+
+// ─── Build exercises for a day ───────────────────────────────────────────────
+function buildExercisesForDay(mgConfig, user, availableEquipment, sessionLen) {
   const { muscleGroups } = mgConfig;
   const caps = DIFFICULTY_CAPS[user.experience] || DIFFICULTY_CAPS.intermediate;
   const maxDiff = caps.strength;
   const params = GOAL_PARAMS[user.goal] || GOAL_PARAMS.hypertrophy;
-  const equipSet = new Set(availableEquipment || ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight']);
+  const equipSet = new Set(availableEquipment || ALL_EQUIPMENT);
+  const sLen = SESSION_LENGTH_PARAMS[sessionLen] || SESSION_LENGTH_PARAMS.medium;
 
   const exercises = [];
 
   for (const mg of muscleGroups) {
     const category = getCategoryForMuscleGroup(mg);
+    const selected = selectExercisesForMuscleGroup(mg, category, params, user, equipSet, maxDiff, sLen);
 
-    // Pick 1 compound exercise (fall back to no equipment filter if none match)
-    let compounds = category.compound.filter(
-      e => e.difficulty >= 6 && e.difficulty <= maxDiff && equipSet.has(e.equipment)
-    );
-    if (compounds.length === 0) {
-      compounds = category.compound.filter(e => e.difficulty >= 6 && e.difficulty <= maxDiff);
-    }
+    for (const ex of selected) {
+      const isCompound = ex.difficulty >= 6;
+      const [minSets, maxSets] = params.setsRange;
+      const [minReps, maxReps] = params.repRange;
+      const [minRest, maxRest] = isCompound ? params.restCompound : params.restIsolation;
 
-    if (compounds.length > 0) {
-      // Prefer exercise that matches the target muscle group
-      const preferred = compounds.filter(e => e.primary === mg || e.muscleGroup === mg);
-      const compound = preferred.length > 0
-        ? pickRandom(preferred)
-        : pickRandom(compounds);
+      const sets = isCompound ? maxSets : Math.round((minSets + maxSets) / 2);
+      const reps = isCompound ? minReps : Math.round((minReps + maxReps) / 2);
+      const restSeconds = Math.round((minRest + maxRest) / 2);
 
-      exercises.push(buildExerciseEntry(compound, params, user));
-    }
-
-    // Pick 1-2 isolation exercises for this muscle group (fall back to no filter if none match)
-    let isolations = category.isolation.filter(
-      e => e.difficulty <= maxDiff && equipSet.has(e.equipment)
-    );
-    if (isolations.length === 0) {
-      isolations = category.isolation.filter(e => e.difficulty <= maxDiff);
-    }
-    const mgIsolations = isolations.filter(e => e.muscleGroup === mg);
-    const selectedIsolations = mgIsolations.length > 0
-      ? pickRandom(mgIsolations, Math.min(2, mgIsolations.length))
-      : pickRandom(isolations, 1);
-
-    for (const iso of selectedIsolations) {
-      exercises.push(buildExerciseEntry(iso, params, user));
+      exercises.push({
+        exerciseId: ex.id,
+        name: ex.name,
+        muscleGroup: ex.muscleGroup,
+        primaryMuscle: ex.primary,
+        equipment: ex.equipment,
+        sets,
+        reps,
+        targetWeight: estimateTargetWeight(user, ex),
+        restSeconds,
+        isCompound,
+        unit: ex.unit || 'reps',
+      });
     }
   }
 
@@ -227,23 +214,13 @@ function buildExercisesForDay(mgConfig, user, availableEquipment) {
   return exercises;
 }
 
-// Append core finisher exercises
-function appendCoreFinisher(user, availableEquipment) {
+// ─── Append core finisher ─────────────────────────────────────────────────────
+function appendCoreFinisher(user) {
   const caps = DIFFICULTY_CAPS[user.experience] || DIFFICULTY_CAPS.intermediate;
-  // Core exercises are skill-based (not cardio), so use strength cap (capped at 8)
   const maxDiff = Math.min(caps.strength, 8);
-  const equipSet = new Set(availableEquipment || ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight']);
-
-  const pool = CORE_EXERCISES.filter(
-    e => e.difficulty <= maxDiff && equipSet.has(e.equipment)
-  );
-
-  const antiExtension = pool.filter(e =>
-    ['plank', 'dead-bug', 'hollow-body-hold'].includes(e.id)
-  );
-  const rotation = pool.filter(e =>
-    ['pallof-press', 'russian-twist', 'lawnmower'].includes(e.id)
-  );
+  const pool = CORE_EXERCISES.filter(e => e.difficulty <= maxDiff);
+  const antiExtension = pool.filter(e => ['plank', 'dead-bug', 'hollow-body-hold'].includes(e.id));
+  const rotation = pool.filter(e => ['pallof-press', 'russian-twist', 'lawnmower'].includes(e.id));
 
   const picks = [];
   if (antiExtension.length) picks.push(pickRandom(antiExtension));
@@ -268,103 +245,235 @@ function appendCoreFinisher(user, availableEquipment) {
   }));
 }
 
-// Append cardio finisher for weight-loss / endurance goals
-function appendCardioFinisher(user, availableEquipment) {
-  if (!['weight-loss', 'endurance'].includes(user.goal)) return [];
+// ─── Append cardio finisher ───────────────────────────────────────────────────
+function appendCardioFinisher(user, cardioLevel) {
+  const cardioConfig = CARDIO_LEVELS[cardioLevel] || CARDIO_LEVELS.moderate;
+  if (!cardioConfig.appendToWorkout) return [];
 
   const caps = DIFFICULTY_CAPS[user.experience] || DIFFICULTY_CAPS.intermediate;
   const maxDiff = caps.cardio;
-  const equipSet = new Set(availableEquipment || ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight']);
 
-  const machines = CARDIO_EXERCISES.machines.filter(
-    e => e.difficulty <= maxDiff && equipSet.has(e.equipment)
-  );
+  const machines = CARDIO_EXERCISES.machines.filter(e => e.difficulty <= maxDiff);
+  const hiit = CARDIO_EXERCISES.hiit.filter(e => e.difficulty <= maxDiff);
 
-  if (!machines.length) return [];
+  const exercises = [];
+  if (machines.length) exercises.push(pickRandom(machines));
+  if (hiit.length && cardioConfig.hiitDays > 0) exercises.push(pickRandom(hiit));
 
-  const ex = pickRandom(machines);
-  const minutes = user.goal === 'weight-loss' ? 25 : 20;
-
-  return [{
+  return exercises.map(ex => ({
     exerciseId: ex.id,
     name: ex.name,
     muscleGroup: 'cardio',
     primaryMuscle: 'cardio',
     equipment: ex.equipment,
     sets: 1,
-    reps: minutes,
+    reps: ex.unit === 'min' ? 20 : 15,
     targetWeight: 0,
     restSeconds: 0,
     isCompound: false,
-    unit: 'min',
-  }];
+    unit: ex.unit || 'min',
+  }));
 }
 
-// Main entry point: generate a complete personalized template
+// ─── Main generator ──────────────────────────────────────────────────────────
+/**
+ * Generate a personalized workout template.
+ *
+ * @param {Object} options
+ * @param {Object}  options.user               - User profile (goal, experience, weight, unit)
+ * @param {number}  options.daysPerWeek         - Training days per week (2-6)
+ * @param {string}  options.splitType          - 'auto' | 'full-body' | 'upper-lower' | 'ppl'
+ * @param {string[]} options.availableEquipment - Equipment available (default: all)
+ * @param {string}  options.sessionLength       - 'short' | 'medium' | 'long'
+ * @param {string}  options.cardioLevel         - 'none' | 'light' | 'moderate' | 'intense'
+ * @param {boolean} options.includeMobility     - Include mobility warm-up circuit
+ * @param {string[]} options.priorityMuscles    - Muscle groups to emphasize (extra exercises)
+ */
 export function generateTemplate({
   user,
-  daysPerWeek,
-  availableEquipment = ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'],
+  daysPerWeek = 4,
   splitType = 'auto',
+  availableEquipment = ALL_EQUIPMENT,
+  sessionLength = 'medium',
+  cardioLevel = 'moderate',
+  includeMobility = false,
+  priorityMuscles = [],
 }) {
   const days = daysPerWeek || 4;
   const splitKey = String(days);
   const splitConfig = SPLIT_CONFIGS[splitKey] || SPLIT_CONFIGS['4'];
 
-  // Override split type if explicitly specified
   const actualType = splitType !== 'auto' ? splitType : splitConfig.type;
-  const muscleMap = SPLIT_MUSCLE_MAP[actualType] || SPLIT_MUSCLE_MAP['upper-lower'];
+  const muscleMap = {
+    'full-body': [
+      { label: 'Full Body A', muscleGroups: ['chest', 'back', 'quads'], primary: 'chest' },
+      { label: 'Full Body B', muscleGroups: ['back', 'shoulders', 'hamstrings'], primary: 'back' },
+      { label: 'Full Body C', muscleGroups: ['chest', 'shoulders', 'quads'], primary: 'shoulders' },
+    ],
+    'upper-lower': [
+      { label: 'Upper A', muscleGroups: ['chest', 'back', 'shoulders'], primary: 'chest' },
+      { label: 'Lower A', muscleGroups: ['quads', 'hamstrings', 'glutes'], primary: 'quads' },
+      { label: 'Upper B', muscleGroups: ['chest', 'back', 'shoulders', 'biceps'], primary: 'back' },
+      { label: 'Lower B', muscleGroups: ['quads', 'hamstrings', 'calves'], primary: 'hamstrings' },
+    ],
+    'ppl': [
+      { label: 'Push', muscleGroups: ['chest', 'shoulders', 'triceps'], primary: 'chest' },
+      { label: 'Pull', muscleGroups: ['back', 'biceps', 'rear delts'], primary: 'back' },
+      { label: 'Legs', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves'], primary: 'quads' },
+    ],
+  }[actualType] || [
+    { label: 'Full Body A', muscleGroups: ['chest', 'back', 'quads'], primary: 'chest' },
+  ];
 
   const dayLabels = splitConfig.days.slice(0, days);
+
+  // Compute cardio days: spread HIIT/LISS across workout days
+  const cardioConfig = CARDIO_LEVELS[cardioLevel] || CARDIO_LEVELS.moderate;
+  const cardioDays = new Set();
+  if (cardioConfig.hiitDays > 0 || cardioConfig.lissDays > 0) {
+    const totalCardioDays = cardioConfig.hiitDays + cardioConfig.lissDays;
+    const shuffled = shuffleArray([...Array(days)].map((_, i) => i));
+    shuffled.slice(0, Math.min(totalCardioDays, days)).forEach(i => cardioDays.add(i));
+  }
 
   const template = {
     id: `generated-${Date.now()}`,
     name: `${actualType.replace('-', ' ')} · ${user.goal}`,
     is_default: false,
     isDefault: false,
+    blockDuration: 4,
+    sessionLength,
+    cardioLevel,
+    includeMobility,
+    priorityMuscles,
     dayTypes: dayLabels.map((label, i) => {
       const mgConfig = muscleMap[i % muscleMap.length];
+      const equipSet = new Set(availableEquipment);
 
-      // Build exercises for this day; use restricted equipment but fall back
-      // to all equipment per-muscle-group if that group would otherwise be empty
-      const exercises = buildExercisesForDay(mgConfig, user, availableEquipment);
-      const coreFinisher = appendCoreFinisher(user, availableEquipment);
-      const cardioFinisher = appendCardioFinisher(user, availableEquipment);
+      let exercises = buildExercisesForDay(mgConfig, user, availableEquipment, sessionLength);
 
-      // Count how many of the targeted muscle groups got at least one exercise
+      // ── Fallback: if missing muscle groups, re-run with all equipment ─────
       const mgWithExercises = new Set(exercises.map(e => e.muscleGroup));
       const missingMGs = mgConfig.muscleGroups.filter(mg => !mgWithExercises.has(mg));
-
-      // If any target muscle group has no exercises, re-run with ALL equipment
-      // (ignoring user restriction) for those missing groups only.
-      // This handles cases like "bodyweight only + shoulders" where no
-      // bodyweight shoulder compounds exist — we must include non-bodyweight
-      // exercises or the day will be empty.
       if (missingMGs.length > 0) {
-        const allEquipment = ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'];
-        const allExercises = buildExercisesForDay(mgConfig, user, allEquipment);
+        const allExercises = buildExercisesForDay(mgConfig, user, ALL_EQUIPMENT, sessionLength);
         const existingIds = new Set(exercises.map(e => e.exerciseId));
-        const extras = allExercises.filter(e => !existingIds.has(e.exerciseId) && missingMGs.includes(e.muscleGroup));
+        const extras = allExercises.filter(
+          e => !existingIds.has(e.exerciseId) && missingMGs.includes(e.muscleGroup)
+        );
         exercises.push(...extras);
+      }
+
+      // ── Priority muscles: add extra isolation for flagged groups ──────────
+      if (priorityMuscles.length > 0) {
+        const params = GOAL_PARAMS[user.goal] || GOAL_PARAMS.hypertrophy;
+        for (const pm of priorityMuscles) {
+          if (!mgConfig.muscleGroups.includes(pm)) continue;
+          if (exercises.some(e => e.muscleGroup === pm && !e.isCompound)) continue; // already has iso
+          const category = getCategoryForMuscleGroup(pm);
+          const caps = DIFFICULTY_CAPS[user.experience] || DIFFICULTY_CAPS.intermediate;
+          const isolations = category.isolation.filter(
+            e => e.difficulty <= caps.strength && ALL_EQUIPMENT.includes(e.equipment)
+          );
+          if (isolations.length > 0) {
+            const pick = pickRandom(isolations);
+            const [minSets, maxSets] = params.setsRange;
+            exercises.push({
+              exerciseId: pick.id,
+              name: pick.name,
+              muscleGroup: pick.muscleGroup,
+              primaryMuscle: pick.primary,
+              equipment: pick.equipment,
+              sets: Math.round((minSets + maxSets) / 2),
+              reps: Math.round((params.repRange[0] + params.repRange[1]) / 2),
+              targetWeight: estimateTargetWeight(user, pick),
+              restSeconds: Math.round((params.restIsolation[0] + params.restIsolation[1]) / 2),
+              isCompound: false,
+              unit: pick.unit || 'reps',
+            });
+          }
+        }
+      }
+
+      // ── Mobility circuit (warm-up) ─────────────────────────────────────────
+      const mobilityExercises = [];
+      if (includeMobility) {
+        const mobilityPool = [
+          { id: 'worlds-greatest', name: "World's Greatest Stretch", muscleGroup: 'mobility', primary: 'hip', equipment: 'bodyweight', difficulty: 2, unit: 'reps' },
+          { id: 'band-pull-apart', name: 'Band Pull-Apart', muscleGroup: 'mobility', primary: 'rear delts', equipment: 'cable', difficulty: 2, unit: 'reps' },
+          { id: 'face-pull', name: 'Face Pull', muscleGroup: 'mobility', primary: 'rear delts', equipment: 'cable', difficulty: 3, unit: 'reps' },
+          { id: 'hip-circles', name: 'Hip Circles', muscleGroup: 'mobility', primary: 'hip', equipment: 'bodyweight', difficulty: 1, unit: 'reps' },
+          { id: 'cat-cow', name: 'Cat-Cow Stretch', muscleGroup: 'mobility', primary: 'spine', equipment: 'bodyweight', difficulty: 1, unit: 'reps' },
+          { id: 'thoracic-extension', name: 'Thoracic Extension', muscleGroup: 'mobility', primary: 'thoracic', equipment: 'bodyweight', difficulty: 2, unit: 'reps' },
+        ];
+        const picks = pickRandom(mobilityPool, 2);
+        for (const ex of picks) {
+          mobilityExercises.push({
+            exerciseId: ex.id,
+            name: ex.name,
+            muscleGroup: 'mobility',
+            primaryMuscle: ex.primary,
+            equipment: ex.equipment,
+            sets: 2,
+            reps: 10,
+            targetWeight: 0,
+            restSeconds: 30,
+            isCompound: false,
+            unit: 'reps',
+          });
+        }
+      }
+
+      // ── Core finisher ──────────────────────────────────────────────────────
+      const coreFinisher = appendCoreFinisher(user);
+
+      // ── Cardio finisher (only on designated cardio days) ───────────────────
+      const cardioFinisher = cardioDays.has(i) ? appendCardioFinisher(user, cardioLevel) : [];
+
+      const allExercises = [...mobilityExercises, ...exercises, ...coreFinisher, ...cardioFinisher];
+
+      // Validate: if still empty, throw descriptive error
+      if (allExercises.length === 0) {
+        throw new Error(
+          `Could not generate exercises for "${label}" (muscle groups: ${mgConfig.muscleGroups.join(', ')}) ` +
+          `with your selected equipment (${availableEquipment.join(', ')}). ` +
+          `Try enabling more equipment options.`
+        );
       }
 
       return {
         label,
         muscleGroups: mgConfig.muscleGroups.join(', '),
-        exercises: [...exercises, ...coreFinisher, ...cardioFinisher],
+        exercises: allExercises,
       };
     }),
   };
 
-  // Validate: warn if any day ended up with no exercises
-  const emptyDays = template.dayTypes.filter(d => d.exercises.length === 0);
-  if (emptyDays.length > 0) {
-    throw new Error(
-      `No exercises could be generated for ${emptyDays.map(d => d.label).join(', ')} ` +
-      `with the selected equipment (${availableEquipment.join(', ')}). ` +
-      `Try adding more equipment options.`
-    );
-  }
-
   return template;
 }
+
+// ─── Expose config for UI use ────────────────────────────────────────────────
+export const GENERATOR_OPTIONS = {
+  sessionLength: [
+    { value: 'short',  label: 'Short (~45 min)',  desc: '4-6 exercises, efficient workouts' },
+    { value: 'medium', label: 'Medium (~60 min)', desc: '6-8 exercises, balanced volume' },
+    { value: 'long',   label: 'Long (~75 min)',   desc: '8-10 exercises, higher volume' },
+  ],
+  cardioLevel: [
+    { value: 'none',     label: 'None',      desc: 'No cardio finisher' },
+    { value: 'light',    label: 'Light',      desc: '1-2 LISS sessions/week' },
+    { value: 'moderate', label: 'Moderate',   desc: '3 sessions/week (HIIT + LISS)' },
+    { value: 'intense',  label: 'Intense',   desc: '4+ sessions/week (HIIT + LISS)' },
+  ],
+  priorityMuscles: [
+    { value: 'chest',      label: 'Chest' },
+    { value: 'back',       label: 'Back' },
+    { value: 'shoulders',  label: 'Shoulders' },
+    { value: 'biceps',     label: 'Biceps' },
+    { value: 'triceps',    label: 'Triceps' },
+    { value: 'quads',      label: 'Quadriceps' },
+    { value: 'hamstrings', label: 'Hamstrings' },
+    { value: 'glutes',     label: 'Glutes' },
+    { value: 'calves',     label: 'Calves' },
+  ],
+};

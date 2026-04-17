@@ -5,7 +5,7 @@ import { buildMesocycle } from '../utils/scheduler';
 import { DEFAULT_TEMPLATES } from '../utils/ppl';
 import { formatDateLong } from '../utils/format';
 import TemplateEditor from '../components/TemplateEditor';
-import { generateTemplate } from '../utils/templateBuilder';
+import { generateTemplate, GENERATOR_OPTIONS } from '../utils/templateBuilder';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -23,6 +23,10 @@ export default function Dashboard({ user }) {
     daysPerWeek: 4,
     splitType: 'auto',
     equipment: ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'],
+    sessionLength: 'medium',
+    cardioLevel: 'moderate',
+    includeMobility: false,
+    priorityMuscles: [],
   });
 
   useEffect(() => {
@@ -532,21 +536,20 @@ export default function Dashboard({ user }) {
       {/* Smart Generator Modal */}
       {generatorOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-bold text-slate-900">Smart Generate</h2>
               <button onClick={() => setGeneratorOpen(false)} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
             </div>
 
             <div className="space-y-5">
+
               {/* Days per week */}
               <div>
                 <label className="label">Training Days per Week</label>
                 <div className="flex items-center gap-4">
                   <input
-                    type="range"
-                    min="2"
-                    max="6"
+                    type="range" min="2" max="6"
                     value={generatorParams.daysPerWeek}
                     onChange={e => setGeneratorParams(p => ({ ...p, daysPerWeek: parseInt(e.target.value) }))}
                     className="flex-1 accent-orange-500"
@@ -554,8 +557,8 @@ export default function Dashboard({ user }) {
                   <span className="w-8 text-center font-bold text-slate-900">{generatorParams.daysPerWeek}</span>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  {generatorParams.daysPerWeek <= 3 ? 'Full Body split recommended' :
-                   generatorParams.daysPerWeek === 4 ? 'Upper/Lower split recommended' : 'Push/Pull/Legs split recommended'}
+                  {generatorParams.daysPerWeek <= 3 ? 'Full Body split' :
+                   generatorParams.daysPerWeek === 4 ? 'Upper/Lower split' : 'Push/Pull/Legs split'}
                 </p>
               </div>
 
@@ -574,6 +577,98 @@ export default function Dashboard({ user }) {
                 </select>
               </div>
 
+              {/* Session length */}
+              <div>
+                <label className="label">Session Length</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {GENERATOR_OPTIONS.sessionLength.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setGeneratorParams(p => ({ ...p, sessionLength: opt.value }))}
+                      className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all text-center ${
+                        generatorParams.sessionLength === opt.value
+                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      <div>{opt.label}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  {generatorParams.sessionLength === 'short' ? '4-6 exercises, ~45 min' :
+                   generatorParams.sessionLength === 'medium' ? '6-8 exercises, ~60 min' :
+                   '8-10 exercises, ~75 min'}
+                </p>
+              </div>
+
+              {/* Cardio level */}
+              <div>
+                <label className="label">Cardio</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {GENERATOR_OPTIONS.cardioLevel.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setGeneratorParams(p => ({ ...p, cardioLevel: opt.value }))}
+                      className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all text-center ${
+                        generatorParams.cardioLevel === opt.value
+                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="capitalize">{opt.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Priority muscles */}
+              <div>
+                <label className="label">Priority Muscles <span className="font-normal text-slate-400">(optional)</span></label>
+                <p className="text-xs text-slate-500 mb-2">Adds extra isolation volume to selected muscle groups</p>
+                <div className="flex flex-wrap gap-2">
+                  {GENERATOR_OPTIONS.priorityMuscles.map(opt => {
+                    const isSelected = generatorParams.priorityMuscles.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => setGeneratorParams(p => ({
+                          ...p,
+                          priorityMuscles: isSelected
+                            ? p.priorityMuscles.filter(m => m !== opt.value)
+                            : [...p.priorityMuscles, opt.value],
+                        }))}
+                        className={`py-1.5 px-3 rounded-full text-xs font-semibold border transition-all ${
+                          isSelected
+                            ? 'border-orange-500 bg-orange-500 text-white'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Mobility toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-semibold text-slate-700">Mobility Warm-Up</div>
+                  <div className="text-xs text-slate-500">Include dynamic warm-up circuit</div>
+                </div>
+                <button
+                  onClick={() => setGeneratorParams(p => ({ ...p, includeMobility: !p.includeMobility }))}
+                  className={`w-12 h-7 rounded-full transition-all relative ${
+                    generatorParams.includeMobility ? 'bg-orange-500' : 'bg-slate-200'
+                  }`}
+                >
+                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all ${
+                    generatorParams.includeMobility ? 'left-6' : 'left-1'
+                  }`} />
+                </button>
+              </div>
+
               {/* Equipment */}
               <div>
                 <label className="label">Available Equipment</label>
@@ -584,12 +679,10 @@ export default function Dashboard({ user }) {
                         type="checkbox"
                         checked={generatorParams.equipment.includes(eq)}
                         onChange={e => {
-                          setGeneratorParams(p => ({
-                            ...p,
-                            equipment: e.target.checked
-                              ? [...p.equipment, eq]
-                              : p.equipment.filter(x => x !== eq),
-                          }));
+                          const newEquip = e.target.checked
+                            ? [...generatorParams.equipment, eq]
+                            : generatorParams.equipment.filter(x => x !== eq);
+                          setGeneratorParams(p => ({ ...p, equipment: newEquip }));
                         }}
                         className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
                       />
@@ -597,6 +690,9 @@ export default function Dashboard({ user }) {
                     </label>
                   ))}
                 </div>
+                {generatorParams.equipment.length <= 2 && (
+                  <p className="text-xs text-amber-600 mt-1">⚠ Limited equipment may reduce exercise variety</p>
+                )}
               </div>
 
               {/* User profile summary */}
@@ -605,16 +701,25 @@ export default function Dashboard({ user }) {
                 <div>Goal: <span className="text-slate-700 capitalize">{user.goal}</span></div>
                 <div>Experience: <span className="text-slate-700 capitalize">{user.experience}</span></div>
                 <div>Weight: <span className="text-slate-700">{user.weight} {user.unit}</span></div>
+                <div>Intensity: <span className="text-slate-700">{user.intensity}/10</span></div>
               </div>
 
               <button
                 onClick={() => {
+                  if (generatorParams.equipment.length === 0) {
+                    alert('Please select at least one equipment option.');
+                    return;
+                  }
                   try {
                     const template = generateTemplate({
                       user,
                       daysPerWeek: generatorParams.daysPerWeek,
                       availableEquipment: generatorParams.equipment,
                       splitType: generatorParams.splitType,
+                      sessionLength: generatorParams.sessionLength,
+                      cardioLevel: generatorParams.cardioLevel,
+                      includeMobility: generatorParams.includeMobility,
+                      priorityMuscles: generatorParams.priorityMuscles,
                     });
                     setTemplates(prev => {
                       const filtered = prev.filter(t => !t.id.startsWith('generated-'));
@@ -625,7 +730,8 @@ export default function Dashboard({ user }) {
                     setGeneratorOpen(false);
                     setTimeout(() => setGeneratedFlash(null), 3000);
                   } catch (err) {
-                    alert(err.message || 'Template generation failed. Try adding more equipment options.');
+                    console.error('Template generation failed:', err);
+                    alert(err.message || 'Template generation failed. Try selecting more equipment.');
                   }
                 }}
                 className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25"
