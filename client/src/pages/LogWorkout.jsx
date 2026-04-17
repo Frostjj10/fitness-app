@@ -220,27 +220,27 @@ export default function LogWorkout({ user }) {
   const currentWorkout = getCurrentWorkout();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="page-title">Log Workout</h1>
-          <p className="text-slate-500 mt-1">Select a day and log your progress</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Log Workout</h1>
+          <p className="text-slate-500 mt-1 text-xs sm:text-sm">Select a day and log your progress</p>
         </div>
         {saved && (
-          <div className="text-orange-500 font-bold flex items-center gap-1 text-sm">
+          <div className="text-orange-500 font-bold flex items-center gap-1 text-xs sm:text-sm">
             ✓ Saved!
           </div>
         )}
       </div>
 
-      <div className="card p-5">
-        <label className="section-title mb-3 block">Which day are you logging?</label>
+      <div className="card p-4 sm:p-5">
+        <label className="text-xs sm:text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 block">Which day?</label>
         <div className="flex flex-wrap gap-2">
           {workoutDays.map(w => (
             <button
               key={w.dayOfWeek}
               onClick={() => { setSelectedDay(w.dayOfWeek); setSaved(false); }}
-              className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+              className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
                 selectedDay === w.dayOfWeek
                   ? 'bg-slate-900 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -254,19 +254,71 @@ export default function LogWorkout({ user }) {
 
       {currentWorkout && (
         <div className="card overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-800 to-slate-700 text-white px-6 py-4">
-            <div className="font-bold text-lg">{currentWorkout.dayOfWeek}</div>
-            <div className="text-sm text-slate-300">{currentWorkout.muscleGroups}</div>
+          <div className="bg-gradient-to-r from-slate-800 to-slate-700 text-white px-4 sm:px-6 py-3 sm:py-4">
+            <div className="font-bold text-base sm:text-lg">{currentWorkout.dayOfWeek}</div>
+            <div className="text-xs sm:text-sm text-slate-300">{currentWorkout.muscleGroups}</div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile-first: card-based layout */}
+          <div className="p-4 space-y-4 sm:hidden">
+            {currentWorkout.exercises.map((ex, i) => {
+              const entry = logEntries[ex.exerciseId] || {};
+              const isCardio = ex.unit === 'min';
+              const rec = getProgressiveOverloadRecommendation(ex.exerciseId, ex.muscleGroup, user.unit, ex.reps, weightLogHistory);
+              const useProgressive = user.progressive_overload !== false;
+              const suggestedWeight = rec.suggestedWeight || ex.targetWeight;
+              const defaultWeight = useProgressive && rec.suggestedWeight ? rec.suggestedWeight : (entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight);
+              const weightChanged = useProgressive && rec.suggestedWeight && rec.suggestedWeight !== rec.lastWeight;
+
+              return (
+                <div key={i} className="border border-slate-100 rounded-xl p-4 bg-white">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-bold text-slate-900">{ex.name}</div>
+                      <div className="text-xs text-slate-500">{ex.muscleGroup}</div>
+                      {weightChanged && (
+                        <div className="text-xs text-orange-500 font-bold mt-1">Goal: {suggestedWeight}{user.unit} (+{rec.increment})</div>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-400 text-right">
+                      Target: {isCardio ? `${ex.reps} min` : `${ex.sets}×${ex.reps} @ ${ex.targetWeight}`}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {!isCardio && (
+                      <div>
+                        <label className="text-xs text-slate-500 font-medium block mb-1">{user.unit}</label>
+                        <input type="number" defaultValue={defaultWeight} onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)} className={`w-full px-3 py-2 border rounded-xl text-sm ${weightChanged ? 'border-orange-400 bg-orange-50' : 'border-slate-200'}`} />
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-xs text-slate-500 font-medium block mb-1">{isCardio ? 'Duration' : 'Reps'}</label>
+                      <input type="number" defaultValue={entry.reps || lastLoggedWeights[ex.exerciseId]?.reps || ex.reps} onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-500 font-medium block mb-1">RPE</label>
+                      <select defaultValue={entry.rpe || 7} onChange={e => updateEntry(ex.exerciseId, 'rpe', e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white">
+                        {[1,2,3,4,5,6,7,8,9,10].map(v => <option key={v} value={v}>{v}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <input type="text" placeholder="Notes..." defaultValue={entry.notes} onChange={e => updateEntry(ex.exerciseId, 'notes', e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop: table layout */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-xs section-title">
+                <tr className="border-b border-slate-100 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   <th className="px-6 py-3">Exercise</th>
                   <th className="px-6 py-3">Target</th>
                   <th className="px-6 py-3">{user.unit}</th>
-                  <th className="px-6 py-3">{currentWorkout.exercises[0]?.unit === 'min' ? 'Duration (min)' : 'Reps'}</th>
+                  <th className="px-6 py-3">{currentWorkout.exercises[0]?.unit === 'min' ? 'Duration' : 'Reps'}</th>
                   <th className="px-6 py-3">RPE</th>
                   <th className="px-6 py-3">Notes</th>
                 </tr>
@@ -275,19 +327,10 @@ export default function LogWorkout({ user }) {
                 {currentWorkout.exercises.map((ex, i) => {
                   const entry = logEntries[ex.exerciseId] || {};
                   const isCardio = ex.unit === 'min';
-
-                  const rec = getProgressiveOverloadRecommendation(
-                    ex.exerciseId,
-                    ex.muscleGroup,
-                    user.unit,
-                    ex.reps,
-                    weightLogHistory
-                  );
+                  const rec = getProgressiveOverloadRecommendation(ex.exerciseId, ex.muscleGroup, user.unit, ex.reps, weightLogHistory);
                   const useProgressive = user.progressive_overload !== false;
                   const suggestedWeight = rec.suggestedWeight || ex.targetWeight;
-                  const defaultWeight = useProgressive && rec.suggestedWeight
-                    ? rec.suggestedWeight
-                    : (entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight);
+                  const defaultWeight = useProgressive && rec.suggestedWeight ? rec.suggestedWeight : (entry.weight || lastLoggedWeights[ex.exerciseId]?.weight || ex.targetWeight);
                   const weightChanged = useProgressive && rec.suggestedWeight && rec.suggestedWeight !== rec.lastWeight;
 
                   return (
@@ -296,61 +339,27 @@ export default function LogWorkout({ user }) {
                         <div className="font-semibold text-slate-900">{ex.name}</div>
                         <div className="text-xs text-slate-500">{ex.muscleGroup}</div>
                         {weightChanged && (
-                          <div className="text-xs text-orange-500 mt-0.5 font-bold flex items-center gap-1">
-                            Goal: {suggestedWeight}{user.unit}
-                          </div>
+                          <div className="text-xs text-orange-500 font-bold mt-0.5">Goal: {suggestedWeight}{user.unit} (+{rec.increment})</div>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600">
-                        {isCardio
-                          ? `${ex.reps} min`
-                          : `${ex.sets}×${ex.reps} @ ${ex.targetWeight}${user.unit}`}
+                        {isCardio ? `${ex.reps} min` : `${ex.sets}×${ex.reps} @ ${ex.targetWeight}${user.unit}`}
                       </td>
                       <td className="px-6 py-4">
-                        {isCardio ? (
-                          <span className="text-slate-300 text-sm">—</span>
-                        ) : (
-                          <div>
-                            <input
-                              type="number"
-                              defaultValue={defaultWeight}
-                              onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)}
-                              className={`w-24 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm ${weightChanged ? 'border-orange-400 bg-orange-50' : 'border-slate-200'}`}
-                            />
-                            {weightChanged && (
-                              <div className="text-xs text-orange-500 mt-0.5 font-bold">+{rec.increment}{user.unit}</div>
-                            )}
-                          </div>
+                        {isCardio ? <span className="text-slate-300 text-sm">—</span> : (
+                          <input type="number" defaultValue={defaultWeight} onChange={e => updateEntry(ex.exerciseId, 'weight', e.target.value)} className={`w-24 px-3 py-2 border rounded-xl text-sm ${weightChanged ? 'border-orange-400 bg-orange-50' : 'border-slate-200'}`} />
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <input
-                          type="number"
-                          defaultValue={entry.reps || lastLoggedWeights[ex.exerciseId]?.reps || ex.reps}
-                          onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)}
-                          className="w-20 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm"
-                          placeholder={isCardio ? 'min' : ''}
-                        />
+                        <input type="number" defaultValue={entry.reps || lastLoggedWeights[ex.exerciseId]?.reps || ex.reps} onChange={e => updateEntry(ex.exerciseId, isCardio ? 'duration' : 'reps', e.target.value)} className="w-20 px-3 py-2 border border-slate-200 rounded-xl text-sm" />
                       </td>
                       <td className="px-6 py-4">
-                        <select
-                          defaultValue={entry.rpe || 7}
-                          onChange={e => updateEntry(ex.exerciseId, 'rpe', e.target.value)}
-                          className="w-32 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm bg-white"
-                        >
-                          {[1,2,3,4,5,6,7,8,9,10].map(v => (
-                            <option key={v} value={v}>{v} — {RPE_LABELS[v]}</option>
-                          ))}
+                        <select defaultValue={entry.rpe || 7} onChange={e => updateEntry(ex.exerciseId, 'rpe', e.target.value)} className="w-24 px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white">
+                          {[1,2,3,4,5,6,7,8,9,10].map(v => <option key={v} value={v}>{v}</option>)}
                         </select>
                       </td>
                       <td className="px-6 py-4">
-                        <input
-                          type="text"
-                          placeholder="Notes..."
-                          defaultValue={entry.notes}
-                          onChange={e => updateEntry(ex.exerciseId, 'notes', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/30 outline-none text-sm"
-                        />
+                        <input type="text" placeholder="..." defaultValue={entry.notes} onChange={e => updateEntry(ex.exerciseId, 'notes', e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm" />
                       </td>
                     </tr>
                   );
@@ -366,7 +375,7 @@ export default function LogWorkout({ user }) {
           <button
             onClick={saveWorkout}
             disabled={saving || saved}
-            className="px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 text-sm"
+            className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 text-sm"
           >
             {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Complete Workout'}
           </button>
@@ -374,15 +383,15 @@ export default function LogWorkout({ user }) {
       )}
 
       {!currentWorkout && workoutDays.length === 0 && (
-        <div className="text-center py-20 card p-16">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <div className="text-center py-16 sm:py-20 card p-8 sm:p-16">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 sm:w-8 sm:h-8 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <rect x="3" y="4" width="18" height="18" rx="2"/>
               <path d="M16 2v4M8 2v4M3 10h18"/>
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-1">No Workouts Scheduled</h2>
-          <p className="text-slate-500 text-sm">Go to Dashboard to create a schedule first.</p>
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-1">No Workouts Scheduled</h2>
+          <p className="text-slate-500 text-xs sm:text-sm">Go to Dashboard to create a schedule first.</p>
         </div>
       )}
     </div>

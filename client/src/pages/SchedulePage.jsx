@@ -241,19 +241,19 @@ export default function SchedulePage({ user }) {
   const currentWeek = schedule.schedule[selectedWeek] || { weekNum: 1, days: [] };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Schedule</h1>
-        <div className="text-slate-500">{formatDateLong(schedule.start_date)} — {formatDateLong(schedule.end_date)}</div>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Schedule</h1>
+        <div className="text-xs sm:text-sm text-slate-500">{formatDateLong(schedule.start_date)} — {formatDateLong(schedule.end_date)}</div>
       </div>
 
-      {/* Week selector */}
-      <div className="flex gap-2">
+      {/* Week selector - horizontal scroll on mobile */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible scrollbar-hide">
         {schedule.schedule.map((week, i) => (
           <button
             key={i}
             onClick={() => setSelectedWeek(i)}
-            className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all shrink-0 ${
               selectedWeek === i ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -262,8 +262,8 @@ export default function SchedulePage({ user }) {
         ))}
       </div>
 
-      {/* 7-day grid - ordered Monday to Sunday */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* 7-day grid - single column on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(dayName => {
           const day = currentWeek.days?.find(d => d.dayOfWeek === dayName);
           if (!day) return null;
