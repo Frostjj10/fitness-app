@@ -268,6 +268,16 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
     handleClose();
   }
 
+  function handleRestoreDefault() {
+    if (!selectedTemplate) return;
+    const defaultTemplate = DEFAULT_TEMPLATES.find(t => t.id === selectedTemplate.id);
+    if (!defaultTemplate) return;
+    if (!confirm(`Restore "${selectedTemplate.name}" to its default exercises? This cannot be undone.`)) return;
+    // Deep clone the default template
+    const restored = JSON.parse(JSON.stringify(defaultTemplate));
+    setEditedTemplate(restored);
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -336,7 +346,17 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
             <div className="space-y-6">
               {/* Template name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Template Name</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-sm font-medium text-gray-700">Template Name</label>
+                  {selectedTemplate && (selectedTemplate.is_default || selectedTemplate.isDefault) && (
+                    <button
+                      onClick={handleRestoreDefault}
+                      className="text-xs text-orange-600 hover:text-orange-800 font-medium"
+                    >
+                      Restore to Default
+                    </button>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={editedTemplate?.name || ''}
