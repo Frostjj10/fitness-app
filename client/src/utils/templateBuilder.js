@@ -324,9 +324,27 @@ export function generateTemplate({
     isDefault: false,
     dayTypes: dayLabels.map((label, i) => {
       const mgConfig = muscleMap[i % muscleMap.length];
+
+      // Build exercises for this day; use restricted equipment but fall back
+      // to all equipment per-muscle-group if that group would otherwise be empty
       const exercises = buildExercisesForDay(mgConfig, user, availableEquipment);
       const coreFinisher = appendCoreFinisher(user, availableEquipment);
       const cardioFinisher = appendCardioFinisher(user, availableEquipment);
+
+      // Count how many of the targeted muscle groups got at least one exercise
+      const mgWithExercises = new Set(exercises.map(e => e.muscleGroup));
+      const missingMGs = mgConfig.muscleGroups.filter(mg => !mgWithExercises.has(mg));
+
+      // If any target muscle group has no exercises, re-run with all equipment
+      // for those missing groups only (don't override successful selections)
+      if (missingMGs.length > 0) {
+        const allExercises = buildExercisesForDay(mgConfig, user, [
+          'barbell', 'dumbbell', 'cable', 'machine', 'bodyweight',
+        ]);
+        const existingIds = new Set(exercises.map(e => e.exerciseId));
+        const extras = allExercises.filter(e => !existingIds.has(e.exerciseId) && missingMGs.includes(e.muscleGroup));
+        exercises.push(...extras);
+      }
 
       return {
         label,

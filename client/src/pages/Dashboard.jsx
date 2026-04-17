@@ -609,20 +609,24 @@ export default function Dashboard({ user }) {
 
               <button
                 onClick={() => {
-                  const template = generateTemplate({
-                    user,
-                    daysPerWeek: generatorParams.daysPerWeek,
-                    availableEquipment: generatorParams.equipment,
-                    splitType: generatorParams.splitType,
-                  });
-                  setTemplates(prev => {
-                    const filtered = prev.filter(t => !t.id.startsWith('generated-'));
-                    return [...filtered, template];
-                  });
-                  setSelectedTemplate(template.id);
-                  setGeneratedFlash(template.id);
-                  setGeneratorOpen(false);
-                  setTimeout(() => setGeneratedFlash(null), 3000);
+                  try {
+                    const template = generateTemplate({
+                      user,
+                      daysPerWeek: generatorParams.daysPerWeek,
+                      availableEquipment: generatorParams.equipment,
+                      splitType: generatorParams.splitType,
+                    });
+                    setTemplates(prev => {
+                      const filtered = prev.filter(t => !t.id.startsWith('generated-'));
+                      return [...filtered, template];
+                    });
+                    setSelectedTemplate(template.id);
+                    setGeneratedFlash(template.id);
+                    setGeneratorOpen(false);
+                    setTimeout(() => setGeneratedFlash(null), 3000);
+                  } catch (err) {
+                    console.error('Template generation failed:', err);
+                  }
                 }}
                 className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25"
               >
