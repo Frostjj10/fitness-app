@@ -335,12 +335,14 @@ export function generateTemplate({
       const mgWithExercises = new Set(exercises.map(e => e.muscleGroup));
       const missingMGs = mgConfig.muscleGroups.filter(mg => !mgWithExercises.has(mg));
 
-      // If any target muscle group has no exercises, re-run with all equipment
-      // for those missing groups only (don't override successful selections)
+      // If any target muscle group has no exercises, re-run with ALL equipment
+      // (ignoring user restriction) for those missing groups only.
+      // This handles cases like "bodyweight only + shoulders" where no
+      // bodyweight shoulder compounds exist — we must include non-bodyweight
+      // exercises or the day will be empty.
       if (missingMGs.length > 0) {
-        const allExercises = buildExercisesForDay(mgConfig, user, [
-          'barbell', 'dumbbell', 'cable', 'machine', 'bodyweight',
-        ]);
+        const allEquipment = ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'];
+        const allExercises = buildExercisesForDay(mgConfig, user, allEquipment);
         const existingIds = new Set(exercises.map(e => e.exerciseId));
         const extras = allExercises.filter(e => !existingIds.has(e.exerciseId) && missingMGs.includes(e.muscleGroup));
         exercises.push(...extras);
@@ -353,6 +355,16 @@ export function generateTemplate({
       };
     }),
   };
+
+  // Validate: warn if any day ended up with no exercises
+  const emptyDays = template.dayTypes.filter(d => d.exercises.length === 0);
+  if (emptyDays.length > 0) {
+    throw new Error(
+      `No exercises could be generated for ${emptyDays.map(d => d.label).join(', ')} ` +
+      `with the selected equipment (${availableEquipment.join(', ')}). ` +
+      `Try adding more equipment options.`
+    );
+  }
 
   return template;
 }

@@ -606,14 +606,18 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
                 <button
                   onClick={() => {
-                    const template = generateTemplate({
-                      user,
-                      daysPerWeek: aiGenParams.daysPerWeek,
-                      availableEquipment: aiGenParams.equipment,
-                      splitType: aiGenParams.splitType,
-                    });
-                    setAiGenOpen(false);
-                    startEdit(template);
+                    try {
+                      const template = generateTemplate({
+                        user,
+                        daysPerWeek: aiGenParams.daysPerWeek,
+                        availableEquipment: aiGenParams.equipment,
+                        splitType: aiGenParams.splitType,
+                      });
+                      setAiGenOpen(false);
+                      startEdit(template);
+                    } catch (err) {
+                      alert(err.message || 'Template generation failed. Try adding more equipment options.');
+                    }
                   }}
                   className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25"
                 >
