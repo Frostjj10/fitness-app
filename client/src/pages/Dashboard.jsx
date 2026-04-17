@@ -123,7 +123,11 @@ export default function Dashboard({ user }) {
         if (typeof dayTypes === 'string') {
           try { dayTypes = JSON.parse(dayTypes); } catch { dayTypes = []; }
         }
-        const normalizedDayTypes = (Array.isArray(dayTypes) ? dayTypes : []).map(dt => {
+        // If dayTypes is empty/invalid, mark template as invalid
+        if (!dayTypes || !Array.isArray(dayTypes) || dayTypes.length < 2) {
+          return { ...t, dayTypes: [], _invalid: true };
+        }
+        const normalizedDayTypes = dayTypes.map(dt => {
           const exercises = (dt.exercises || dt.day_types || []).map(ex => ({
             exerciseId: ex.exercise_id || ex.exerciseId,
             name: ex.name,
@@ -144,9 +148,11 @@ export default function Dashboard({ user }) {
         return { ...t, dayTypes: normalizedDayTypes };
       });
 
-      const fetchedIds = new Set(normalized.map(t => t.id));
+      // Only use DB templates that have valid dayTypes
+      const validDbTemplates = normalized.filter(t => !t._invalid);
+      const fetchedIds = new Set(validDbTemplates.map(t => t.id));
       const missingDefaults = defaultTemplates.filter(t => !fetchedIds.has(t.id));
-      setTemplates([...missingDefaults, ...normalized]);
+      setTemplates([...missingDefaults, ...validDbTemplates]);
     } else {
       setTemplates(defaultTemplates);
     }
