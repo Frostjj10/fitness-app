@@ -15,6 +15,13 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
     }));
   }
 
+  function startCardioEdit(ex) {
+    setEditValuesById(prev => ({
+      ...prev,
+      [ex.exerciseId]: { sets: 1, reps: ex.reps, targetWeight: 0, restSeconds: 0 },
+    }));
+  }
+
   function cancelEdit(exerciseId) {
     setEditValuesById(prev => { const n = { ...prev }; delete n[exerciseId]; return n; });
   }
@@ -53,23 +60,32 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                 {editValuesById[ex.exerciseId] ? (
                   <div className="space-y-2">
                     <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
-                    <div className="grid grid-cols-4 gap-2 text-sm">
-                      <div>
-                        <label className="text-xs text-slate-500 font-medium">Sets</label>
-                        <input type="number" value={editValuesById[ex.exerciseId].sets} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], sets: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 font-medium">Reps</label>
-                        <input type="number" value={editValuesById[ex.exerciseId].reps} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], reps: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 font-medium">Weight</label>
-                        <input type="number" value={editValuesById[ex.exerciseId].targetWeight} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], targetWeight: parseFloat(e.target.value) || 0 } }))} className="input text-sm py-1.5" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 font-medium">Rest</label>
-                        <input type="number" value={editValuesById[ex.exerciseId].restSeconds} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" />
-                      </div>
+                    <div className={`grid gap-2 text-sm ${isCardio ? 'grid-cols-1' : 'grid-cols-4'}`}>
+                      {isCardio ? (
+                        <div>
+                          <label className="text-xs text-slate-500 font-medium">Duration (min)</label>
+                          <input type="number" value={editValuesById[ex.exerciseId].reps} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], reps: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />
+                        </div>
+                      ) : (
+                        <>
+                          <div>
+                            <label className="text-xs text-slate-500 font-medium">Sets</label>
+                            <input type="number" value={editValuesById[ex.exerciseId].sets} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], sets: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-slate-500 font-medium">Reps</label>
+                            <input type="number" value={editValuesById[ex.exerciseId].reps} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], reps: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-slate-500 font-medium">Weight</label>
+                            <input type="number" value={editValuesById[ex.exerciseId].targetWeight} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], targetWeight: parseFloat(e.target.value) || 0 } }))} className="input text-sm py-1.5" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-slate-500 font-medium">Rest</label>
+                            <input type="number" value={editValuesById[ex.exerciseId].restSeconds} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" />
+                          </div>
+                        </>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => saveEdit(ex.exerciseId)} className="px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg hover:bg-slate-800">Save</button>
@@ -81,13 +97,16 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
                       <div className="text-xs text-slate-500">
-                        {isCardio ? `${ex.reps} min` : `${ex.sets}×${ex.reps} @ ${ex.targetWeight} · ${ex.restSeconds}s · ${ex.isCompound ? 'Compound' : 'Iso}'}`}
+                        {isCardio ? `${ex.reps} min` : `${ex.sets}×${ex.reps} @ ${ex.targetWeight} · ${ex.restSeconds}s · ${ex.isCompound ? 'Compound' : 'Isolation'}`}
                       </div>
                     </div>
                     <div className="flex gap-1 ml-2">
-                      {!isCardio && (
-                        <button onClick={() => startEdit(ex)} className="text-xs font-semibold text-slate-500 hover:text-slate-900 px-2 py-1 rounded-lg hover:bg-slate-200 transition-all">Edit</button>
-                      )}
+                      <button
+                        onClick={() => isCardio ? startCardioEdit(ex) : startEdit(ex)}
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-900 px-2 py-1 rounded-lg hover:bg-slate-200 transition-all"
+                      >
+                        Edit
+                      </button>
                       <button onClick={() => onRemoveExercise(ex.exerciseId)} className="text-xs text-slate-300 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition-all">✕</button>
                     </div>
                   </div>

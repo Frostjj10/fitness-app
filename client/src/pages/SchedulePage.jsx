@@ -202,13 +202,19 @@ export default function SchedulePage({ user }) {
     const day = week.days.find(d => d.dayOfWeek === dayOfWeek);
     if (!day?.id) return;
 
+    // Find the exercise to check if it's cardio (unit = 'min')
+    const ex = day.workout?.exercises?.find(e => e.exerciseId === exerciseId);
+    const isCardio = ex?.unit === 'min';
+
     // Convert camelCase updates to snake_case for Supabase
-    const dbUpdates = {
-      sets: updates.sets,
-      reps: updates.reps,
-      target_weight: updates.targetWeight,
-      rest_seconds: updates.restSeconds,
-    };
+    const dbUpdates = isCardio
+      ? { reps: updates.reps } // Cardio: only update duration (stored in reps)
+      : {
+          sets: updates.sets,
+          reps: updates.reps,
+          target_weight: updates.targetWeight,
+          rest_seconds: updates.restSeconds,
+        };
 
     await supabase
       .from('workout_exercises')
