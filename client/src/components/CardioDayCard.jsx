@@ -55,7 +55,7 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
                 {editValuesById[ex.exerciseId] ? (
                   <div className="space-y-2">
                     <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                       <div>
                         <label className="text-xs text-slate-500 font-medium">Duration ({ex.unit})</label>
                         <input type="number" value={getEditValues(ex.exerciseId).reps} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], reps: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />

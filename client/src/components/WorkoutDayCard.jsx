@@ -60,7 +60,7 @@ export default function WorkoutDayCard({ day, onAddExercise, onRemoveExercise, o
                 {editValuesById[ex.exerciseId] ? (
                   <div className="space-y-2">
                     <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
-                    <div className={`grid gap-2 text-sm ${isCardio ? 'grid-cols-1' : 'grid-cols-4'}`}>
+                    <div className={`grid gap-2 text-sm ${isCardio ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-4'}`}>
                       {isCardio ? (
                         <div>
                           <label className="text-xs text-slate-500 font-medium">Duration (min)</label>

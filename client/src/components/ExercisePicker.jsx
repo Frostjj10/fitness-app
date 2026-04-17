@@ -175,7 +175,7 @@ export default function ExercisePicker({ isOpen, onClose, onSelect, currentExerc
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
       <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl w-full sm:max-w-2xl sm:max-h-[85vh] h-[90vh] sm:h-auto flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b">
           <div>
             <h2 className="text-xl font-bold text-slate-900">Add Exercise</h2>
             <p className="text-sm text-slate-500">Select an exercise to add to this workout</p>

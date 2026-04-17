@@ -81,13 +81,13 @@ export default function Settings({ user, onUpdate }) {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="page-title">Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
         <p className="text-slate-500 mt-1">Manage your profile and preferences</p>
       </div>
 
       <div className="card p-6">
         <div className="section-title mb-4">Profile</div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="label">Name</label>
             <input type="text" value={form.name || ''} onChange={e => updateField('name', e.target.value)} className="input" />

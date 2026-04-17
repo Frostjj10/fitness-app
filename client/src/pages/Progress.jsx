@@ -82,12 +82,12 @@ export default function Progress({ user }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Progress</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Progress</h1>
         <p className="text-slate-500 mt-1 text-sm">Track your strength gains over time</p>
       </div>
 
       {exerciseList.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-100 p-16 text-center">
+        <div className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-16 text-center">
           <div className="text-slate-200 text-5xl mb-4 font-thin">—</div>
           <h2 className="text-xl font-bold text-slate-900 mb-1">No Data Yet</h2>
           <p className="text-slate-500 text-sm">Log your workouts to see your progress here.</p>
@@ -112,20 +112,20 @@ export default function Progress({ user }) {
             </select>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Best Weight</div>
-              <div className="text-3xl font-extrabold text-slate-900">{prs.weight}</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">{prs.weight}</div>
               <div className="text-sm text-slate-500 font-medium">{user.unit} × {prs.reps} reps</div>
             </div>
             <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Est. 1RM</div>
-              <div className="text-3xl font-extrabold text-orange-500">{prs.estimated1RM}</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-orange-500">{prs.estimated1RM}</div>
               <div className="text-sm text-slate-500 font-medium">{user.unit} · Epley</div>
             </div>
             <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Entries</div>
-              <div className="text-3xl font-extrabold text-slate-900">{weightLog.length}</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">{weightLog.length}</div>
               <div className="text-sm text-slate-500 font-medium">logged sets</div>
             </div>
           </div>
@@ -147,8 +147,8 @@ export default function Progress({ user }) {
             </div>
           )}
 
-          <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100">
+          <div className="bg-white rounded-xl border border-slate-100 overflow-x-auto">
+            <div className="px-4 sm:px-6 py-4 border-b border-slate-100 min-w-[600px]">
               <h2 className="text-base font-bold text-slate-900">Recent History</h2>
             </div>
             <table className="w-full">
