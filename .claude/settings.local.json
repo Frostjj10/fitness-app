@@ -40,7 +40,19 @@
       "Bash(python3 -m json.tool)",
       "Bash(curl -s 'http://localhost:3001/api/exercises?grouped=true')",
       "Bash(curl -s 'http://localhost:3001/api/schedules/current')",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Schedule:', d.get\\('id'\\) if d else 'None'\\)\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Schedule:', d.get\\('id'\\) if d else 'None'\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git restore *)",
+      "Bash(git commit *)",
+      "Bash(git config *)",
+      "Bash(git show *)",
+      "Read(//tmp/**)",
+      "Bash(vercel projects *)",
+      "Bash(git fetch *)",
+      "Bash(git rm *)",
+      "Bash(vercel ls *)"
     ]
   }
 }
