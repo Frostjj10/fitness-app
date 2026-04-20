@@ -535,98 +535,120 @@ export default function Dashboard({ user }) {
 
       {/* Smart Generator Modal */}
       {generatorOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-slate-900">Smart Generate</h2>
-              <button onClick={() => setGeneratorOpen(false)} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style={{ maxHeight: '90vh' }}>
+            {/* Header */}
+            <div className="px-7 pt-7 pb-5 border-b border-slate-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Build Your Template</h2>
+                  <p className="text-sm text-slate-400 mt-0.5">Customize your training parameters</p>
+                </div>
+                <button onClick={() => setGeneratorOpen(false)} className="text-slate-300 hover:text-slate-500 transition-colors text-xl leading-none">×</button>
+              </div>
             </div>
 
-            <div className="space-y-5">
+            {/* Scrollable body */}
+            <div className="overflow-y-auto px-7 py-5 space-y-6" style={{ maxHeight: 'calc(90vh - 160px)' }}>
 
               {/* Days per week */}
               <div>
-                <label className="label">Training Days per Week</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range" min="2" max="6"
-                    value={generatorParams.daysPerWeek}
-                    onChange={e => setGeneratorParams(p => ({ ...p, daysPerWeek: parseInt(e.target.value) }))}
-                    className="flex-1 accent-orange-500"
-                  />
-                  <span className="w-8 text-center font-bold text-slate-900">{generatorParams.daysPerWeek}</span>
+                <div className="flex items-baseline justify-between mb-3">
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-widest">Training Days</label>
+                  <span className="text-2xl font-light text-slate-900">{generatorParams.daysPerWeek}<span className="text-sm text-slate-400 font-normal ml-1">/week</span></span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  {generatorParams.daysPerWeek <= 3 ? 'Full Body split' :
-                   generatorParams.daysPerWeek === 4 ? 'Upper/Lower split' : 'Push/Pull/Legs split'}
+                <input
+                  type="range" min="2" max="6"
+                  value={generatorParams.daysPerWeek}
+                  onChange={e => setGeneratorParams(p => ({ ...p, daysPerWeek: parseInt(e.target.value) }))}
+                  className="w-full h-1 rounded-full appearance-none cursor-pointer accent-slate-900 bg-slate-200"
+                />
+                <p className="text-xs text-slate-400 mt-2">
+                  {generatorParams.daysPerWeek <= 3 ? 'Full Body split recommended' :
+                   generatorParams.daysPerWeek === 4 ? 'Upper / Lower split recommended' : 'Push / Pull / Legs split recommended'}
                 </p>
               </div>
 
+              <div className="border-t border-slate-100" />
+
               {/* Split type */}
               <div>
-                <label className="label">Training Split</label>
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">Training Split</label>
                 <select
                   value={generatorParams.splitType}
                   onChange={e => setGeneratorParams(p => ({ ...p, splitType: e.target.value }))}
-                  className="input"
+                  className="w-full text-sm text-slate-700 bg-transparent border-b border-slate-200 py-2 focus:outline-none focus:border-slate-900 transition-colors appearance-none cursor-pointer"
                 >
-                  <option value="auto">Auto (recommended)</option>
+                  <option value="auto">Auto-detect from days</option>
                   <option value="full-body">Full Body</option>
                   <option value="upper-lower">Upper / Lower</option>
                   <option value="ppl">Push / Pull / Legs</option>
                 </select>
               </div>
 
+              <div className="border-t border-slate-100" />
+
               {/* Session length */}
               <div>
-                <label className="label">Session Length</label>
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-widest mb-3">Session Length</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {GENERATOR_OPTIONS.sessionLength.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setGeneratorParams(p => ({ ...p, sessionLength: opt.value }))}
-                      className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all text-center ${
-                        generatorParams.sessionLength === opt.value
-                          ? 'border-orange-500 bg-orange-50 text-orange-700'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
-                    >
-                      <div>{opt.label}</div>
-                    </button>
-                  ))}
+                  {GENERATOR_OPTIONS.sessionLength.map(opt => {
+                    const active = generatorParams.sessionLength === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => setGeneratorParams(p => ({ ...p, sessionLength: opt.value }))}
+                        className={`py-2.5 rounded-xl text-center transition-all ${
+                          active
+                            ? 'bg-slate-900 text-white shadow-sm'
+                            : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className={`text-sm font-medium ${active ? 'text-white' : 'text-slate-700'}`}>{opt.label}</div>
+                        <div className={`text-[10px] mt-0.5 ${active ? 'text-slate-300' : 'text-slate-400'}`}>{opt.desc}</div>
+                      </button>
+                    );
+                  })}
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  {generatorParams.sessionLength === 'short' ? '4-6 exercises, ~45 min' :
-                   generatorParams.sessionLength === 'medium' ? '6-8 exercises, ~60 min' :
-                   '8-10 exercises, ~75 min'}
-                </p>
               </div>
+
+              <div className="border-t border-slate-100" />
 
               {/* Cardio level */}
               <div>
-                <label className="label">Cardio</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {GENERATOR_OPTIONS.cardioLevel.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setGeneratorParams(p => ({ ...p, cardioLevel: opt.value }))}
-                      className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all text-center ${
-                        generatorParams.cardioLevel === opt.value
-                          ? 'border-orange-500 bg-orange-50 text-orange-700'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
-                    >
-                      <div className="capitalize">{opt.label}</div>
-                    </button>
-                  ))}
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-widest mb-3">Cardio</label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {GENERATOR_OPTIONS.cardioLevel.map(opt => {
+                    const active = generatorParams.cardioLevel === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => setGeneratorParams(p => ({ ...p, cardioLevel: opt.value }))}
+                        className={`py-2 rounded-lg text-center transition-all ${
+                          active
+                            ? 'bg-slate-900 text-white'
+                            : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="text-xs font-medium capitalize">{opt.label}</div>
+                      </button>
+                    );
+                  })}
                 </div>
+                <p className="text-xs text-slate-400 mt-2">
+                  {generatorParams.cardioLevel === 'none' ? 'No cardio finisher' :
+                   generatorParams.cardioLevel === 'light' ? '1 LISS session per week' :
+                   generatorParams.cardioLevel === 'moderate' ? 'HIIT + LISS sessions mixed in' : 'High frequency cardio added'}
+                </p>
               </div>
+
+              <div className="border-t border-slate-100" />
 
               {/* Priority muscles */}
               <div>
-                <label className="label">Priority Muscles <span className="font-normal text-slate-400">(optional)</span></label>
-                <p className="text-xs text-slate-500 mb-2">Adds extra isolation volume to selected muscle groups</p>
-                <div className="flex flex-wrap gap-2">
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-widest mb-1">Priority Muscles</label>
+                <p className="text-xs text-slate-400 mb-3">Add extra volume to specific muscle groups</p>
+                <div className="flex flex-wrap gap-1.5">
                   {GENERATOR_OPTIONS.priorityMuscles.map(opt => {
                     const isSelected = generatorParams.priorityMuscles.includes(opt.value);
                     return (
@@ -638,10 +660,10 @@ export default function Dashboard({ user }) {
                             ? p.priorityMuscles.filter(m => m !== opt.value)
                             : [...p.priorityMuscles, opt.value],
                         }))}
-                        className={`py-1.5 px-3 rounded-full text-xs font-semibold border transition-all ${
+                        className={`py-1.5 px-3 rounded-full text-xs transition-all ${
                           isSelected
-                            ? 'border-orange-500 bg-orange-500 text-white'
-                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                         }`}
                       >
                         {opt.label}
@@ -651,59 +673,80 @@ export default function Dashboard({ user }) {
                 </div>
               </div>
 
+              <div className="border-t border-slate-100" />
+
               {/* Mobility toggle */}
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-slate-700">Mobility Warm-Up</div>
-                  <div className="text-xs text-slate-500">Include dynamic warm-up circuit</div>
+                  <div className="text-sm text-slate-700">Mobility Warm-Up</div>
+                  <div className="text-xs text-slate-400">Dynamic stretching &amp; activation</div>
                 </div>
                 <button
                   onClick={() => setGeneratorParams(p => ({ ...p, includeMobility: !p.includeMobility }))}
-                  className={`w-12 h-7 rounded-full transition-all relative ${
-                    generatorParams.includeMobility ? 'bg-orange-500' : 'bg-slate-200'
+                  className={`w-11 h-6 rounded-full transition-all relative ${
+                    generatorParams.includeMobility ? 'bg-amber-500' : 'bg-slate-200'
                   }`}
                 >
-                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all ${
-                    generatorParams.includeMobility ? 'left-6' : 'left-1'
+                  <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${
+                    generatorParams.includeMobility ? 'left-[22px]' : 'left-0.5'
                   }`} />
                 </button>
               </div>
 
+              <div className="border-t border-slate-100" />
+
               {/* Equipment */}
               <div>
-                <label className="label">Available Equipment</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-widest">Equipment</label>
+                  {generatorParams.equipment.length <= 2 && (
+                    <span className="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Limited variety</span>
+                  )}
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
                   {['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'].map(eq => (
-                    <label key={eq} className="flex items-center gap-2 text-sm text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={generatorParams.equipment.includes(eq)}
-                        onChange={e => {
-                          const newEquip = e.target.checked
-                            ? [...generatorParams.equipment, eq]
-                            : generatorParams.equipment.filter(x => x !== eq);
-                          setGeneratorParams(p => ({ ...p, equipment: newEquip }));
-                        }}
-                        className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-                      />
-                      <span className="capitalize">{eq}</span>
-                    </label>
+                    <button
+                      key={eq}
+                      onClick={() => setGeneratorParams(p => ({
+                        ...p,
+                        equipment: generatorParams.equipment.includes(eq)
+                          ? generatorParams.equipment.filter(x => x !== eq)
+                          : [...generatorParams.equipment, eq],
+                      }))}
+                      className={`py-2 rounded-lg text-xs capitalize transition-all ${
+                        generatorParams.equipment.includes(eq)
+                          ? 'bg-slate-900 text-white'
+                          : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                      }`}
+                    >
+                      {eq}
+                    </button>
                   ))}
                 </div>
-                {generatorParams.equipment.length <= 2 && (
-                  <p className="text-xs text-amber-600 mt-1">⚠ Limited equipment may reduce exercise variety</p>
-                )}
               </div>
 
               {/* User profile summary */}
-              <div className="bg-slate-50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
-                <div className="font-semibold text-slate-700 mb-2">Your Profile</div>
-                <div>Goal: <span className="text-slate-700 capitalize">{user.goal}</span></div>
-                <div>Experience: <span className="text-slate-700 capitalize">{user.experience}</span></div>
-                <div>Weight: <span className="text-slate-700">{user.weight} {user.unit}</span></div>
-                <div>Intensity: <span className="text-slate-700">{user.intensity}/10</span></div>
+              <div className="rounded-xl bg-slate-50 px-4 py-3">
+                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-2">Your Profile</p>
+                <div className="flex gap-4">
+                  <div>
+                    <p className="text-xs text-slate-400">Goal</p>
+                    <p className="text-sm font-medium text-slate-700 capitalize">{user.goal}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">Experience</p>
+                    <p className="text-sm font-medium text-slate-700 capitalize">{user.experience}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">Level</p>
+                    <p className="text-sm font-medium text-slate-700">{user.intensity}/10</p>
+                  </div>
+                </div>
               </div>
+            </div>
 
+            {/* Footer CTA */}
+            <div className="px-7 pb-7 pt-4 border-t border-slate-100">
               <button
                 onClick={() => {
                   if (generatorParams.equipment.length === 0) {
@@ -734,7 +777,7 @@ export default function Dashboard({ user }) {
                     alert(err.message || 'Template generation failed. Try selecting more equipment.');
                   }
                 }}
-                className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25"
+                className="w-full py-3.5 bg-slate-900 text-white text-sm font-medium rounded-xl hover:bg-slate-800 active:scale-[0.98] transition-all shadow-sm"
               >
                 Generate Template
               </button>
