@@ -197,8 +197,7 @@ export default function Layout({ user, onLogout, children }) {
 
       {/* Main Content */}
       <main
-        className="flex-1 pt-14 pb-20 lg:pt-0 lg:pb-0"
-        style={{ marginLeft: '0' }}
+        className="flex-1 pt-14 pb-20 lg:pt-0 lg:pb-0 lg:ml-16 xl:ml-56"
       >
         <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
           {children}

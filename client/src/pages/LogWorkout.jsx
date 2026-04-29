@@ -142,7 +142,7 @@ export default function LogWorkout({ user }) {
         const isCardio = ex.unit === 'min';
         return {
           user_id: user.id,
-          date,
+          date: today,
           exercise_id: ex.exerciseId,
           exercise_name: ex.name,
           muscle_group: ex.muscleGroup,
@@ -158,7 +158,7 @@ export default function LogWorkout({ user }) {
       await supabase.from('workout_logs').insert([{
         user_id: user.id,
         schedule_id: schedule.id,
-        date,
+        date: today,
         day_of_week: workout.dayOfWeek,
         muscle_groups: workout.muscleGroups,
         completed: true,
@@ -350,7 +350,7 @@ export default function LogWorkout({ user }) {
                           className="text-xs font-bold mt-1"
                           style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif' }}
                         >
-                          Suggested: {suggestedWeight}{user.unit} (+{rec.increment})
+                          Suggested: {rec.suggestedWeight}{user.unit} (+{rec.increment})
                         </div>
                       )}
                     </div>
