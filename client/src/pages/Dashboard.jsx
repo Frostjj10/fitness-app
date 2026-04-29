@@ -358,16 +358,16 @@ export default function Dashboard({ user }) {
   return (
     <div>
       {/* Page header — full width accent bar */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-10">
         <div>
           <h1
-            className="text-5xl font-extrabold text-white tracking-tighter"
+            className="text-6xl font-extrabold text-white tracking-tighter"
             style={{ fontFamily: 'Syne, sans-serif', letterSpacing: '-0.04em' }}
           >
             {currentSchedule ? 'Your Block' : 'Build a Program'}
           </h1>
           <p
-            className="text-sm font-medium mt-2"
+            className="text-base font-medium mt-3"
             style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
           >
             {currentSchedule ? `Week ${currentSchedule.schedule?.[0]?.weekNum || 1} · ${currentSchedule.workoutDays?.length || 0} days/week` : `Hey ${user.name}, let's set up your training`}
@@ -377,7 +377,7 @@ export default function Dashboard({ user }) {
           <Link
             to="/log"
             className="btn-primary shrink-0"
-            style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '0.875rem', padding: '14px 28px' }}
+            style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '0.875rem', padding: '16px 32px' }}
           >
             Start Workout →
           </Link>
@@ -392,7 +392,7 @@ export default function Dashboard({ user }) {
             {/* Next workout highlight */}
             {nextWorkout && (
               <div
-                className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5"
+                className="p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
                 style={{ background: 'var(--surface)', borderLeft: '4px solid var(--accent)' }}
               >
                 <div className="flex items-center gap-5">
@@ -441,8 +441,8 @@ export default function Dashboard({ user }) {
 
             {/* This week's days — horizontal scroll strip */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-              <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
-                <h2 className="text-sm font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
+              <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
+                <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
                   This Week
                 </h2>
                 <Link
@@ -460,7 +460,7 @@ export default function Dashboard({ user }) {
                     <Link
                       key={w.dayOfWeek}
                       to="/log"
-                      className="min-w-[120px] p-4 flex flex-col items-center gap-2 text-center transition-all hover:opacity-80"
+                      className="min-w-[140px] p-5 flex flex-col items-center gap-3 text-center transition-all hover:opacity-80"
                       style={{
                         background: isNext ? 'rgba(202,255,0,0.08)' : 'transparent',
                         borderRight: '1px solid var(--border)',
@@ -473,7 +473,7 @@ export default function Dashboard({ user }) {
                         {w.dayOfWeek.slice(0, 3)}
                       </div>
                       <div
-                        className="w-8 h-8 flex items-center justify-center"
+                        className="w-10 h-10 flex items-center justify-center"
                         style={{ background: isNext ? 'var(--accent)' : 'var(--surface-2)' }}
                       >
                         <svg className="w-4 h-4" style={{ color: isNext ? '#000' : 'var(--text-dim)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
@@ -490,9 +490,9 @@ export default function Dashboard({ user }) {
             </div>
 
             {/* Block stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                <div className="stat-number text-3xl">{currentSchedule.schedule?.length || 0}</div>
+            <div className="grid grid-cols-3 gap-5">
+              <div className="p-6" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                <div className="stat-number text-4xl">{currentSchedule.schedule?.length || 0}</div>
                 <div className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}>
                   Weeks
                 </div>
