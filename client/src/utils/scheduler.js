@@ -6,17 +6,22 @@ import { buildWorkoutFromTemplateDay, DEFAULT_TEMPLATES, CORE_EXERCISES } from '
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 function getDateForDay(weekStartDate, dayOfWeek) {
-  // Parse YYYY-MM-DD as local date
+  // Parse YYYY-MM-DD as local date (not UTC)
   const [y, m, d] = weekStartDate.split('-').map(Number);
-  const start = new Date(y, m - 1, d);
+  // Use noon to avoid midnight timezone shift
+  const start = new Date(y, m - 1, d, 12, 0, 0);
   const dayIndex = DAYS_OF_WEEK.indexOf(dayOfWeek);
   // Convert JS getDay() (0=Sun) to Monday-first index (0=Mon)
   const firstDayIndex = (start.getDay() + 6) % 7;
   // Always return the NEXT occurrence of dayOfWeek, never a past date
   let daysUntil = dayIndex - firstDayIndex;
-  if (daysUntil < 0) daysUntil += 7;
-  const targetDate = new Date(y, m - 1, d + daysUntil);
-  return targetDate.toLocaleDateString('en-CA');
+  if (daysUntil <= 0) daysUntil += 7;
+  const target = new Date(y, m - 1, d + daysUntil, 12, 0, 0);
+  // Format as YYYY-MM-DD locally
+  const ty = target.getFullYear();
+  const tm = String(target.getMonth() + 1).padStart(2, '0');
+  const td = String(target.getDate()).padStart(2, '0');
+  return `${ty}-${tm}-${td}`;
 }
 
 export function buildMesocycle(user, workoutDays, startDate, templateId = 'ppl', userDefaults = null, templates = null) {
@@ -59,13 +64,23 @@ export function buildMesocycle(user, workoutDays, startDate, templateId = 'ppl',
     return { weekNum: week.weekNum, startDate: weekStartStr, days };
   });
 
-  const endDate = new Date(y, m - 1, d + 27);
+  const startLocal = new Date(y, m - 1, d, 12, 0, 0);
+  const ty = String(startLocal.getFullYear()).padStart(2, '0');
+  const tm = String(startLocal.getMonth() + 1).padStart(2, '0');
+  const td = String(startLocal.getDate()).padStart(2, '0');
+  const startStr = `${ty}-${tm}-${td}`;
+
+  const end = new Date(y, m - 1, d + 27, 12, 0, 0);
+  const ey = String(end.getFullYear()).padStart(2, '0');
+  const em = String(end.getMonth() + 1).padStart(2, '0');
+  const ed = String(end.getDate()).padStart(2, '0');
+  const endStr = `${ey}-${em}-${ed}`;
 
   return {
     id: `block-${Date.now()}`,
     userId: user.id,
-    startDate: start.toLocaleDateString('en-CA'),
-    endDate: endDate.toLocaleDateString('en-CA'),
+    startDate: startStr,
+    endDate: endStr,
     goal: user.goal,
     workoutDays,
     templateId: template.id,
