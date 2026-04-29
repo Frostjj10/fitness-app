@@ -3,21 +3,21 @@ import { PUSH_EXERCISES, PULL_EXERCISES, LEG_EXERCISES, CARDIO_EXERCISES, CORE_E
 
 const ALL_CATEGORIES = [
   { value: 'all', label: 'All Exercises' },
-  { value: 'push', label: 'Push Exercises' },
-  { value: 'pull', label: 'Pull Exercises' },
-  { value: 'legs', label: 'Leg Exercises' },
+  { value: 'push', label: 'Push' },
+  { value: 'pull', label: 'Pull' },
+  { value: 'legs', label: 'Legs' },
   { value: 'upper', label: 'Upper Body' },
   { value: 'lower', label: 'Lower Body' },
   { value: 'chest', label: 'Chest' },
   { value: 'back', label: 'Back' },
   { value: 'shoulders', label: 'Shoulders' },
-  { value: 'arms', label: 'Biceps & Triceps' },
+  { value: 'arms', label: 'Arms' },
   { value: 'core', label: 'Core' },
   { value: 'cardio', label: 'Cardio' },
 ];
 
 const EQUIPMENT_OPTIONS = [
-  { value: 'all', label: 'All Equipment' },
+  { value: 'all', label: 'All' },
   { value: 'barbell', label: 'Barbell' },
   { value: 'dumbbell', label: 'Dumbbell' },
   { value: 'cable', label: 'Cable' },
@@ -109,7 +109,6 @@ export default function ExercisePicker({ isOpen, onClose, onSelect, currentExerc
   const [weight, setWeight] = useState(0);
   const [rest, setRest] = useState(90);
 
-  // Reset state when picker opens
   useEffect(() => {
     if (isOpen) {
       setSearch('');
@@ -172,24 +171,53 @@ export default function ExercisePicker({ isOpen, onClose, onSelect, currentExerc
   const alreadyAdded = new Set(currentExerciseIds);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
-      <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl w-full sm:max-w-2xl sm:max-h-[85vh] h-[90vh] sm:h-auto flex flex-col">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ background: 'rgba(8,8,12,0.9)', backdropFilter: 'blur(8px)' }}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b">
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}
+        >
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Add Exercise</h2>
-            <p className="text-sm text-slate-500">Select an exercise to add to this workout</p>
+            <h2
+              className="text-xl font-extrabold text-white tracking-tight"
+              style={{ fontFamily: 'Syne, sans-serif' }}
+            >
+              Add Exercise
+            </h2>
+            <p
+              className="text-sm font-medium mt-0.5"
+              style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.03em' }}
+            >
+              Select an exercise to add to this workout
+            </p>
           </div>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button
+            onClick={handleClose}
+            className="text-3xl leading-none transition-colors font-light"
+            style={{ color: 'var(--text-dim)' }}
+          >
+            ×
+          </button>
         </div>
 
         {/* Controls */}
-        <div className="px-6 py-3 border-b space-y-2">
+        <div
+          className="px-6 py-3 space-y-2"
+          style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}
+        >
           <div className="flex gap-2">
             <select
               value={selectedCategory}
               onChange={e => { setSelectedCategory(e.target.value); setSearch(''); }}
-              className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-white"
+              className="input flex-1"
+              style={{ fontFamily: 'Barlow Condensed, sans-serif' }}
             >
               {ALL_CATEGORIES.map(cat => (
                 <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -198,22 +226,40 @@ export default function ExercisePicker({ isOpen, onClose, onSelect, currentExerc
             <select
               value={selectedEquipment}
               onChange={e => setSelectedEquipment(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-white"
+              className="input w-32"
+              style={{ fontFamily: 'Barlow Condensed, sans-serif' }}
             >
               {EQUIPMENT_OPTIONS.map(eq => (
                 <option key={eq.value} value={eq.value}>{eq.label}</option>
               ))}
             </select>
-            <div className="flex rounded-lg border overflow-hidden shrink-0">
+            <div
+              className="flex shrink-0"
+              style={{ border: '1px solid var(--border)' }}
+            >
               <button
                 onClick={() => setViewMode('browse')}
-                className={`px-3 py-2 text-sm ${viewMode === 'browse' ? 'bg-orange-500 text-white' : 'bg-gray-50 hover:bg-gray-100 text-slate-600'}`}
+                className="px-3 py-2 text-sm font-bold transition-all"
+                style={{
+                  fontFamily: 'Barlow Condensed, sans-serif',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  background: viewMode === 'browse' ? 'var(--accent)' : 'var(--surface-2)',
+                  color: viewMode === 'browse' ? '#000' : 'var(--text-dim)',
+                }}
               >
                 Browse
               </button>
               <button
                 onClick={() => setViewMode('grouped')}
-                className={`px-3 py-2 text-sm ${viewMode === 'grouped' ? 'bg-orange-500 text-white' : 'bg-gray-50 hover:bg-gray-100 text-slate-600'}`}
+                className="px-3 py-2 text-sm font-bold transition-all"
+                style={{
+                  fontFamily: 'Barlow Condensed, sans-serif',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  background: viewMode === 'grouped' ? 'var(--accent)' : 'var(--surface-2)',
+                  color: viewMode === 'grouped' ? '#000' : 'var(--text-dim)',
+                }}
               >
                 Grouped
               </button>
@@ -223,8 +269,9 @@ export default function ExercisePicker({ isOpen, onClose, onSelect, currentExerc
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name, muscle, or equipment..."
-            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+            placeholder="Search exercises..."
+            className="input"
+            style={{ fontFamily: 'Barlow Condensed, sans-serif' }}
           />
         </div>
 
@@ -280,7 +327,16 @@ export default function ExercisePicker({ isOpen, onClose, onSelect, currentExerc
 
 function BrowseView({ exercises, selectedEx, alreadyAdded, onSelect, onConfigure }) {
   if (exercises.length === 0) {
-    return <div className="text-center text-slate-400 py-12">No exercises found</div>;
+    return (
+      <div className="text-center py-12">
+        <div
+          className="text-sm font-bold"
+          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+        >
+          No exercises found
+        </div>
+      </div>
+    );
   }
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -299,26 +355,36 @@ function BrowseView({ exercises, selectedEx, alreadyAdded, onSelect, onConfigure
 
 function GroupedView({ selectedEx, alreadyAdded, onConfigure }) {
   const groups = [
-    { label: 'Push', color: 'text-blue-600', items: [...PUSH_EXERCISES.compound, ...PUSH_EXERCISES.isolation], isCompound: true },
-    { label: 'Pull', color: 'text-green-600', items: [...PULL_EXERCISES.compound, ...PULL_EXERCISES.isolation], isCompound: true },
-    { label: 'Legs', color: 'text-purple-600', items: [...LEG_EXERCISES.compound, ...LEG_EXERCISES.isolation], isCompound: true },
-    { label: 'Cardio', color: 'text-orange-600', items: [...CARDIO_EXERCISES.machines, ...CARDIO_EXERCISES.hiit], isCardio: true },
-    { label: 'Core', color: 'text-teal-600', items: [...CORE_EXERCISES], isCore: true },
+    { label: 'Push', color: 'var(--accent)', items: [...PUSH_EXERCISES.compound, ...PUSH_EXERCISES.isolation], isCompound: true },
+    { label: 'Pull', color: 'var(--text-dim)', items: [...PULL_EXERCISES.compound, ...PULL_EXERCISES.isolation], isCompound: true },
+    { label: 'Legs', color: 'var(--accent)', items: [...LEG_EXERCISES.compound, ...LEG_EXERCISES.isolation], isCompound: true },
+    { label: 'Cardio', color: 'var(--text-dim)', items: [...CARDIO_EXERCISES.machines, ...CARDIO_EXERCISES.hiit], isCardio: true },
+    { label: 'Core', color: 'var(--accent)', items: [...CORE_EXERCISES], isCore: true },
   ];
 
   return (
     <div className="space-y-6">
       {groups.map(group => (
         <div key={group.label}>
-          <h3 className={`font-bold text-sm uppercase tracking-wider ${group.color} mb-2`}>{group.label}</h3>
+          <h3
+            className="font-bold text-sm uppercase tracking-widest mb-2"
+            style={{ color: group.color, fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+          >
+            {group.label}
+          </h3>
           {group.label === 'Cardio' ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {['Machines', 'HIIT / Bodyweight'].map(sub => {
                 const subItems = sub === 'Machines' ? group.items.filter(e => e.equipment === 'machine') : group.items.filter(e => e.equipment !== 'machine');
                 if (!subItems.length) return null;
                 return (
                   <div key={sub}>
-                    <h4 className="text-xs font-medium text-slate-400 mb-1 uppercase tracking-wider">{sub}</h4>
+                    <h4
+                      className="text-[10px] font-bold uppercase tracking-widest mb-2"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      {sub}
+                    </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {subItems.map(ex => (
                         <ExerciseRow
@@ -335,11 +401,16 @@ function GroupedView({ selectedEx, alreadyAdded, onConfigure }) {
               })}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {group.isCompound && (
                 <>
                   <div>
-                    <h4 className="text-xs font-medium text-slate-400 mb-1 uppercase tracking-wider">Compound</h4>
+                    <h4
+                      className="text-[10px] font-bold uppercase tracking-widest mb-2"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      Compound
+                    </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {group.items.filter(e => e.difficulty >= 6).map(ex => (
                         <ExerciseRow
@@ -353,7 +424,12 @@ function GroupedView({ selectedEx, alreadyAdded, onConfigure }) {
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-xs font-medium text-slate-400 mb-1 uppercase tracking-wider">Isolation</h4>
+                    <h4
+                      className="text-[10px] font-bold uppercase tracking-widest mb-2"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      Isolation
+                    </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {group.items.filter(e => e.difficulty < 6).map(ex => (
                         <ExerciseRow
@@ -395,21 +471,29 @@ function ExerciseRow({ ex, isSelected, isDisabled, onConfigure }) {
     <button
       disabled={isDisabled}
       onClick={onConfigure}
-      className={`text-left px-3 py-2.5 rounded-lg border transition-all text-sm w-full ${
-        isDisabled
-          ? 'bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed'
-          : isSelected
-          ? 'bg-orange-50 border-orange-400 shadow-sm'
-          : 'hover:bg-slate-50 border-slate-200 hover:border-slate-300'
-      }`}
+      className="text-left px-3 py-2.5 transition-all text-sm w-full"
+      style={{
+        border: `1px solid ${isSelected ? 'var(--accent)' : isDisabled ? 'var(--border)' : 'var(--border)'}`,
+        background: isDisabled ? 'var(--surface-3)' : isSelected ? 'rgba(202,255,0,0.08)' : 'var(--surface-2)',
+        opacity: isDisabled ? 0.4 : 1,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+      }}
     >
-      <div className="font-semibold text-slate-900">{ex.name}</div>
-      <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5 flex-wrap">
-        <span className={isCardio ? 'text-orange-500' : ''}>{ex.muscleGroup}</span>
-        <span className="text-slate-300">·</span>
+      <div
+        className="font-bold text-sm text-white"
+        style={{ fontFamily: 'Syne, sans-serif' }}
+      >
+        {ex.name}
+      </div>
+      <div
+        className="text-xs font-medium mt-0.5 flex items-center gap-1.5 flex-wrap"
+        style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+      >
+        <span>{ex.muscleGroup}</span>
+        <span style={{ color: 'var(--border)' }}>·</span>
         <span>{ex.equipment}</span>
-        <span className="text-slate-300">·</span>
-        <span className={ex.difficulty >= 6 ? 'text-slate-700 font-medium' : ''}>
+        <span style={{ color: 'var(--border)' }}>·</span>
+        <span style={{ color: ex.difficulty >= 6 ? 'var(--text)' : 'var(--text-dim)' }}>
           {ex.difficulty >= 6 ? 'Compound' : 'Isolation'}
         </span>
       </div>
@@ -421,44 +505,58 @@ function ConfigPanel({ ex, sets, setSets, reps, setReps, weight, setWeight, rest
   const isCardio = ex.unit === 'min';
 
   return (
-    <div className="px-6 py-4 border-t bg-slate-50">
-      <h4 className="font-semibold text-sm text-slate-900 mb-3">Configure: {ex.name}</h4>
+    <div
+      className="px-6 py-4"
+      style={{ borderTop: '1px solid var(--border)', background: 'var(--surface-2)' }}
+    >
+      <h4
+        className="font-bold text-sm text-white mb-3"
+        style={{ fontFamily: 'Syne, sans-serif' }}
+      >
+        Configure: {ex.name}
+      </h4>
       <div className="grid grid-cols-5 gap-2 text-sm">
         {isCardio ? (
           <div className="col-span-4">
-            <label className="text-xs text-slate-500 font-medium">Duration (min)</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>Duration (min)</label>
             <input
               type="number"
               value={reps}
               onChange={e => setReps(parseInt(e.target.value) || 0)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+              className="input"
               min="1"
             />
           </div>
         ) : (
           <>
             <div>
-              <label className="text-xs text-slate-500 font-medium">Sets</label>
-              <input type="number" value={sets} onChange={e => setSets(parseInt(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none" min="1" />
+              <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>Sets</label>
+              <input type="number" value={sets} onChange={e => setSets(parseInt(e.target.value) || 0)} className="input" min="1" />
             </div>
             <div>
-              <label className="text-xs text-slate-500 font-medium">Reps</label>
-              <input type="number" value={reps} onChange={e => setReps(parseInt(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none" min="1" />
+              <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>Reps</label>
+              <input type="number" value={reps} onChange={e => setReps(parseInt(e.target.value) || 0)} className="input" min="1" />
             </div>
             <div>
-              <label className="text-xs text-slate-500 font-medium">Weight ({unit})</label>
-              <input type="number" value={weight} onChange={e => setWeight(parseFloat(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none" min="0" />
+              <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>Weight ({unit})</label>
+              <input type="number" value={weight} onChange={e => setWeight(parseFloat(e.target.value) || 0)} className="input" min="0" />
             </div>
             <div>
-              <label className="text-xs text-slate-500 font-medium">Rest (s)</label>
-              <input type="number" value={rest} onChange={e => setRest(parseInt(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none" min="0" />
+              <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>Rest (s)</label>
+              <input type="number" value={rest} onChange={e => setRest(parseInt(e.target.value) || 0)} className="input" min="0" />
             </div>
           </>
         )}
         <div className="flex items-end">
           <button
             onClick={() => onAdd(ex)}
-            className="w-full py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 text-sm font-semibold shadow-sm"
+            className="w-full py-2 font-bold text-sm uppercase tracking-widest transition-all"
+            style={{
+              background: 'var(--accent)',
+              color: '#000',
+              fontFamily: 'Barlow Condensed, sans-serif',
+              letterSpacing: '0.1em',
+            }}
           >
             Add
           </button>

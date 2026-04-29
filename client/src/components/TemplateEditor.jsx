@@ -5,7 +5,7 @@ import { generateTemplate, GENERATOR_OPTIONS } from '../utils/templateBuilder';
 import ExercisePicker from './ExercisePicker';
 
 export default function TemplateEditor({ isOpen, onClose, onSave, templates = [], userId, user }) {
-  const [view, setView] = useState('select'); // 'select' | 'edit'
+  const [view, setView] = useState('select');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [editedTemplate, setEditedTemplate] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -55,57 +55,51 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
   }
 
   function startEdit(tpl) {
-      setSelectedTemplate(tpl);
-      // Deep clone to avoid mutating the original
-      const normalized = JSON.parse(JSON.stringify(tpl));
+    setSelectedTemplate(tpl);
+    const normalized = JSON.parse(JSON.stringify(tpl));
 
-      // Handle top-level day_types (JSONB string or object)
-      if (normalized.day_types) {
-        if (typeof normalized.day_types === 'string') {
-          try { normalized.day_types = JSON.parse(normalized.day_types); } catch { normalized.day_types = []; }
-        }
-        // Promote to dayTypes if not already set
-        if (!normalized.dayTypes) {
-          normalized.dayTypes = normalized.day_types;
-        }
-        delete normalized.day_types;
+    if (normalized.day_types) {
+      if (typeof normalized.day_types === 'string') {
+        try { normalized.day_types = JSON.parse(normalized.day_types); } catch { normalized.day_types = []; }
       }
-
-      // Normalize each dayType: ensure exercises have camelCase keys
-      if (normalized.dayTypes && Array.isArray(normalized.dayTypes)) {
-        normalized.dayTypes = normalized.dayTypes.map(dt => {
-          // Parse stringified inner day_types if needed
-          let innerExercises = dt.exercises || dt.day_types || [];
-          if (typeof innerExercises === 'string') {
-            try { innerExercises = JSON.parse(innerExercises); } catch { innerExercises = []; }
-          }
-
-          // Normalize each exercise: snake_case DB fields → camelCase
-          const normalizedExercises = innerExercises.map(ex => ({
-            exerciseId: ex.exercise_id || ex.exerciseId,
-            name: ex.name || '',
-            muscleGroup: ex.muscle_group || ex.muscleGroup || '',
-            primaryMuscle: ex.primary || ex.primaryMuscle || '',
-            equipment: ex.equipment || '',
-            sets: ex.sets || 3,
-            reps: ex.reps || 10,
-            targetWeight: ex.target_weight || ex.targetWeight || 0,
-            restSeconds: ex.rest_seconds || ex.restSeconds || 60,
-            isCompound: ex.is_compound ?? ex.isCompound ?? false,
-            unit: ex.unit || 'reps',
-          }));
-
-          return {
-            label: dt.label || '',
-            muscleGroups: dt.muscle_groups || dt.muscleGroups || '',
-            exercises: normalizedExercises,
-          };
-        });
+      if (!normalized.dayTypes) {
+        normalized.dayTypes = normalized.day_types;
       }
-
-      setEditedTemplate(normalized);
-      setView('edit');
+      delete normalized.day_types;
     }
+
+    if (normalized.dayTypes && Array.isArray(normalized.dayTypes)) {
+      normalized.dayTypes = normalized.dayTypes.map(dt => {
+        let innerExercises = dt.exercises || dt.day_types || [];
+        if (typeof innerExercises === 'string') {
+          try { innerExercises = JSON.parse(innerExercises); } catch { innerExercises = []; }
+        }
+
+        const normalizedExercises = innerExercises.map(ex => ({
+          exerciseId: ex.exercise_id || ex.exerciseId,
+          name: ex.name || '',
+          muscleGroup: ex.muscle_group || ex.muscleGroup || '',
+          primaryMuscle: ex.primary || ex.primaryMuscle || '',
+          equipment: ex.equipment || '',
+          sets: ex.sets || 3,
+          reps: ex.reps || 10,
+          targetWeight: ex.target_weight || ex.targetWeight || 0,
+          restSeconds: ex.rest_seconds || ex.restSeconds || 60,
+          isCompound: ex.is_compound ?? ex.isCompound ?? false,
+          unit: ex.unit || 'reps',
+        }));
+
+        return {
+          label: dt.label || '',
+          muscleGroups: dt.muscle_groups || dt.muscleGroups || '',
+          exercises: normalizedExercises,
+        };
+      });
+    }
+
+    setEditedTemplate(normalized);
+    setView('edit');
+  }
 
   function createNew() {
     const newTpl = {
@@ -155,12 +149,10 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
   function handleExerciseSelect(ex) {
     if (pickerDayIndex === null) return;
-    // Ensure exercise has required identity fields
     if (!ex.id && !ex.name) {
       console.error('handleExerciseSelect called with invalid exercise:', ex);
       return;
     }
-    // Use id if available, otherwise generate a temporary id based on name
     const exerciseId = ex.id || `custom-${ex.name?.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
     const exerciseEntry = {
       exerciseId: exerciseId,
@@ -211,7 +203,6 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
   async function handleSave() {
     if (!editedTemplate) return;
 
-    // Debug: verify exercises have required fields before saving
     const dayTypesSource = editedTemplate.dayTypes || editedTemplate.day_types || [];
     for (const dt of dayTypesSource) {
       for (const ex of (dt.exercises || [])) {
@@ -221,7 +212,6 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
       }
     }
 
-    // Convert camelCase to snake_case for API
     const templateToSave = {
       id: editedTemplate.id,
       name: editedTemplate.name,
@@ -230,7 +220,6 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
         label: dt.label,
         muscle_groups: dt.muscleGroups,
         exercises: (dt.exercises || []).map((ex, exIdx) => {
-          // Ensure exercise_id is always set
           const exerciseId = ex.exerciseId || `missing-id-${exIdx}-${Date.now()}`;
           return {
             exercise_id: exerciseId,
@@ -246,7 +235,6 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
       })),
     };
 
-    // Generated templates (prefix 'generated-') never exist in Supabase, always INSERT them
     const isGenerated = (editedTemplate.id || '').startsWith('generated-');
     const isNew = isGenerated || !selectedTemplate || !templates.find(t => t.id === editedTemplate.id);
 
@@ -286,7 +274,6 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
     const defaultTemplate = DEFAULT_TEMPLATES.find(t => t.id === selectedTemplate.id);
     if (!defaultTemplate) return;
     if (!confirm(`Restore "${selectedTemplate.name}" to its default exercises? This cannot be undone.`)) return;
-    // Deep clone the default template
     const restored = JSON.parse(JSON.stringify(defaultTemplate));
     setEditedTemplate(restored);
   }
@@ -294,60 +281,109 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ background: 'rgba(8,8,12,0.9)', backdropFilter: 'blur(8px)' }}
+    >
+      <div
+        className="w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}
+        >
           <div>
-            <h2 className="text-xl font-bold">
+            <h2
+              className="text-xl font-extrabold text-white tracking-tight"
+              style={{ fontFamily: 'Syne, sans-serif' }}
+            >
               {view === 'select' ? 'Workout Templates' : `Edit: ${editedTemplate?.name}`}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p
+              className="text-sm font-medium mt-0.5"
+              style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.03em' }}
+            >
               {view === 'select' ? 'Choose a template to customize or create your own' : (editedTemplate?.id || '').startsWith('generated-') ? 'Generated template — click Save to keep it' : 'Edit day types and exercises'}
             </p>
           </div>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button
+            onClick={handleClose}
+            className="text-3xl leading-none transition-colors font-light"
+            style={{ color: 'var(--text-dim)' }}
+          >
+            ×
+          </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto px-6 py-4">
+        <div className="flex-1 overflow-auto px-6 py-5">
           {view === 'select' ? (
             <div className="space-y-4">
-              {/* Template cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {templates.map(t => {
                   const isGenerated = (t.id || '').startsWith('generated-');
                   return (
-                  <div
-                    key={t.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      t.is_default || t.isDefault ? 'border-blue-200 bg-blue-50' : isGenerated ? 'border-orange-200 bg-orange-50' : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => startEdit(t)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="font-medium">{t.name}</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {(() => {
-                            const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
-                            return `${dt.length} day${dt.length !== 1 ? 's' : ''}`;
-                          })()}
+                    <div
+                      key={t.id}
+                      className="p-5 cursor-pointer transition-all"
+                      style={{
+                        border: `2px solid ${t.is_default || t.isDefault ? 'var(--text)' : isGenerated ? 'var(--accent)' : 'var(--border)'}`,
+                        background: t.is_default || t.isDefault ? 'var(--text)' : isGenerated ? 'rgba(202,255,0,0.06)' : 'var(--surface-2)',
+                      }}
+                      onClick={() => startEdit(t)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div
+                            className="font-bold text-sm"
+                            style={{ fontFamily: 'Syne, sans-serif', color: t.is_default || t.isDefault ? '#000' : 'var(--text)' }}
+                          >
+                            {t.name}
+                          </div>
+                          <div
+                            className="text-xs mt-1 font-medium"
+                            style={{
+                              color: t.is_default || t.isDefault ? '#000' : 'var(--text-dim)',
+                              fontFamily: 'Barlow Condensed, sans-serif',
+                            }}
+                          >
+                            {(() => {
+                              const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
+                              return `${dt.length} days`;
+                            })()}
+                          </div>
+                          <div
+                            className="text-xs mt-1"
+                            style={{
+                              color: t.is_default || t.isDefault ? '#000' : 'var(--text-dim)',
+                              fontFamily: 'Barlow Condensed, sans-serif',
+                            }}
+                          >
+                            {(() => {
+                              const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
+                              return dt.map(d => d.label).join(', ');
+                            })()}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-400 mt-1">
-                          {(() => {
-                            const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
-                            return dt.map(d => d.label).join(', ');
-                          })()}
-                        </div>
+                        {t.is_default || t.isDefault ? (
+                          <span
+                            className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5"
+                            style={{ background: t.is_default || t.isDefault ? 'var(--accent)' : 'var(--accent)', color: '#000', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+                          >
+                            Default
+                          </span>
+                        ) : isGenerated ? (
+                          <span
+                            className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5"
+                            style={{ background: 'var(--accent)', color: '#000', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+                          >
+                            Generated
+                          </span>
+                        ) : null}
                       </div>
-                      {t.is_default || t.isDefault ? (
-                        <span className="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded">Default</span>
-                      ) : isGenerated ? (
-                        <span className="text-xs bg-orange-200 text-orange-800 px-2 py-0.5 rounded">Generated</span>
-                      ) : null}
                     </div>
-                  </div>
                   );
                 })}
               </div>
@@ -355,18 +391,31 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
               {/* Create new */}
               <button
                 onClick={createNew}
-                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-700 font-medium"
+                className="w-full py-3 font-bold text-sm uppercase tracking-widest transition-all"
+                style={{
+                  border: '2px dashed var(--border)',
+                  color: 'var(--text-dim)',
+                  background: 'transparent',
+                  fontFamily: 'Barlow Condensed, sans-serif',
+                  letterSpacing: '0.1em',
+                }}
               >
                 + Create New Template
               </button>
 
-              {/* AI Generate */}
+              {/* Smart Generate */}
               {user && (
                 <button
                   onClick={() => setAiGenOpen(true)}
-                  className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/25"
+                  className="w-full py-4 font-bold text-sm uppercase tracking-widest transition-all"
+                  style={{
+                    background: 'var(--accent)',
+                    color: '#000',
+                    fontFamily: 'Barlow Condensed, sans-serif',
+                    letterSpacing: '0.1em',
+                  }}
                 >
-                  AI Generate Template
+                  Smart Generate Template
                 </button>
               )}
             </div>
@@ -374,12 +423,18 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
             <div className="space-y-6">
               {/* Template name */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-sm font-medium text-gray-700">Template Name</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label
+                    className="text-[10px] font-bold uppercase tracking-widest"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Template Name
+                  </label>
                   {selectedTemplate && (selectedTemplate.is_default || selectedTemplate.isDefault) && (
                     <button
                       onClick={handleRestoreDefault}
-                      className="text-xs text-orange-600 hover:text-orange-800 font-medium"
+                      className="text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80"
+                      style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
                     >
                       Restore to Default
                     </button>
@@ -389,37 +444,54 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                   type="text"
                   value={editedTemplate?.name || ''}
                   onChange={e => updateTemplate({ name: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="input"
                 />
               </div>
 
               {/* Day types */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-gray-700">Day Types</label>
+                  <label
+                    className="text-[10px] font-bold uppercase tracking-widest"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Day Types
+                  </label>
                   <button
                     onClick={addDayType}
-                    className="text-sm text-blue-600 hover:text-blue-800"
+                    className="text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
                   >
                     + Add Day
                   </button>
                 </div>
 
                 {(editedTemplate?.dayTypes || editedTemplate?.day_types || []).map((dayType, di) => (
-                  <div key={di} className="border rounded-lg p-4 bg-gray-50">
+                  <div
+                    key={di}
+                    className="p-4"
+                    style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+                  >
                     <div className="flex items-center gap-3 mb-3">
                       <input
                         type="text"
                         value={dayType.label}
                         onChange={e => updateDayType(di, { label: e.target.value })}
-                        className="flex-1 px-3 py-1.5 border rounded-lg text-sm font-medium"
+                        className="input flex-1"
                         placeholder="Day label (e.g. Push A)"
+                        style={{ fontFamily: 'Syne, sans-serif' }}
                       />
-                      <span className="text-xs text-gray-500">{dayType.muscleGroups || dayType.muscle_groups}</span>
+                      <span
+                        className="text-xs font-medium shrink-0"
+                        style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                      >
+                        {dayType.muscleGroups || dayType.muscle_groups}
+                      </span>
                       {(editedTemplate.dayTypes || editedTemplate.day_types || []).length > 1 && (
                         <button
                           onClick={() => removeDayType(di)}
-                          className="text-red-500 hover:text-red-700 text-sm"
+                          className="text-xs font-bold uppercase tracking-wider shrink-0 transition-all hover:opacity-80"
+                          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
                         >
                           Remove
                         </button>
@@ -431,59 +503,81 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                       {(dayType.exercises || []).map((ex, ei) => {
                         const resolved = resolveExercises([ex])[0];
                         return (
-                        <div key={ei} className="flex items-center gap-2 bg-white rounded-lg p-2">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{resolved?.name || ex.name || 'Unknown'}</div>
-                            <div className="text-xs text-gray-400">{(resolved?.muscleGroup || ex.muscleGroup || '—')} · {(resolved?.equipment || ex.equipment || '—')}</div>
-                          </div>
-                          <input
-                            type="number"
-                            value={ex.sets}
-                            onChange={e => updateExercise(di, ex.exerciseId, { sets: parseInt(e.target.value) || 1 })}
-                            className="w-12 px-1 py-1 border rounded text-sm text-center"
-                            min="1"
-                            title="Sets"
-                          />
-                          <span className="text-xs text-gray-400">×</span>
-                          <input
-                            type="number"
-                            value={ex.reps}
-                            onChange={e => updateExercise(di, ex.exerciseId, { reps: parseInt(e.target.value) || 1 })}
-                            className="w-12 px-1 py-1 border rounded text-sm text-center"
-                            min="1"
-                            title="Reps"
-                          />
-                          <span className="text-xs text-gray-400">@</span>
-                          <input
-                            type="number"
-                            value={ex.targetWeight || ''}
-                            onChange={e => updateExercise(di, ex.exerciseId, { targetWeight: parseFloat(e.target.value) || 0 })}
-                            className="w-16 px-1 py-1 border rounded text-sm text-center"
-                            placeholder="Auto"
-                            title="Weight"
-                          />
-                          <span className="text-xs text-gray-400">·</span>
-                          <input
-                            type="number"
-                            value={ex.restSeconds}
-                            onChange={e => updateExercise(di, ex.exerciseId, { restSeconds: parseInt(e.target.value) || 0 })}
-                            className="w-14 px-1 py-1 border rounded text-sm text-center"
-                            title="Rest (s)"
-                          />
-                          <button
-                            onClick={() => removeExercise(di, ex.exerciseId)}
-                            className="text-red-400 hover:text-red-600 text-sm"
+                          <div
+                            key={ei}
+                            className="flex items-center gap-2 p-2"
+                            style={{ background: 'var(--surface-3)', border: '1px solid var(--border)' }}
                           >
-                            ✕
-                          </button>
-                        </div>
-                      );
-                    })}
+                            <div className="flex-1 min-w-0">
+                              <div
+                                className="text-sm font-bold text-white"
+                                style={{ fontFamily: 'Syne, sans-serif' }}
+                              >
+                                {resolved?.name || ex.name || 'Unknown'}
+                              </div>
+                              <div
+                                className="text-xs font-medium mt-0.5"
+                                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                              >
+                                {(resolved?.muscleGroup || ex.muscleGroup || '—')} · {(resolved?.equipment || ex.equipment || '—')}
+                              </div>
+                            </div>
+                            <input
+                              type="number"
+                              value={ex.sets}
+                              onChange={e => updateExercise(di, ex.exerciseId, { sets: parseInt(e.target.value) || 1 })}
+                              className="input w-12 text-center py-2"
+                              min="1"
+                              title="Sets"
+                            />
+                            <span className="text-xs font-bold" style={{ color: 'var(--text-dim)' }}>×</span>
+                            <input
+                              type="number"
+                              value={ex.reps}
+                              onChange={e => updateExercise(di, ex.exerciseId, { reps: parseInt(e.target.value) || 1 })}
+                              className="input w-12 text-center py-2"
+                              min="1"
+                              title="Reps"
+                            />
+                            <span className="text-xs font-bold" style={{ color: 'var(--text-dim)' }}>@</span>
+                            <input
+                              type="number"
+                              value={ex.targetWeight || ''}
+                              onChange={e => updateExercise(di, ex.exerciseId, { targetWeight: parseFloat(e.target.value) || 0 })}
+                              className="input w-16 text-center py-2"
+                              placeholder="Auto"
+                              title="Weight"
+                            />
+                            <span className="text-xs font-bold" style={{ color: 'var(--text-dim)' }}>·</span>
+                            <input
+                              type="number"
+                              value={ex.restSeconds}
+                              onChange={e => updateExercise(di, ex.exerciseId, { restSeconds: parseInt(e.target.value) || 0 })}
+                              className="input w-14 text-center py-2"
+                              title="Rest (s)"
+                            />
+                            <button
+                              onClick={() => removeExercise(di, ex.exerciseId)}
+                              className="text-lg font-bold transition-all hover:opacity-60"
+                              style={{ color: 'var(--border)' }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     <button
                       onClick={() => openPicker(di)}
-                      className="mt-2 w-full py-1.5 border border-dashed border-gray-300 rounded text-sm text-gray-500 hover:border-gray-400 hover:text-gray-600"
+                      className="mt-2 w-full py-2 font-bold text-xs uppercase tracking-widest transition-all"
+                      style={{
+                        border: '2px dashed var(--border)',
+                        color: 'var(--text-dim)',
+                        background: 'transparent',
+                        fontFamily: 'Barlow Condensed, sans-serif',
+                        letterSpacing: '0.1em',
+                      }}
                     >
                       + Add Exercise
                     </button>
@@ -491,11 +585,12 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                 ))}
               </div>
 
-              {/* Delete (for custom templates) */}
+              {/* Delete */}
               {selectedTemplate && !selectedTemplate.is_default && !selectedTemplate.isDefault && (
                 <button
                   onClick={handleDelete}
-                  className="text-red-500 hover:text-red-700 text-sm"
+                  className="text-sm font-bold uppercase tracking-wider transition-all hover:opacity-80"
+                  style={{ color: '#FF6B6B', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
                 >
                   Delete Template
                 </button>
@@ -506,23 +601,39 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
         {/* Footer */}
         {view === 'edit' && (
-          <div className="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+          <div
+            className="px-6 py-4 flex justify-end gap-3"
+            style={{ borderTop: '1px solid var(--border)', background: 'var(--surface-2)' }}
+          >
             <button
               onClick={() => setView('select')}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              className="px-6 py-3 font-bold text-sm uppercase tracking-widest transition-all"
+              style={{
+                border: '2px solid var(--border)',
+                color: 'var(--text-dim)',
+                background: 'transparent',
+                fontFamily: 'Barlow Condensed, sans-serif',
+                letterSpacing: '0.1em',
+              }}
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="px-6 py-3 font-bold text-sm uppercase tracking-widest transition-all"
+              style={{
+                background: 'var(--accent)',
+                color: '#000',
+                fontFamily: 'Barlow Condensed, sans-serif',
+                letterSpacing: '0.1em',
+                border: 'none',
+              }}
             >
               Save Template
             </button>
           </div>
         )}
 
-        {/* Exercise picker */}
         <ExercisePicker
           isOpen={pickerOpen}
           onClose={() => { setPickerOpen(false); setPickerDayIndex(null); }}
@@ -534,47 +645,91 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
         {/* AI Generator Modal */}
         {aiGenOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-[60] p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ maxHeight: '92vh' }}>
-
-              {/* Hero header */}
-              <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-7 pt-7 pb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/40">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <div
+            className="fixed inset-0 flex items-center justify-center z-[60] p-4"
+            style={{ background: 'rgba(8,8,12,0.9)', backdropFilter: 'blur(8px)' }}
+          >
+            <div
+              className="w-full max-w-md overflow-hidden"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+            >
+              {/* Header */}
+              <div
+                className="px-7 pt-7 pb-6"
+                style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+                    <svg className="w-5 h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="square">
+                      <path strokeLinecap="square" strokeLinejoin="miter" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <button onClick={() => setAiGenOpen(false)} className="text-slate-500 hover:text-white text-2xl leading-none transition-colors">×</button>
+                  <button
+                    onClick={() => setAiGenOpen(false)}
+                    className="text-3xl leading-none transition-colors font-light"
+                    style={{ color: 'var(--text-dim)' }}
+                  >
+                    ×
+                  </button>
                 </div>
-                <h2 className="text-xl font-black text-white tracking-tight">Smart Generate</h2>
-                <p className="text-slate-400 text-sm mt-1">Build a custom training template tailored to your goals</p>
+                <h2
+                  className="text-xl font-extrabold text-white tracking-tight"
+                  style={{ fontFamily: 'Syne, sans-serif' }}
+                >
+                  Smart Generate
+                </h2>
+                <p
+                  className="text-sm font-medium mt-1"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.03em' }}
+                >
+                  Build a custom training template
+                </p>
               </div>
 
               {/* Scrollable body */}
-              <div className="overflow-y-auto px-7 py-5 space-y-3" style={{ maxHeight: 'calc(92vh - 180px)' }}>
-
+              <div
+                className="overflow-y-auto px-7 py-5 space-y-3"
+                style={{ maxHeight: 'calc(92vh - 180px)', flex: 1 }}
+              >
                 {/* Training Days */}
-                <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-5 text-white shadow-xl shadow-orange-500/20">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-orange-100">Training Days per Week</span>
-                    <span className="text-5xl font-black text-white leading-none">{aiGenParams.daysPerWeek}</span>
+                <div className="p-5" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                      style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      Training Days / Week
+                    </span>
+                    <span
+                      className="text-5xl font-extrabold leading-none"
+                      style={{ color: 'var(--accent)', fontFamily: 'Syne, sans-serif' }}
+                    >
+                      {aiGenParams.daysPerWeek}
+                    </span>
                   </div>
                   <input
                     type="range" min="2" max="6"
                     value={aiGenParams.daysPerWeek}
                     onChange={e => setAiGenParams(p => ({ ...p, daysPerWeek: parseInt(e.target.value) }))}
-                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-white bg-white/30"
+                    className="w-full"
                   />
-                  <p className="text-xs text-orange-100 mt-2 font-semibold">
+                  <p
+                    className="text-xs font-bold mt-3"
+                    style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em' }}
+                  >
                     {aiGenParams.daysPerWeek <= 3 ? '→ Full Body split' :
                      aiGenParams.daysPerWeek === 4 ? '→ Upper / Lower split' : '→ Push / Pull / Legs split'}
                   </p>
                 </div>
 
                 {/* Split type */}
-                <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-3">Training Split</label>
+                <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }} className="p-5">
+                  <label
+                    className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-3"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Training Split
+                  </label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { value: 'auto', label: 'Auto' },
@@ -587,10 +742,15 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                         <button
                           key={opt.value}
                           onClick={() => setAiGenParams(p => ({ ...p, splitType: opt.value }))}
-                          className={`py-2.5 rounded-xl text-sm font-black text-center transition-all ${active
-                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30'
-                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
-                          }`}
+                          className="py-2.5 text-sm font-bold text-center transition-all"
+                          style={{
+                            fontFamily: 'Barlow Condensed, sans-serif',
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            background: active ? 'var(--accent)' : 'var(--surface-3)',
+                            color: active ? '#000' : 'var(--text-dim)',
+                            border: active ? '2px solid var(--accent)' : '1px solid var(--border)',
+                          }}
                         >
                           {opt.label}
                         </button>
@@ -601,7 +761,12 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
                 {/* Session length */}
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-3">Session Length</label>
+                  <label
+                    className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-3"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Session Length
+                  </label>
                   <div className="grid grid-cols-3 gap-2">
                     {GENERATOR_OPTIONS.sessionLength.map(opt => {
                       const active = aiGenParams.sessionLength === opt.value;
@@ -609,13 +774,20 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                         <button
                           key={opt.value}
                           onClick={() => setAiGenParams(p => ({ ...p, sessionLength: opt.value }))}
-                          className={`py-3 px-2 rounded-2xl text-center transition-all border-2 ${active
-                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 border-transparent text-white shadow-lg shadow-orange-500/30'
-                            : 'bg-white border-slate-200 text-slate-600 hover:border-orange-400 hover:bg-orange-50'
-                          }`}
+                          className="py-3 px-2 text-center transition-all border-2 font-bold text-sm"
+                          style={{
+                            fontFamily: 'Barlow Condensed, sans-serif',
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            background: active ? 'var(--accent)' : 'var(--surface-2)',
+                            color: active ? '#000' : 'var(--text-dim)',
+                            borderColor: active ? 'var(--accent)' : 'var(--border)',
+                          }}
                         >
-                          <div className={`text-sm font-black ${active ? 'text-white' : 'text-slate-700'}`}>{opt.label}</div>
-                          <div className={`text-[10px] mt-0.5 ${active ? 'text-orange-200' : 'text-slate-400'}`}>{opt.desc}</div>
+                          {opt.label}
+                          <div className="text-[10px] mt-0.5 font-medium" style={{ color: active ? '#000' : 'var(--text-dim)' }}>
+                            {opt.desc}
+                          </div>
                         </button>
                       );
                     })}
@@ -624,7 +796,12 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
                 {/* Cardio */}
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-3">Cardio</label>
+                  <label
+                    className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-3"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Cardio
+                  </label>
                   <div className="grid grid-cols-4 gap-1.5">
                     {GENERATOR_OPTIONS.cardioLevel.map(opt => {
                       const active = aiGenParams.cardioLevel === opt.value;
@@ -632,17 +809,25 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                         <button
                           key={opt.value}
                           onClick={() => setAiGenParams(p => ({ ...p, cardioLevel: opt.value }))}
-                          className={`py-2.5 rounded-xl text-center transition-all ${active
-                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30'
-                            : 'bg-slate-100 text-slate-500 hover:bg-orange-100 hover:text-orange-600'
-                          }`}
+                          className="py-2.5 text-center transition-all font-bold text-sm border-2"
+                          style={{
+                            fontFamily: 'Barlow Condensed, sans-serif',
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            background: active ? 'var(--accent)' : 'var(--surface-2)',
+                            color: active ? '#000' : 'var(--text-dim)',
+                            borderColor: active ? 'var(--accent)' : 'var(--border)',
+                          }}
                         >
-                          <div className="text-xs font-black capitalize">{opt.label}</div>
+                          <span className="text-xs capitalize">{opt.label}</span>
                         </button>
                       );
                     })}
                   </div>
-                  <p className="text-xs text-slate-400 mt-2 font-semibold">
+                  <p
+                    className="text-xs font-bold mt-2"
+                    style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em' }}
+                  >
                     {aiGenParams.cardioLevel === 'none' ? 'No cardio finisher added' :
                      aiGenParams.cardioLevel === 'light' ? '1 LISS session per week' :
                      aiGenParams.cardioLevel === 'moderate' ? 'HIIT + LISS mixed weekly' : 'High frequency cardio'}
@@ -650,9 +835,16 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                 </div>
 
                 {/* Priority muscles */}
-                <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-1">Priority Muscles</label>
-                  <p className="text-xs text-slate-600 mb-3">Add extra isolation volume to lagging muscle groups</p>
+                <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }} className="p-5">
+                  <label
+                    className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-1"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Priority Muscles
+                  </label>
+                  <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}>
+                    Add extra isolation volume to lagging muscle groups
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {GENERATOR_OPTIONS.priorityMuscles.map(opt => {
                       const isSelected = aiGenParams.priorityMuscles.includes(opt.value);
@@ -665,10 +857,15 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                               ? p.priorityMuscles.filter(m => m !== opt.value)
                               : [...p.priorityMuscles, opt.value],
                           }))}
-                          className={`py-1.5 px-3 rounded-full text-xs font-black transition-all ${isSelected
-                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
-                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
-                          }`}
+                          className="py-1.5 px-3 text-xs font-bold transition-all"
+                          style={{
+                            fontFamily: 'Barlow Condensed, sans-serif',
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            background: isSelected ? 'var(--accent)' : 'var(--surface-3)',
+                            color: isSelected ? '#000' : 'var(--text-dim)',
+                            border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border)',
+                          }}
                         >
                           {opt.label}
                         </button>
@@ -677,26 +874,51 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                   </div>
                 </div>
 
-                {/* Mobility */}
-                <div className="flex items-center justify-between bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl px-5 py-4 shadow-inner">
+                {/* Mobility toggle */}
+                <div
+                  className="flex items-center justify-between px-5 py-4"
+                  style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+                >
                   <div>
-                    <div className="text-sm font-black text-white">Mobility Warm-Up</div>
-                    <div className="text-xs text-slate-400">Dynamic stretching &amp; activation circuit</div>
+                    <div className="text-sm font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
+                      Mobility Warm-Up
+                    </div>
+                    <div className="text-xs font-medium" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}>
+                      Dynamic stretching &amp; activation circuit
+                    </div>
                   </div>
                   <button
                     onClick={() => setAiGenParams(p => ({ ...p, includeMobility: !p.includeMobility }))}
-                    className={`w-12 h-7 rounded-full transition-all relative ${aiGenParams.includeMobility ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-slate-600'}`}
+                    className="w-12 h-7 transition-all relative"
+                    style={{ background: aiGenParams.includeMobility ? 'var(--accent)' : 'var(--surface-3)', border: `1px solid ${aiGenParams.includeMobility ? 'var(--accent)' : 'var(--border)'}` }}
                   >
-                    <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-all ${aiGenParams.includeMobility ? 'left-[22px]' : 'left-0.5'}`} />
+                    <div
+                      className="absolute top-0.5 w-6 h-6 transition-all"
+                      style={{
+                        background: '#fff',
+                        left: aiGenParams.includeMobility ? '22px' : '0.5px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                      }}
+                    />
                   </button>
                 </div>
 
                 {/* Equipment */}
-                <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
+                <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }} className="p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Equipment</label>
+                    <label
+                      className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                      style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      Equipment
+                    </label>
                     {aiGenParams.equipment.length <= 2 && (
-                      <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full uppercase">Limited</span>
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider"
+                        style={{ background: 'rgba(202,255,0,0.15)', color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+                      >
+                        Limited
+                      </span>
                     )}
                   </div>
                   <div className="grid grid-cols-5 gap-1.5">
@@ -709,10 +931,15 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                             ? aiGenParams.equipment.filter(x => x !== eq)
                             : [...aiGenParams.equipment, eq],
                         }))}
-                        className={`py-2.5 rounded-xl text-[10px] font-black capitalize transition-all ${aiGenParams.equipment.includes(eq)
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
-                          : 'bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-white'
-                        }`}
+                        className="py-2.5 text-[10px] font-bold capitalize transition-all"
+                        style={{
+                          fontFamily: 'Barlow Condensed, sans-serif',
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                          background: aiGenParams.equipment.includes(eq) ? 'var(--accent)' : 'var(--surface-3)',
+                          color: aiGenParams.equipment.includes(eq) ? '#000' : 'var(--text-dim)',
+                          border: aiGenParams.equipment.includes(eq) ? '2px solid var(--accent)' : '1px solid var(--border)',
+                        }}
                       >
                         {eq}
                       </button>
@@ -722,19 +949,43 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
 
                 {/* Profile strip */}
                 {user && (
-                  <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl px-5 py-4 shadow-inner">
+                  <div
+                    className="px-5 py-4"
+                    style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+                  >
                     <div className="flex gap-6">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Goal</p>
-                        <p className="text-sm font-black text-white capitalize">{user.goal}</p>
+                        <p
+                          className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+                          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                        >
+                          Goal
+                        </p>
+                        <p className="text-sm font-bold text-white capitalize" style={{ fontFamily: 'Syne, sans-serif' }}>
+                          {user.goal}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Experience</p>
-                        <p className="text-sm font-black text-white capitalize">{user.experience}</p>
+                        <p
+                          className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+                          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                        >
+                          Experience
+                        </p>
+                        <p className="text-sm font-bold text-white capitalize" style={{ fontFamily: 'Syne, sans-serif' }}>
+                          {user.experience}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Intensity</p>
-                        <p className="text-sm font-black text-white">{user.intensity}/10</p>
+                        <p
+                          className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+                          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                        >
+                          Intensity
+                        </p>
+                        <p className="text-sm font-bold mono" style={{ color: 'var(--accent)' }}>
+                          {user.intensity}/10
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -742,7 +993,10 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
               </div>
 
               {/* Footer CTA */}
-              <div className="px-7 pb-7 pt-4 bg-white">
+              <div
+                className="px-7 pb-7 pt-4"
+                style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}
+              >
                 <button
                   onClick={() => {
                     if (aiGenParams.equipment.length === 0) {
@@ -767,7 +1021,17 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
                       alert(err.message || 'Template generation failed. Try selecting more equipment.');
                     }
                   }}
-                  className="w-full py-4 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 bg-[length:200%_100%] text-white text-sm font-black rounded-2xl hover:shadow-xl hover:shadow-orange-500/40 active:scale-[0.98] transition-all"
+                  className="btn-primary w-full"
+                  style={{
+                    fontFamily: 'Barlow Condensed, sans-serif',
+                    fontWeight: 800,
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    fontSize: '1rem',
+                    padding: '16px 24px',
+                    background: 'var(--accent)',
+                    color: '#000',
+                  }}
                 >
                   Generate &amp; Edit
                 </button>
@@ -775,7 +1039,6 @@ export default function TemplateEditor({ isOpen, onClose, onSave, templates = []
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

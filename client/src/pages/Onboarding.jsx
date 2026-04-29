@@ -74,32 +74,64 @@ export default function Onboarding({ user: authUser, onComplete }) {
   const currentStep = steps[step];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8">
-        {/* Progress */}
-        <div className="flex gap-2 mb-8">
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{ background: 'var(--bg)' }}
+    >
+      {/* Background grid */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(var(--border) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px',
+          opacity: 0.3,
+        }}
+      />
+
+      <div
+        className="w-full max-w-md relative z-10 p-8"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+      >
+        {/* Progress bar */}
+        <div className="flex gap-2 mb-10">
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`flex-1 h-2 rounded-full transition-colors ${
-                i <= step ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+              className="flex-1 h-1 transition-colors"
+              style={{
+                background: i <= step ? 'var(--accent)' : 'var(--border)',
+              }}
             />
           ))}
         </div>
 
-        <h2 className="text-2xl font-bold mb-2">{currentStep.title}</h2>
-        <p className="text-gray-500 mb-6">Step {step + 1} of {steps.length}</p>
+        <div className="mb-2">
+          <p
+            className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
+            style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+          >
+            Step {step + 1} of {steps.length}
+          </p>
+          <h2
+            className="text-4xl font-extrabold text-white tracking-tight"
+            style={{ fontFamily: 'Syne, sans-serif' }}
+          >
+            {currentStep.title}
+          </h2>
+        </div>
 
         {/* Name */}
         {step === 0 && (
           <div>
-            <label className="block text-sm font-medium mb-2">What's your name?</label>
+            <label className="label">What's your name?</label>
             <input
               type="text"
               value={form.name}
               onChange={e => updateField('name', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-lg"
+              className="input"
               placeholder="Enter your name"
               autoFocus
             />
@@ -110,29 +142,29 @@ export default function Onboarding({ user: authUser, onComplete }) {
         {step === 1 && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Age</label>
+              <label className="label">Age</label>
               <input
                 type="number"
                 value={form.age}
                 onChange={e => updateField('age', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="input"
                 placeholder="25"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Weight</label>
+              <label className="label">Weight</label>
               <div className="flex gap-2">
                 <input
                   type="number"
                   value={form.weight}
                   onChange={e => updateField('weight', e.target.value)}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="input flex-1"
                   placeholder="175"
                 />
                 <select
                   value={form.unit}
                   onChange={e => updateField('unit', e.target.value)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="input w-24"
                 >
                   <option value="lbs">lbs</option>
                   <option value="kg">kg</option>
@@ -140,12 +172,12 @@ export default function Onboarding({ user: authUser, onComplete }) {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Height (optional)</label>
+              <label className="label">Height (optional)</label>
               <input
                 type="text"
                 value={form.height}
                 onChange={e => updateField('height', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="input"
                 placeholder={"5'10\" or 178cm"}
               />
             </div>
@@ -154,19 +186,29 @@ export default function Onboarding({ user: authUser, onComplete }) {
 
         {/* Goal */}
         {step === 2 && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {GOALS.map(g => (
               <button
                 key={g.value}
                 onClick={() => updateField('goal', g.value)}
-                className={`p-4 rounded-lg border-2 text-left transition-all ${
-                  form.goal === g.value
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300'
-                }`}
+                className="p-4 text-left transition-all"
+                style={{
+                  border: `2px solid ${form.goal === g.value ? 'var(--accent)' : 'var(--border)'}`,
+                  background: form.goal === g.value ? 'rgba(202,255,0,0.08)' : 'var(--surface-2)',
+                }}
               >
-                <div className="font-medium">{g.label}</div>
-                <div className="text-sm text-gray-500">{g.description}</div>
+                <div
+                  className="font-bold text-sm text-white"
+                  style={{ fontFamily: 'Syne, sans-serif' }}
+                >
+                  {g.label}
+                </div>
+                <div
+                  className="text-xs mt-0.5 font-medium"
+                  style={{ color: 'var(--text-dim)' }}
+                >
+                  {g.description}
+                </div>
               </button>
             ))}
           </div>
@@ -175,25 +217,39 @@ export default function Onboarding({ user: authUser, onComplete }) {
         {/* Experience */}
         {step === 3 && (
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {EXPERIENCE_LEVELS.map(l => (
                 <button
                   key={l.value}
                   onClick={() => updateField('experience', l.value)}
-                  className={`p-4 rounded-lg border-2 text-center transition-all ${
-                    form.experience === l.value
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
+                  className="p-4 text-center transition-all"
+                  style={{
+                    border: `2px solid ${form.experience === l.value ? 'var(--accent)' : 'var(--border)'}`,
+                    background: form.experience === l.value ? 'rgba(202,255,0,0.08)' : 'var(--surface-2)',
+                  }}
                 >
-                  <div className="font-medium text-sm">{l.label}</div>
-                  <div className="text-xs text-gray-500">{l.description}</div>
+                  <div
+                    className="font-bold text-sm text-white"
+                    style={{ fontFamily: 'Syne, sans-serif' }}
+                  >
+                    {l.label}
+                  </div>
+                  <div
+                    className="text-xs mt-0.5 font-medium"
+                    style={{ color: 'var(--text-dim)' }}
+                  >
+                    {l.description}
+                  </div>
                 </button>
               ))}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Preferred Intensity: <span className="text-blue-600 font-bold">{form.intensity}</span>/10
+              <label
+                className="label"
+                style={{ color: 'var(--text-dim)' }}
+              >
+                Preferred Intensity:{' '}
+                <span style={{ color: 'var(--accent)', fontWeight: 800 }}>{form.intensity}</span>/10
               </label>
               <input
                 type="range"
@@ -201,9 +257,12 @@ export default function Onboarding({ user: authUser, onComplete }) {
                 max="10"
                 value={form.intensity}
                 onChange={e => updateField('intensity', parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                className="w-full"
               />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <div
+                className="flex justify-between text-xs mt-1 font-bold"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em' }}
+              >
                 <span>Easy</span>
                 <span>Maximum</span>
               </div>
@@ -212,11 +271,19 @@ export default function Onboarding({ user: authUser, onComplete }) {
         )}
 
         {/* Navigation */}
-        <div className="flex gap-3 mt-8">
+        <div className="flex gap-3 mt-10">
           {step > 0 && (
             <button
               onClick={() => setStep(s => s - 1)}
-              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-6 py-3 font-bold text-sm transition-all"
+              style={{
+                border: `2px solid var(--border)`,
+                color: 'var(--text-dim)',
+                background: 'transparent',
+                fontFamily: 'Barlow Condensed, sans-serif',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+              }}
             >
               Back
             </button>
@@ -226,7 +293,16 @@ export default function Onboarding({ user: authUser, onComplete }) {
             <button
               onClick={() => setStep(s => s + 1)}
               disabled={!canProceed()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 font-bold text-sm transition-all"
+              style={{
+                background: canProceed() ? 'var(--accent)' : 'var(--surface-3)',
+                color: canProceed() ? '#000' : 'var(--text-dim)',
+                fontFamily: 'Barlow Condensed, sans-serif',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                cursor: canProceed() ? 'pointer' : 'not-allowed',
+                border: 'none',
+              }}
             >
               Continue
             </button>
@@ -234,7 +310,16 @@ export default function Onboarding({ user: authUser, onComplete }) {
             <button
               onClick={handleComplete}
               disabled={!canProceed()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 font-bold text-sm transition-all"
+              style={{
+                background: canProceed() ? 'var(--accent)' : 'var(--surface-3)',
+                color: canProceed() ? '#000' : 'var(--text-dim)',
+                fontFamily: 'Barlow Condensed, sans-serif',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                cursor: canProceed() ? 'pointer' : 'not-allowed',
+                border: 'none',
+              }}
             >
               Get Started
             </button>

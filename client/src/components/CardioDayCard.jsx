@@ -25,24 +25,42 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
     cancelEdit(exerciseId);
   }
 
-  function getEditValues(exerciseId) {
-    return editValuesById[exerciseId] || {};
-  }
-
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:border-slate-200 transition-colors shadow-sm">
+    <div
+      className="transition-all"
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+    >
       <div
-        className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 py-3 cursor-pointer hover:from-orange-600 hover:to-amber-600 transition-all"
+        className="px-5 py-3 flex justify-between items-center cursor-pointer"
+        style={{ background: 'var(--surface-2)', borderBottom: expanded ? '1px solid var(--border)' : 'none' }}
         onClick={() => setExpanded(e => !e)}
       >
-        <div className="flex justify-between items-center">
-          <div>
-            <div className="font-bold text-sm">{day.dayOfWeek}</div>
-            <div className="text-xs text-orange-100">{formatDate(day.date)}</div>
+        <div>
+          <div
+            className="font-bold text-sm text-white"
+            style={{ fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+          >
+            {day.dayOfWeek}
           </div>
-          <div className="text-right">
-            <div className="text-xs font-semibold bg-white/15 px-2 py-0.5 rounded-md">Cardio</div>
-            <div className="text-xs text-orange-100 mt-0.5">{workout.exercises.length} exercises</div>
+          <div
+            className="text-xs font-medium mt-0.5"
+            style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+          >
+            {formatDate(day.date)}
+          </div>
+        </div>
+        <div className="text-right">
+          <div
+            className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5"
+            style={{ background: 'rgba(202,255,0,0.15)', color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+          >
+            Cardio
+          </div>
+          <div
+            className="text-xs font-medium mt-0.5"
+            style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+          >
+            {workout.exercises.length} exercises
           </div>
         </div>
       </div>
@@ -51,56 +69,121 @@ export default function CardioDayCard({ day, onAddExercise, onRemoveExercise, on
         <div className="p-4">
           <div className="space-y-2">
             {workout.exercises.map((ex, i) => (
-              <div key={i} className="rounded-xl p-3 border border-orange-100 bg-orange-50/50">
+              <div
+                key={i}
+                className="p-3"
+                style={{ background: 'var(--surface-2)', border: '1px solid rgba(202,255,0,0.2)' }}
+              >
                 {editValuesById[ex.exerciseId] ? (
                   <div className="space-y-2">
-                    <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    <div
+                      className="font-bold text-sm text-white"
+                      style={{ fontFamily: 'Syne, sans-serif' }}
+                    >
+                      {ex.name}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <label className="text-xs text-slate-500 font-medium">Duration ({ex.unit})</label>
-                        <input type="number" value={getEditValues(ex.exerciseId).reps} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], reps: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" min="1" />
+                        <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>Duration (min)</label>
+                        <input
+                          type="number"
+                          value={editValuesById[ex.exerciseId].reps}
+                          onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], reps: parseInt(e.target.value) || 0 } }))}
+                          className="input text-sm py-1.5"
+                          min="1"
+                        />
                       </div>
                       <div>
-                        <label className="text-xs text-slate-500 font-medium">Rest (s)</label>
-                        <input type="number" value={getEditValues(ex.exerciseId).restSeconds} onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 } }))} className="input text-sm py-1.5" />
+                        <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>Rest (s)</label>
+                        <input
+                          type="number"
+                          value={editValuesById[ex.exerciseId].restSeconds}
+                          onChange={e => setEditValuesById(p => ({ ...p, [ex.exerciseId]: { ...p[ex.exerciseId], restSeconds: parseInt(e.target.value) || 0 } }))}
+                          className="input text-sm py-1.5"
+                        />
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => saveEdit(ex.exerciseId)} className="px-3 py-1.5 bg-orange-500 text-white text-xs font-bold rounded-lg hover:bg-orange-600">Save</button>
-                      <button onClick={() => cancelEdit(ex.exerciseId)} className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg hover:bg-slate-200">Cancel</button>
+                      <button
+                        onClick={() => saveEdit(ex.exerciseId)}
+                        className="px-3 py-1.5 font-bold text-xs transition-all"
+                        style={{ background: 'var(--accent)', color: '#000', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => cancelEdit(ex.exerciseId)}
+                        className="px-3 py-1.5 font-bold text-xs transition-all"
+                        style={{ background: 'var(--surface-3)', color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+                      >
+                        Cancel
+                      </button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-semibold text-sm text-slate-900">{ex.name}</div>
-                      <div className="text-xs text-slate-500">{ex.sets} × {ex.reps} {ex.unit}</div>
+                      <div className="font-semibold text-sm text-white" style={{ fontFamily: 'Syne, sans-serif' }}>{ex.name}</div>
+                      <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}>{ex.sets} × {ex.reps} {ex.unit}</div>
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={() => startEdit(ex)} className="text-xs font-semibold text-orange-500 hover:text-orange-700 px-2 py-1 rounded-lg hover:bg-orange-50 transition-all">Edit</button>
-                      <button onClick={() => onRemoveExercise(ex.exerciseId)} className="text-xs text-slate-300 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition-all">✕</button>
+                      <button
+                        onClick={() => startEdit(ex)}
+                        className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 transition-all"
+                        style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em', border: '1px solid var(--accent)' }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => onRemoveExercise(ex.exerciseId)}
+                        className="text-lg font-bold transition-all hover:opacity-60"
+                        style={{ color: 'var(--border)' }}
+                      >
+                        ×
+                      </button>
                     </div>
                   </div>
                 )}
               </div>
             ))}
           </div>
-          <button onClick={onAddExercise} className="mt-3 w-full py-2 border-2 border-dashed border-orange-200 text-orange-400 rounded-xl hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50 text-xs font-semibold transition-all">
+          <button
+            onClick={onAddExercise}
+            className="mt-3 w-full py-2 font-bold text-xs uppercase tracking-widest transition-all"
+            style={{
+              border: '2px dashed var(--border)',
+              color: 'var(--text-dim)',
+              background: 'transparent',
+              fontFamily: 'Barlow Condensed, sans-serif',
+              letterSpacing: '0.1em',
+            }}
+          >
             + Add Exercise
           </button>
         </div>
       ) : (
         <div className="p-4">
-          <div className="text-xs font-semibold text-orange-500 mb-2">{workout.muscleGroups}</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}>
+            {workout.muscleGroups}
+          </div>
           <div className="space-y-1">
             {workout.exercises.slice(0, 3).map((ex, i) => (
-              <div key={i} className="text-sm text-slate-600 truncate flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
+              <div
+                key={i}
+                className="text-sm font-medium truncate flex items-center gap-2"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+              >
+                <div className="w-1.5 h-1.5 shrink-0" style={{ background: 'var(--accent)' }} />
                 {ex.name} ({ex.reps} {ex.unit})
               </div>
             ))}
             {workout.exercises.length > 3 && (
-              <div className="text-xs text-slate-300 font-medium">+{workout.exercises.length - 3} more</div>
+              <div
+                className="text-[10px] font-bold uppercase tracking-widest"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+              >
+                +{workout.exercises.length - 3} more
+              </div>
             )}
           </div>
         </div>

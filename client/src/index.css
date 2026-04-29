@@ -1,53 +1,152 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg: #08080C;
+    --surface: #0F0F14;
+    --surface-2: #17171D;
+    --surface-3: #1E1E26;
+    --accent: #CAFF00;
+    --accent-dim: #9ABB00;
+    --text: #FAFAFA;
+    --text-dim: #8A8A9A;
+    --border: #2A2A35;
+  }
+
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    @apply bg-slate-50 text-slate-900 antialiased;
-    -webkit-tap-highlight-color: transparent;
+    font-family: 'Barlow Condensed', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     padding-env: env(safe-area-inset-bottom);
   }
 
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Syne', sans-serif;
+    letter-spacing: -0.01em;
+  }
+
   * {
-    @apply border-slate-100;
+    border-color: var(--border) !important;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-700 active:scale-[0.98] transition-all;
+    @apply px-6 py-3 font-bold text-sm tracking-wide transition-all;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .btn-primary:hover {
+    background: #d4ff33;
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl hover:bg-slate-50 active:scale-[0.98] transition-all border border-slate-200;
+    @apply px-6 py-3 font-bold text-sm tracking-wide transition-all;
+    background: transparent;
+    color: var(--text);
+    border: 2px solid var(--border);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .btn-ghost {
-    @apply px-4 py-2 text-slate-600 font-medium rounded-lg hover:bg-slate-100 active:scale-[0.98] transition-all;
+    @apply px-4 py-2 font-semibold text-sm tracking-wide transition-all;
+    background: transparent;
+    color: var(--text-dim);
+  }
+  .btn-ghost:hover {
+    color: var(--text);
   }
 
   .card {
-    @apply bg-white rounded-2xl border border-slate-100;
+    background: var(--surface);
+    border: 1px solid var(--border);
   }
 
   .input {
-    @apply w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 outline-none bg-white placeholder:text-slate-300 transition-all text-sm;
+    @apply w-full px-4 py-3.5 font-medium text-sm transition-all outline-none;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .input::placeholder {
+    color: var(--text-dim);
+  }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(202, 255, 0, 0.15);
   }
 
   .label {
-    @apply block text-sm font-medium text-slate-700 mb-1.5;
+    @apply block text-xs font-bold uppercase tracking-widest mb-2;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
   }
 
   .section-title {
-    @apply text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3;
+    @apply text-xs font-bold uppercase tracking-[0.2em] mb-4;
+    color: var(--accent);
+    letter-spacing: 0.15em;
   }
 
   .page-title {
-    @apply text-3xl font-extrabold text-slate-900 tracking-tight;
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .stat-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .badge {
+    @apply text-[10px] font-bold uppercase tracking-widest px-2 py-0.5;
+    background: var(--accent);
+    color: #000;
+    letter-spacing: 0.1em;
+  }
+
+  .badge-outline {
+    @apply text-[10px] font-bold uppercase tracking-widest px-2 py-0.5;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .tag {
+    @apply text-[10px] font-bold uppercase tracking-widest px-2 py-1;
+    background: var(--surface-3);
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
   }
 }
 
@@ -73,4 +172,56 @@
     min-height: 44px;
     min-width: 44px;
   }
+}
+
+/* Custom range slider — neon thumb */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 0;
+  margin-top: -7px;
+  border: 2px solid #000;
+  box-shadow: 0 0 8px var(--accent);
+}
+input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 0;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 0;
+  border: 2px solid #000;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Select element */
+select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+select:focus {
+  border-color: var(--accent);
+  outline: none;
 }

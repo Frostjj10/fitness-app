@@ -55,7 +55,6 @@ export default function SchedulePage({ user }) {
         .eq('schedule_week_id', week.id)
         .order('day_of_week');
 
-      // Sort days by weekday order (Monday=0, Tuesday=1, ... Sunday=6)
       const DAY_ORDER = { monday: 0, tuesday: 1, wednesday: 2, thursday: 3, friday: 4, saturday: 5, sunday: 6 };
       days.sort((a, b) => (DAY_ORDER[a.day_of_week] ?? 7) - (DAY_ORDER[b.day_of_week] ?? 7));
 
@@ -67,7 +66,6 @@ export default function SchedulePage({ user }) {
             .eq('schedule_day_id', day.id)
             .order('sort_order');
 
-          // Normalize exercises from snake_case (DB) to camelCase (code)
           const normalizedExercises = (exercises || []).map(ex => ({
             exerciseId: ex.exercise_id,
             name: ex.name,
@@ -102,7 +100,6 @@ export default function SchedulePage({ user }) {
       };
     }));
 
-    // Fetch schedule metadata
     const { data: scheduleMeta } = await supabase
       .from('schedules')
       .select('*')
@@ -171,16 +168,10 @@ export default function SchedulePage({ user }) {
   }
 
   async function handleRemoveExercise(dayOfWeek, exerciseId) {
-    if (!exerciseId) {
-      console.warn('handleRemoveExercise: no exerciseId provided for dayOfWeek', dayOfWeek);
-      return;
-    }
+    if (!exerciseId) return;
     const week = schedule.schedule[selectedWeek];
     const day = week.days.find(d => d.dayOfWeek === dayOfWeek);
-    if (!day?.id) {
-      console.warn('handleRemoveExercise: day not found for', dayOfWeek, 'or no day.id');
-      return;
-    }
+    if (!day?.id) return;
 
     const { error } = await supabase
       .from('workout_exercises')
@@ -188,10 +179,7 @@ export default function SchedulePage({ user }) {
       .eq('schedule_day_id', day.id)
       .eq('exercise_id', exerciseId);
 
-    if (error) {
-      console.error('handleRemoveExercise error:', error);
-      return;
-    }
+    if (error) return;
 
     const fullSchedule = await loadFullSchedule(schedule.id);
     setSchedule(fullSchedule);
@@ -202,13 +190,11 @@ export default function SchedulePage({ user }) {
     const day = week.days.find(d => d.dayOfWeek === dayOfWeek);
     if (!day?.id) return;
 
-    // Find the exercise to check if it's cardio (unit = 'min')
     const ex = day.workout?.exercises?.find(e => e.exerciseId === exerciseId);
     const isCardio = ex?.unit === 'min';
 
-    // Convert camelCase updates to snake_case for Supabase
     const dbUpdates = isCardio
-      ? { reps: updates.reps } // Cardio: only update duration (stored in reps)
+      ? { reps: updates.reps }
       : {
           sets: updates.sets,
           reps: updates.reps,
@@ -227,13 +213,33 @@ export default function SchedulePage({ user }) {
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-gray-500">Loading schedule...</div>;
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div
+          className="text-xl font-extrabold tracking-tight"
+          style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-dim)' }}
+        >
+          Loading...
+        </div>
+      </div>
+    );
   }
 
   if (!schedule || !schedule.schedule) {
     return (
-      <div className="text-center py-20">
-        <p className="text-gray-500">No active schedule. Create one from the Dashboard.</p>
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div
+          className="text-5xl font-extrabold mb-4"
+          style={{ fontFamily: 'Syne, sans-serif', color: 'var(--border)' }}
+        >
+          NO SCHEDULE
+        </div>
+        <p
+          className="text-sm font-medium"
+          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+        >
+          Create one from the Dashboard first.
+        </p>
       </div>
     );
   }
@@ -241,33 +247,65 @@ export default function SchedulePage({ user }) {
   const currentWeek = schedule.schedule[selectedWeek] || { weekNum: 1, days: [] };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Schedule</h1>
-        <div className="text-xs sm:text-sm text-slate-500">{formatDateLong(schedule.start_date)} — {formatDateLong(schedule.end_date)}</div>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1
+            className="text-4xl font-extrabold text-white tracking-tight"
+            style={{ fontFamily: 'Syne, sans-serif' }}
+          >
+            Schedule
+          </h1>
+          <p
+            className="text-sm font-medium mt-2"
+            style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+          >
+            {formatDateLong(schedule.start_date)} — {formatDateLong(schedule.end_date)}
+          </p>
+        </div>
+        <div
+          className="text-[10px] font-bold uppercase tracking-widest"
+          style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.2em' }}
+        >
+          {schedule.schedule.length} Week Block
+        </div>
       </div>
 
-      {/* Week selector - horizontal scroll on mobile */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible scrollbar-hide">
+      {/* Week selector */}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
         {schedule.schedule.map((week, i) => (
           <button
             key={i}
             onClick={() => setSelectedWeek(i)}
-            className={`px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all shrink-0 ${
-              selectedWeek === i ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+            className="px-5 py-2.5 font-bold text-sm transition-all shrink-0"
+            style={{
+              fontFamily: 'Barlow Condensed, sans-serif',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              background: selectedWeek === i ? 'var(--accent)' : 'var(--surface-2)',
+              color: selectedWeek === i ? '#000' : 'var(--text-dim)',
+              border: selectedWeek === i ? '2px solid var(--accent)' : '1px solid var(--border)',
+            }}
           >
-            Week {week.weekNum}
+            Wk {week.weekNum}
           </button>
         ))}
       </div>
 
-      {/* 7-day grid - single column on mobile */}
+      {/* 7-day grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(dayName => {
           const day = currentWeek.days?.find(d => d.dayOfWeek === dayName);
           if (!day) return null;
-          if (day.type === 'rest') return <RestDayCard key={dayName} day={day} onAddExercise={(pplType) => handleAddExercise(day.dayOfWeek, pplType)} onRemoveExercise={(exerciseId) => handleRemoveExercise(day.dayOfWeek, exerciseId)} />;
+          if (day.type === 'rest') return (
+            <RestDayCard
+              key={dayName}
+              day={day}
+              onAddExercise={(pplType) => handleAddExercise(day.dayOfWeek, pplType)}
+              onRemoveExercise={(exerciseId) => handleRemoveExercise(day.dayOfWeek, exerciseId)}
+            />
+          );
           if (day.type === 'cardio') {
             return (
               <CardioDayCard
@@ -291,7 +329,6 @@ export default function SchedulePage({ user }) {
         })}
       </div>
 
-      {/* Exercise picker modal */}
       <ExercisePicker
         isOpen={pickerOpen}
         onClose={() => { setPickerOpen(false); setPickerDay(null); }}

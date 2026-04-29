@@ -14,11 +14,10 @@ export default function Dashboard({ user }) {
   const [workoutDays, setWorkoutDays] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('ppl');
-  const [selectedWeek, setSelectedWeek] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [generatorOpen, setGeneratorOpen] = useState(false);
-  const [generatedFlash, setGeneratedFlash] = useState(null); // id of most recently generated template
+  const [generatedFlash, setGeneratedFlash] = useState(null);
   const [generatorParams, setGeneratorParams] = useState({
     daysPerWeek: 4,
     splitType: 'auto',
@@ -135,7 +134,6 @@ export default function Dashboard({ user }) {
         if (typeof dayTypes === 'string') {
           try { dayTypes = JSON.parse(dayTypes); } catch { dayTypes = []; }
         }
-        // If dayTypes is empty/invalid, mark template as invalid
         if (!dayTypes || !Array.isArray(dayTypes) || dayTypes.length < 2) {
           return { ...t, dayTypes: [], _invalid: true };
         }
@@ -160,7 +158,6 @@ export default function Dashboard({ user }) {
         return { ...t, dayTypes: normalizedDayTypes };
       });
 
-      // Only use DB templates that have valid dayTypes
       const validDbTemplates = normalized.filter(t => !t._invalid);
       const fetchedIds = new Set(validDbTemplates.map(t => t.id));
       const missingDefaults = defaultTemplates.filter(t => !fetchedIds.has(t.id));
@@ -343,181 +340,330 @@ export default function Dashboard({ user }) {
   const activeDaysPerWeek = currentSchedule?.workoutDays?.length || 0;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
+      {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-slate-500 mt-1 text-xs sm:text-sm">Welcome back, {user.name}</p>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="text-sm font-medium mt-2" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Welcome back, {user.name}
+          </p>
         </div>
+        {currentSchedule && (
+          <Link
+            to="/log"
+            className="btn-primary"
+            style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '0.875rem' }}
+          >
+            Start Workout
+          </Link>
+        )}
       </div>
 
       {!currentSchedule ? (
-        <div className="bg-white rounded-2xl shadow-shadow-xl border border-slate-100 p-4 sm:p-6 lg:p-8">
-          <div className="mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-1">Build Your Program</h2>
-            <p className="text-slate-500 text-xs sm:text-sm">Choose your training days and a template to generate your 4-week block.</p>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+          {/* Program builder header */}
+          <div className="px-6 pt-6 pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
+            <h2 className="text-2xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Syne, sans-serif' }}>
+              Build Your Program
+            </h2>
+            <p className="text-sm font-medium mt-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.03em' }}>
+              Choose your training days and template
+            </p>
           </div>
 
-          <div className="mb-6">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Select Training Days</p>
-            <div className="flex flex-wrap gap-2">
-              {DAYS.map(day => (
-                <button
-                  key={day}
-                  onClick={() => toggleDay(day)}
-                  className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl font-bold text-xs sm:text-sm transition-all ${
-                    workoutDays.includes(day)
-                      ? 'bg-slate-900 text-white shadow-lg'
-                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                  }`}
-                >
-                  {day.slice(0, 3)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Template</p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setGeneratorOpen(true)}
-                  className="text-xs text-orange-500 hover:text-orange-600 font-semibold"
-                >
-                  Smart Generate
-                </button>
-                <button
-                  onClick={() => setEditorOpen(true)}
-                  className="text-xs text-orange-500 hover:text-orange-600 font-semibold"
-                >
-                  Edit
-                </button>
+          <div className="p-6 space-y-6">
+            {/* Training days */}
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}>
+                Select Training Days
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {DAYS.map(day => (
+                  <button
+                    key={day}
+                    onClick={() => toggleDay(day)}
+                    className="w-12 h-12 font-bold text-xs transition-all"
+                    style={{
+                      fontFamily: 'Barlow Condensed, sans-serif',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      background: workoutDays.includes(day) ? 'var(--accent)' : 'var(--surface-2)',
+                      color: workoutDays.includes(day) ? '#000' : 'var(--text-dim)',
+                      border: workoutDays.includes(day) ? '2px solid var(--accent)' : '1px solid var(--border)',
+                    }}
+                  >
+                    {day.slice(0, 3)}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {templates.map(t => {
-                const isGenerated = t.id.startsWith('generated-');
-                const isFlash = generatedFlash === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedTemplate(t.id)}
-                    className={`p-4 sm:p-5 rounded-xl border-2 text-left transition-all ${
-                      selectedTemplate === t.id
-                        ? isGenerated
-                          ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-200'
-                          : 'border-slate-900 bg-slate-900 text-white'
-                        : isFlash
-                        ? 'border-orange-300 bg-orange-50'
-                        : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="font-bold text-sm flex-1">{t.name}</div>
-                      {isGenerated && (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0 ${selectedTemplate === t.id ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-600'}`}>
-                          Generated
-                        </span>
-                      )}
-                    </div>
-                    <div className={`text-xs mt-1 ${selectedTemplate === t.id ? (isGenerated ? 'text-orange-400' : 'text-slate-400') : 'text-slate-500'}`}>
-                      {(() => {
-                        const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
-                        return `${dt.length} days`;
-                      })()}
-                    </div>
-                    {isFlash && (
-                      <div className="text-xs text-orange-500 font-semibold mt-1">✓ Template created!</div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
-          <button
-            onClick={generateSchedule}
-            disabled={workoutDays.length === 0 || generating}
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 text-sm"
-          >
-            {generating ? 'Building...' : 'Generate 4-Week Block'}
-          </button>
+            {/* Template */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}>
+                  Template
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setGeneratorOpen(true)}
+                    className="text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+                  >
+                    Smart Generate
+                  </button>
+                  <button
+                    onClick={() => setEditorOpen(true)}
+                    className="text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80"
+                    style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {templates.map(t => {
+                  const isGenerated = t.id.startsWith('generated-');
+                  const isFlash = generatedFlash === t.id;
+                  const isSelected = selectedTemplate === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setSelectedTemplate(t.id)}
+                      className="p-4 text-left transition-all"
+                      style={{
+                        border: `2px solid ${isSelected ? (isGenerated ? 'var(--accent)' : 'var(--text)') : 'var(--border)'}`,
+                        background: isSelected
+                          ? (isGenerated ? 'rgba(202,255,0,0.1)' : 'var(--text)')
+                          : isFlash
+                          ? 'rgba(202,255,0,0.08)'
+                          : 'var(--surface-2)',
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div
+                          className="font-bold text-sm flex-1"
+                          style={{
+                            fontFamily: 'Syne, sans-serif',
+                            color: isSelected ? (isGenerated ? 'var(--accent)' : '#000') : 'var(--text)',
+                          }}
+                        >
+                          {t.name}
+                        </div>
+                        {isGenerated && (
+                          <span
+                            className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 shrink-0"
+                            style={{
+                              background: isSelected ? '#000' : 'var(--accent)',
+                              color: isSelected ? 'var(--accent)' : '#000',
+                              fontFamily: 'Barlow Condensed, sans-serif',
+                              letterSpacing: '0.1em',
+                            }}
+                          >
+                            Generated
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className="text-xs mt-1 font-medium"
+                        style={{
+                          color: isSelected ? (isGenerated ? 'var(--accent)' : 'var(--text-dim)') : 'var(--text-dim)',
+                          fontFamily: 'Barlow Condensed, sans-serif',
+                        }}
+                      >
+                        {(() => {
+                          const dt = Array.isArray(t.dayTypes) ? t.dayTypes : Array.isArray(t.day_types) ? t.day_types : [];
+                          return `${dt.length} days`;
+                        })()}
+                      </div>
+                      {isFlash && (
+                        <div className="text-xs font-bold mt-1" style={{ color: 'var(--accent)' }}>
+                          Template created!
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Generate button */}
+            <button
+              onClick={generateSchedule}
+              disabled={workoutDays.length === 0 || generating}
+              className="btn-primary w-full"
+              style={{
+                fontFamily: 'Barlow Condensed, sans-serif',
+                fontWeight: 800,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                fontSize: '1rem',
+                padding: '16px 24px',
+                opacity: (workoutDays.length === 0 || generating) ? 0.4 : 1,
+              }}
+            >
+              {generating ? 'Building...' : 'Generate 4-Week Block'}
+            </button>
+          </div>
         </div>
       ) : (
-        <div>
+        <div className="space-y-4">
           {/* Stats row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Current Block</p>
-              <p className="text-xs sm:text-sm font-bold text-slate-900">{formatDateLong(currentSchedule.startDate)}</p>
-              <p className="text-xs text-slate-500">to {formatDateLong(currentSchedule.endDate)}</p>
+            <div className="p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}>
+                Current Block
+              </p>
+              <p className="text-sm font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
+                {formatDateLong(currentSchedule.startDate)}
+              </p>
+              <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}>
+                to {formatDateLong(currentSchedule.endDate)}
+              </p>
             </div>
-            <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Week</p>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" style={{ width: `${getWeekProgress()}%` }} />
+            <div className="p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}>
+                Week Progress
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-1.5" style={{ background: 'var(--surface-3)' }}>
+                  <div className="h-full" style={{ width: `${getWeekProgress()}%`, background: 'var(--accent)' }} />
                 </div>
-                <span className="text-xs font-bold text-slate-700">{Math.round(getWeekProgress())}%</span>
+                <span className="text-sm font-bold mono" style={{ color: 'var(--accent)' }}>
+                  {Math.round(getWeekProgress())}%
+                </span>
               </div>
             </div>
-            <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Days</p>
-              <p className="text-xs sm:text-sm font-bold text-slate-900">{currentSchedule.workoutDays?.join(', ') || 'None'}</p>
+            <div className="p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}>
+                Training Days
+              </p>
+              <p className="text-sm font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
+                {currentSchedule.workoutDays?.join(', ') || 'None'}
+              </p>
             </div>
           </div>
 
           {/* Next workout */}
           {nextWorkout && (
-            <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mt-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M14.5 4l-5 6-3 5 6.5 6L20 10l-5.5-6z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-orange-500 uppercase tracking-wider">Next Workout</p>
-                    <p className="text-base sm:text-lg font-bold text-slate-900">{nextWorkout.dayOfWeek}</p>
-                    <p className="text-xs sm:text-sm text-slate-500">{nextWorkout.muscleGroups} · {nextWorkout.exercises?.length || 0} exercises</p>
-                  </div>
+            <div
+              className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-12 h-12 flex items-center justify-center shrink-0"
+                  style={{ background: 'var(--accent)' }}
+                >
+                  <svg className="w-6 h-6 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                    <path d="M14.5 4l-5 6-3 5 6.5 6L20 10l-5.5-6z"/>
+                  </svg>
                 </div>
-                <Link to="/log" className="w-full sm:w-auto text-center px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 active:scale-[0.98] transition-all text-sm">
-                  Start
-                </Link>
+                <div>
+                  <p
+                    className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Next Workout
+                  </p>
+                  <p
+                    className="text-xl font-extrabold text-white"
+                    style={{ fontFamily: 'Syne, sans-serif' }}
+                  >
+                    {nextWorkout.dayOfWeek}
+                  </p>
+                  <p
+                    className="text-xs font-medium mt-0.5"
+                    style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                  >
+                    {nextWorkout.muscleGroups} · {nextWorkout.exercises?.length || 0} exercises
+                  </p>
+                </div>
               </div>
+              <Link
+                to="/log"
+                className="btn-primary text-center"
+                style={{
+                  fontFamily: 'Barlow Condensed, sans-serif',
+                  fontWeight: 800,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  fontSize: '0.875rem',
+                  padding: '12px 24px',
+                  flexShrink: 0,
+                }}
+              >
+                Start
+              </Link>
             </div>
           )}
 
-          {/* Quick stats */}
-          <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-6 mt-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-slate-900">Block Overview</h2>
-              <Link to="/schedule" className="text-xs text-orange-500 font-semibold hover:text-orange-600">View Schedule →</Link>
+          {/* Block overview */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }} className="p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2
+                className="text-base font-extrabold text-white tracking-tight"
+                style={{ fontFamily: 'Syne, sans-serif' }}
+              >
+                Block Overview
+              </h2>
+              <Link
+                to="/schedule"
+                className="text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80"
+                style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+              >
+                View Schedule →
+              </Link>
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <div className="text-center p-3 sm:p-4 bg-slate-50 rounded-xl">
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">{currentSchedule.schedule?.length || 0}</div>
-                <div className="text-xs text-slate-500 mt-1 font-medium">Weeks</div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-4" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                <div className="stat-number">{currentSchedule.schedule?.length || 0}</div>
+                <div
+                  className="text-[10px] font-bold uppercase tracking-widest mt-1"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                >
+                  Weeks
+                </div>
               </div>
-              <div className="text-center p-3 sm:p-4 bg-slate-50 rounded-xl">
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">{activeDaysPerWeek}</div>
-                <div className="text-xs text-slate-500 mt-1 font-medium">Days/Wk</div>
+              <div className="text-center p-4" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                <div className="stat-number">{activeDaysPerWeek}</div>
+                <div
+                  className="text-[10px] font-bold uppercase tracking-widest mt-1"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                >
+                  Days/Wk
+                </div>
               </div>
-              <div className="text-center p-3 sm:p-4 bg-slate-50 rounded-xl">
-                <div className="text-sm sm:text-xl font-extrabold text-orange-500 truncate">
+              <div className="text-center p-4" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                <div
+                  className="text-sm font-bold truncate"
+                  style={{ color: 'var(--accent)', fontFamily: 'Syne, sans-serif' }}
+                >
                   {currentSchedule.templateId ? templates.find(t => t.id === currentSchedule.templateId)?.name || 'Custom' : '—'}
                 </div>
-                <div className="text-xs text-slate-500 mt-1 font-medium">Template</div>
+                <div
+                  className="text-[10px] font-bold uppercase tracking-widest mt-1"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                >
+                  Template
+                </div>
               </div>
             </div>
           </div>
 
+          {/* New block */}
           <button
             onClick={clearSchedule}
-            className="w-full mt-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-slate-300 hover:text-slate-600 font-medium text-sm transition-all"
+            className="w-full py-3 font-bold text-sm transition-all hover:opacity-80"
+            style={{
+              border: '2px dashed var(--border)',
+              color: 'var(--text-dim)',
+              background: 'transparent',
+              fontFamily: 'Barlow Condensed, sans-serif',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
           >
             + New Block
           </button>
@@ -533,49 +679,87 @@ export default function Dashboard({ user }) {
         user={user}
       />
 
-{/* Smart Generator Modal */}
+      {/* Smart Generator Modal */}
       {generatorOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ maxHeight: '92vh' }}>
-
-            {/* Hero header */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-7 pt-7 pb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/40">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          style={{ background: 'rgba(8,8,12,0.9)', backdropFilter: 'blur(8px)' }}
+        >
+          <div
+            className="w-full max-w-md overflow-hidden"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+          >
+            {/* Header */}
+            <div className="px-7 pt-7 pb-6" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+                  <svg className="w-5 h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="square">
+                    <path strokeLinecap="square" strokeLinejoin="miter" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <button onClick={() => setGeneratorOpen(false)} className="text-slate-500 hover:text-white text-2xl leading-none transition-colors">×</button>
+                <button
+                  onClick={() => setGeneratorOpen(false)}
+                  className="text-3xl leading-none transition-colors font-light"
+                  style={{ color: 'var(--text-dim)' }}
+                >
+                  ×
+                </button>
               </div>
-              <h2 className="text-xl font-black text-white tracking-tight">Smart Generate</h2>
-              <p className="text-slate-400 text-sm mt-1">Build a custom training template tailored to your goals</p>
+              <h2
+                className="text-xl font-extrabold text-white tracking-tight"
+                style={{ fontFamily: 'Syne, sans-serif' }}
+              >
+                Smart Generate
+              </h2>
+              <p className="text-sm font-medium mt-1" style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.03em' }}>
+                Build a custom training template
+              </p>
             </div>
 
             {/* Scrollable body */}
-            <div className="overflow-y-auto px-7 py-5 space-y-3" style={{ maxHeight: 'calc(92vh - 180px)' }}>
-
-              {/* Training Days — bold gradient block */}
-              <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-5 text-white shadow-xl shadow-orange-500/20">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-orange-100">Training Days per Week</span>
-                  <span className="text-5xl font-black text-white leading-none">{generatorParams.daysPerWeek}</span>
+            <div
+              className="overflow-y-auto px-7 py-5 space-y-3"
+              style={{ maxHeight: 'calc(92vh - 180px)', flex: 1 }}
+            >
+              {/* Training Days — bold block */}
+              <div className="p-5" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                <div className="flex items-center justify-between mb-4">
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Training Days / Week
+                  </span>
+                  <span
+                    className="text-5xl font-extrabold leading-none"
+                    style={{ color: 'var(--accent)', fontFamily: 'Syne, sans-serif' }}
+                  >
+                    {generatorParams.daysPerWeek}
+                  </span>
                 </div>
                 <input
                   type="range" min="2" max="6"
                   value={generatorParams.daysPerWeek}
                   onChange={e => setGeneratorParams(p => ({ ...p, daysPerWeek: parseInt(e.target.value) }))}
-                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-white bg-white/30"
+                  className="w-full"
                 />
-                <p className="text-xs text-orange-100 mt-2 font-semibold">
+                <p
+                  className="text-xs font-bold mt-3"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em' }}
+                >
                   {generatorParams.daysPerWeek <= 3 ? '→ Full Body split' :
                    generatorParams.daysPerWeek === 4 ? '→ Upper / Lower split' : '→ Push / Pull / Legs split'}
                 </p>
               </div>
 
               {/* Split type */}
-              <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-3">Training Split</label>
+              <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }} className="p-5">
+                <label
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-3"
+                  style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                >
+                  Training Split
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { value: 'auto', label: 'Auto' },
@@ -588,10 +772,15 @@ export default function Dashboard({ user }) {
                       <button
                         key={opt.value}
                         onClick={() => setGeneratorParams(p => ({ ...p, splitType: opt.value }))}
-                        className={`py-2.5 rounded-xl text-sm font-black text-center transition-all ${active
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30'
-                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
-                        }`}
+                        className="py-2.5 text-sm font-bold text-center transition-all"
+                        style={{
+                          fontFamily: 'Barlow Condensed, sans-serif',
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                          background: active ? 'var(--accent)' : 'var(--surface-3)',
+                          color: active ? '#000' : 'var(--text-dim)',
+                          border: active ? '2px solid var(--accent)' : '1px solid var(--border)',
+                        }}
                       >
                         {opt.label}
                       </button>
@@ -602,7 +791,12 @@ export default function Dashboard({ user }) {
 
               {/* Session length */}
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-3">Session Length</label>
+                <label
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-3"
+                  style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                >
+                  Session Length
+                </label>
                 <div className="grid grid-cols-3 gap-2">
                   {GENERATOR_OPTIONS.sessionLength.map(opt => {
                     const active = generatorParams.sessionLength === opt.value;
@@ -610,13 +804,23 @@ export default function Dashboard({ user }) {
                       <button
                         key={opt.value}
                         onClick={() => setGeneratorParams(p => ({ ...p, sessionLength: opt.value }))}
-                        className={`py-3 px-2 rounded-2xl text-center transition-all border-2 ${active
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 border-transparent text-white shadow-lg shadow-orange-500/30'
-                          : 'bg-white border-slate-200 text-slate-600 hover:border-orange-400 hover:bg-orange-50'
-                        }`}
+                        className="py-3 px-2 text-center transition-all border-2 font-bold text-sm"
+                        style={{
+                          fontFamily: 'Barlow Condensed, sans-serif',
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                          background: active ? 'var(--accent)' : 'var(--surface-2)',
+                          color: active ? '#000' : 'var(--text-dim)',
+                          borderColor: active ? 'var(--accent)' : 'var(--border)',
+                        }}
                       >
-                        <div className={`text-sm font-black ${active ? 'text-white' : 'text-slate-700'}`}>{opt.label}</div>
-                        <div className={`text-[10px] mt-0.5 ${active ? 'text-orange-200' : 'text-slate-400'}`}>{opt.desc}</div>
+                        {opt.label}
+                        <div
+                          className="text-[10px] mt-0.5 font-medium"
+                          style={{ color: active ? '#000' : 'var(--text-dim)' }}
+                        >
+                          {opt.desc}
+                        </div>
                       </button>
                     );
                   })}
@@ -625,7 +829,12 @@ export default function Dashboard({ user }) {
 
               {/* Cardio */}
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-3">Cardio</label>
+                <label
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-3"
+                  style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                >
+                  Cardio
+                </label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {GENERATOR_OPTIONS.cardioLevel.map(opt => {
                     const active = generatorParams.cardioLevel === opt.value;
@@ -633,17 +842,25 @@ export default function Dashboard({ user }) {
                       <button
                         key={opt.value}
                         onClick={() => setGeneratorParams(p => ({ ...p, cardioLevel: opt.value }))}
-                        className={`py-2.5 rounded-xl text-center transition-all ${active
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30'
-                          : 'bg-slate-100 text-slate-500 hover:bg-orange-100 hover:text-orange-600'
-                        }`}
+                        className="py-2.5 text-center transition-all font-bold text-sm border-2"
+                        style={{
+                          fontFamily: 'Barlow Condensed, sans-serif',
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                          background: active ? 'var(--accent)' : 'var(--surface-2)',
+                          color: active ? '#000' : 'var(--text-dim)',
+                          borderColor: active ? 'var(--accent)' : 'var(--border)',
+                        }}
                       >
-                        <div className="text-xs font-black capitalize">{opt.label}</div>
+                        <span className="text-xs capitalize">{opt.label}</span>
                       </button>
                     );
                   })}
                 </div>
-                <p className="text-xs text-slate-400 mt-2 font-semibold">
+                <p
+                  className="text-xs font-bold mt-2"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em' }}
+                >
                   {generatorParams.cardioLevel === 'none' ? 'No cardio finisher added' :
                    generatorParams.cardioLevel === 'light' ? '1 LISS session per week' :
                    generatorParams.cardioLevel === 'moderate' ? 'HIIT + LISS mixed weekly' : 'High frequency cardio'}
@@ -651,9 +868,19 @@ export default function Dashboard({ user }) {
               </div>
 
               {/* Priority muscles */}
-              <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-1">Priority Muscles</label>
-                <p className="text-xs text-slate-600 mb-3">Add extra isolation volume to lagging muscle groups</p>
+              <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }} className="p-5">
+                <label
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] block mb-1"
+                  style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                >
+                  Priority Muscles
+                </label>
+                <p
+                  className="text-xs font-medium mb-3"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                >
+                  Add extra isolation volume to lagging muscle groups
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {GENERATOR_OPTIONS.priorityMuscles.map(opt => {
                     const isSelected = generatorParams.priorityMuscles.includes(opt.value);
@@ -666,10 +893,15 @@ export default function Dashboard({ user }) {
                             ? p.priorityMuscles.filter(m => m !== opt.value)
                             : [...p.priorityMuscles, opt.value],
                         }))}
-                        className={`py-1.5 px-3 rounded-full text-xs font-black transition-all ${isSelected
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
-                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
-                        }`}
+                        className="py-1.5 px-3 text-xs font-bold transition-all"
+                        style={{
+                          fontFamily: 'Barlow Condensed, sans-serif',
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                          background: isSelected ? 'var(--accent)' : 'var(--surface-3)',
+                          color: isSelected ? '#000' : 'var(--text-dim)',
+                          border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border)',
+                        }}
                       >
                         {opt.label}
                       </button>
@@ -678,26 +910,57 @@ export default function Dashboard({ user }) {
                 </div>
               </div>
 
-              {/* Mobility */}
-              <div className="flex items-center justify-between bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl px-5 py-4 shadow-inner">
+              {/* Mobility toggle */}
+              <div
+                className="flex items-center justify-between px-5 py-4"
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+              >
                 <div>
-                  <div className="text-sm font-black text-white">Mobility Warm-Up</div>
-                  <div className="text-xs text-slate-400">Dynamic stretching &amp; activation circuit</div>
+                  <div
+                    className="text-sm font-bold text-white"
+                    style={{ fontFamily: 'Syne, sans-serif' }}
+                  >
+                    Mobility Warm-Up
+                  </div>
+                  <div
+                    className="text-xs font-medium"
+                    style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                  >
+                    Dynamic stretching &amp; activation circuit
+                  </div>
                 </div>
                 <button
                   onClick={() => setGeneratorParams(p => ({ ...p, includeMobility: !p.includeMobility }))}
-                  className={`w-12 h-7 rounded-full transition-all relative ${generatorParams.includeMobility ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-slate-600'}`}
+                  className="w-12 h-7 transition-all relative"
+                  style={{ background: generatorParams.includeMobility ? 'var(--accent)' : 'var(--surface-3)', border: `1px solid ${generatorParams.includeMobility ? 'var(--accent)' : 'var(--border)'}` }}
                 >
-                  <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-all ${generatorParams.includeMobility ? 'left-[22px]' : 'left-0.5'}`} />
+                  <div
+                    className="absolute top-0.5 w-6 h-6 transition-all"
+                    style={{
+                      background: '#fff',
+                      left: generatorParams.includeMobility ? '22px' : '0.5px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                    }}
+                  />
                 </button>
               </div>
 
               {/* Equipment */}
-              <div className="bg-slate-900 rounded-2xl p-5 shadow-inner">
+              <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }} className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Equipment</label>
+                  <label
+                    className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                    style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                  >
+                    Equipment
+                  </label>
                   {generatorParams.equipment.length <= 2 && (
-                    <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full uppercase">Limited</span>
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider"
+                      style={{ background: 'rgba(202,255,0,0.15)', color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+                    >
+                      Limited
+                    </span>
                   )}
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
@@ -710,10 +973,15 @@ export default function Dashboard({ user }) {
                           ? generatorParams.equipment.filter(x => x !== eq)
                           : [...generatorParams.equipment, eq],
                       }))}
-                      className={`py-2.5 rounded-xl text-[10px] font-black capitalize transition-all ${generatorParams.equipment.includes(eq)
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
-                        : 'bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-white'
-                      }`}
+                      className="py-2.5 text-[10px] font-bold capitalize transition-all"
+                      style={{
+                        fontFamily: 'Barlow Condensed, sans-serif',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        background: generatorParams.equipment.includes(eq) ? 'var(--accent)' : 'var(--surface-3)',
+                        color: generatorParams.equipment.includes(eq) ? '#000' : 'var(--text-dim)',
+                        border: generatorParams.equipment.includes(eq) ? '2px solid var(--accent)' : '1px solid var(--border)',
+                      }}
                     >
                       {eq}
                     </button>
@@ -722,26 +990,59 @@ export default function Dashboard({ user }) {
               </div>
 
               {/* Profile strip */}
-              <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl px-5 py-4 shadow-inner">
+              <div
+                className="px-5 py-4"
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+              >
                 <div className="flex gap-6">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Goal</p>
-                    <p className="text-sm font-black text-white capitalize">{user.goal}</p>
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      Goal
+                    </p>
+                    <p
+                      className="text-sm font-bold text-white capitalize"
+                      style={{ fontFamily: 'Syne, sans-serif' }}
+                    >
+                      {user.goal}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Experience</p>
-                    <p className="text-sm font-black text-white capitalize">{user.experience}</p>
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      Experience
+                    </p>
+                    <p
+                      className="text-sm font-bold text-white capitalize"
+                      style={{ fontFamily: 'Syne, sans-serif' }}
+                    >
+                      {user.experience}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Intensity</p>
-                    <p className="text-sm font-black text-white">{user.intensity}/10</p>
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      Intensity
+                    </p>
+                    <p
+                      className="text-sm font-bold mono"
+                      style={{ color: 'var(--accent)' }}
+                    >
+                      {user.intensity}/10
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Footer CTA */}
-            <div className="px-7 pb-7 pt-4 bg-white">
+            <div className="px-7 pb-7 pt-4" style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
               <button
                 onClick={() => {
                   if (generatorParams.equipment.length === 0) {
@@ -772,7 +1073,17 @@ export default function Dashboard({ user }) {
                     alert(err.message || 'Template generation failed. Try selecting more equipment.');
                   }
                 }}
-                className="w-full py-4 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 bg-[length:200%_100%] animate-shimmer text-white text-sm font-black rounded-2xl hover:shadow-xl hover:shadow-orange-500/40 active:scale-[0.98] transition-all"
+                className="btn-primary w-full"
+                style={{
+                  fontFamily: 'Barlow Condensed, sans-serif',
+                  fontWeight: 800,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  fontSize: '1rem',
+                  padding: '16px 24px',
+                  background: 'var(--accent)',
+                  color: '#000',
+                }}
               >
                 Generate Template
               </button>

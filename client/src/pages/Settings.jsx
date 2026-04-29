@@ -81,12 +81,18 @@ export default function Settings({ user, onUpdate }) {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-slate-500 mt-1">Manage your profile and preferences</p>
+        <h1 className="page-title">Settings</h1>
+        <p
+          className="text-sm font-medium mt-2"
+          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+        >
+          Manage your profile and preferences
+        </p>
       </div>
 
-      <div className="card p-6">
-        <div className="section-title mb-4">Profile</div>
+      {/* Profile section */}
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }} className="p-6">
+        <div className="section-title mb-6">Profile</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="label">Name</label>
@@ -127,44 +133,68 @@ export default function Settings({ user, onUpdate }) {
             </select>
           </div>
           <div className="col-span-2">
-            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <div
+              className="flex items-center gap-4 p-4"
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+            >
               <input
                 type="checkbox"
+                id="progressive_overload"
                 checked={form.progressive_overload ?? true}
                 onChange={e => updateField('progressive_overload', e.target.checked)}
-                className="w-5 h-5 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                style={{ accentColor: 'var(--accent)', width: '20px', height: '20px' }}
               />
-              <div>
-                <div className="text-sm font-semibold text-slate-900">Progressive Overload Suggestions</div>
-                <div className="text-xs text-slate-500">Automatically suggest next session's weight based on your logged performance</div>
-              </div>
+              <label htmlFor="progressive_overload">
+                <div
+                  className="text-sm font-bold text-white"
+                  style={{ fontFamily: 'Syne, sans-serif' }}
+                >
+                  Progressive Overload Suggestions
+                </div>
+                <div
+                  className="text-xs font-medium mt-0.5"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                >
+                  Automatically suggest next session's weight based on your logged performance
+                </div>
+              </label>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 mt-5">
+        <div className="flex items-center gap-4 mt-6">
           <button onClick={saveProfile} className="btn-primary">
             Save Profile
           </button>
           {saved && (
-            <span className="text-orange-500 font-semibold text-sm flex items-center gap-1">
-              ✓ Saved!
+            <span
+              className="text-sm font-bold flex items-center gap-2"
+              style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                <path d="M5 13l4 4L19 7"/>
+              </svg>
+              Saved!
             </span>
           )}
         </div>
       </div>
 
-      <div className="card p-6">
-        <div className="section-title mb-4">Data</div>
+      {/* Data section */}
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }} className="p-6">
+        <div className="section-title mb-6">Data</div>
         <div className="flex gap-3">
-          <button onClick={exportData} className="btn-secondary text-sm">
+          <button onClick={exportData} className="btn-secondary">
             Export Data
           </button>
-          <label className="btn-secondary text-sm cursor-pointer">
+          <label className="btn-secondary cursor-pointer">
             Import Data
             <input type="file" accept=".json" onChange={importData} className="hidden" />
           </label>
         </div>
-        <p className="text-sm text-slate-500 mt-3">
+        <p
+          className="text-sm font-medium mt-4"
+          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+        >
           Export your data as a JSON backup. Import to restore your workout history.
         </p>
       </div>

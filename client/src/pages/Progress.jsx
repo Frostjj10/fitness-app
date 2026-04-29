@@ -80,22 +80,46 @@ export default function Progress({ user }) {
   const prs = getPRs();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Progress</h1>
-        <p className="text-slate-500 mt-1 text-sm">Track your strength gains over time</p>
+        <h1 className="page-title">Progress</h1>
+        <p
+          className="text-sm font-medium mt-2"
+          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+        >
+          Track your strength gains over time
+        </p>
       </div>
 
       {exerciseList.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-16 text-center">
-          <div className="text-slate-200 text-5xl mb-4 font-thin">—</div>
-          <h2 className="text-xl font-bold text-slate-900 mb-1">No Data Yet</h2>
-          <p className="text-slate-500 text-sm">Log your workouts to see your progress here.</p>
+        <div
+          className="flex flex-col items-center justify-center py-32 text-center"
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+        >
+          <div
+            className="text-6xl font-extrabold mb-4"
+            style={{ fontFamily: 'Syne, sans-serif', color: 'var(--border)' }}
+          >
+            — —
+          </div>
+          <h2 className="text-2xl font-extrabold text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>No Data Yet</h2>
+          <p
+            className="text-sm font-medium"
+            style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+          >
+            Log your workouts to see your progress here.
+          </p>
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Select Exercise</label>
+          {/* Exercise selector */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }} className="p-5">
+            <p
+              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-3"
+              style={{ color: 'var(--accent)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+            >
+              Select Exercise
+            </p>
             <select
               value={selectedExercise}
               onChange={e => setSelectedExercise(e.target.value)}
@@ -112,73 +136,165 @@ export default function Progress({ user }) {
             </select>
           </div>
 
+          {/* PR stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Best Weight</div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">{prs.weight}</div>
-              <div className="text-sm text-slate-500 font-medium">{user.unit} × {prs.reps} reps</div>
+            <div className="p-5 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <p
+                className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+              >
+                Best Weight
+              </p>
+              <div className="stat-number">{prs.weight}</div>
+              <div
+                className="text-sm font-medium mt-1"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+              >
+                {user.unit} × {prs.reps} reps
+              </div>
             </div>
-            <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Est. 1RM</div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-orange-500">{prs.estimated1RM}</div>
-              <div className="text-sm text-slate-500 font-medium">{user.unit} · Epley</div>
+            <div className="p-5 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <p
+                className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+              >
+                Est. 1RM
+              </p>
+              <div className="stat-number">{prs.estimated1RM}</div>
+              <div
+                className="text-sm font-medium mt-1"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+              >
+                {user.unit} · Epley
+              </div>
             </div>
-            <div className="bg-white rounded-xl border border-slate-100 p-5 text-center">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Entries</div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">{weightLog.length}</div>
-              <div className="text-sm text-slate-500 font-medium">logged sets</div>
+            <div className="p-5 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <p
+                className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+              >
+                Total Entries
+              </p>
+              <div className="stat-number">{weightLog.length}</div>
+              <div
+                className="text-sm font-medium mt-1"
+                style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+              >
+                logged sets
+              </div>
             </div>
           </div>
 
+          {/* Chart */}
           {chartData.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h2 className="text-base font-bold text-slate-900 mb-4">Weight Progress</h2>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }} className="p-6">
+              <h2
+                className="text-base font-extrabold text-white mb-4 tracking-tight"
+                style={{ fontFamily: 'Syne, sans-serif' }}
+              >
+                Weight Progress
+              </h2>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#94a3b8' }} />
-                    <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="weight" stroke="#f97316" strokeWidth={2.5} dot={{ fill: '#f97316', strokeWidth: 0, r: 4 }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12, fill: 'var(--text-dim)' }} tickLine={false} axisLine={{ stroke: 'var(--border)' }} />
+                    <YAxis tick={{ fontSize: 12, fill: 'var(--text-dim)' }} tickLine={false} axisLine={{ stroke: 'var(--border)' }} />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'var(--surface-2)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 0,
+                        color: 'var(--text)',
+                        fontFamily: 'Barlow Condensed, sans-serif',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        fontSize: '12px',
+                      }}
+                    />
+                    <Line type="monotone" dataKey="weight" stroke="var(--accent)" strokeWidth={2.5} dot={{ fill: 'var(--accent)', strokeWidth: 0, r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
 
-          <div className="bg-white rounded-xl border border-slate-100 overflow-x-auto">
-            <div className="px-4 sm:px-6 py-4 border-b border-slate-100 min-w-[600px]">
-              <h2 className="text-base font-bold text-slate-900">Recent History</h2>
+          {/* History table */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', overflowX: 'auto' }}>
+            <div
+              className="px-6 py-4"
+              style={{ borderBottom: '1px solid var(--border)' }}
+            >
+              <h2 className="text-base font-extrabold text-white tracking-tight" style={{ fontFamily: 'Syne, sans-serif' }}>Recent History</h2>
             </div>
-            <table className="w-full">
+            <table className="w-full" style={{ minWidth: '600px' }}>
               <thead>
-                <tr className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50">
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3">Exercise</th>
-                  <th className="px-6 py-3">Weight</th>
-                  <th className="px-6 py-3">Reps</th>
-                  <th className="px-6 py-3">RPE</th>
-                  <th className="px-6 py-3">Est. 1RM</th>
-                  <th className="px-6 py-3 w-12"></th>
+                <tr
+                  className="text-left"
+                  style={{ background: 'var(--surface-2)' }}
+                >
+                  {['Date', 'Exercise', 'Weight', 'Reps', 'RPE', 'Est. 1RM', ''].map(h => (
+                    <th
+                      key={h}
+                      className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.15em' }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {chartData.slice(-10).reverse().map((entry, i) => (
-                  <tr key={i} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-3 text-sm text-slate-600 font-medium">{entry.date}</td>
-                    <td className="px-6 py-3 text-sm text-slate-600">{selectedExercise}</td>
-                    <td className="px-6 py-3 text-sm font-bold text-slate-900">{entry.weight} {user.unit}</td>
-                    <td className="px-6 py-3 text-sm text-slate-600">{entry.reps}</td>
-                    <td className="px-6 py-3 text-sm text-slate-600">{entry.rpe}/10</td>
-                    <td className="px-6 py-3 text-sm font-bold text-orange-500">{entry.estimated1RM} {user.unit}</td>
+                  <tr
+                    key={i}
+                    className="transition-colors"
+                    style={{ borderTop: '1px solid var(--border)' }}
+                  >
+                    <td
+                      className="px-6 py-3 text-sm font-medium"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                    >
+                      {entry.date}
+                    </td>
+                    <td
+                      className="px-6 py-3 text-sm font-medium"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                    >
+                      {selectedExercise}
+                    </td>
+                    <td
+                      className="px-6 py-3 text-sm font-bold text-white"
+                      style={{ fontFamily: 'Barlow Condensed, sans-serif' }}
+                    >
+                      {entry.weight} {user.unit}
+                    </td>
+                    <td
+                      className="px-6 py-3 text-sm font-medium"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                    >
+                      {entry.reps}
+                    </td>
+                    <td
+                      className="px-6 py-3 text-sm font-medium"
+                      style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                    >
+                      {entry.rpe}/10
+                    </td>
+                    <td
+                      className="px-6 py-3 text-sm font-bold"
+                      style={{ color: 'var(--accent)', fontFamily: 'JetBrains Mono, monospace' }}
+                    >
+                      {entry.estimated1RM} {user.unit}
+                    </td>
                     <td className="px-6 py-3">
                       <button
                         onClick={() => deleteLogEntry(entry.date, selectedExercise)}
-                        className="text-slate-300 hover:text-red-500 text-sm transition-colors"
+                        className="text-lg transition-all hover:opacity-60"
+                        style={{ color: 'var(--border)' }}
                         title="Delete entry"
                       >
-                        ✕
+                        ×
                       </button>
                     </td>
                   </tr>
