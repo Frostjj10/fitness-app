@@ -44,53 +44,129 @@ export default function Auth() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'var(--bg)' }}
-    >
-      {/* Background grid lines */}
+    <div className="min-h-screen flex" style={{ background: 'var(--bg)' }}>
+      {/* Left panel — branding */}
       <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `
-            linear-gradient(var(--border) 1px, transparent 1px),
-            linear-gradient(90deg, var(--border) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-          opacity: 0.3,
-        }}
-      />
+        className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden"
+        style={{ background: 'var(--surface)', borderRight: '1px solid var(--border)' }}
+      >
+        {/* Background grid */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage: `
+              linear-gradient(var(--border) 1px, transparent 1px),
+              linear-gradient(90deg, var(--border) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+          }}
+        />
 
-      <div className="w-full max-w-sm relative z-10">
-        {/* Logo mark */}
-        <div className="text-center mb-12">
-          <div
-            className="inline-flex items-center justify-center w-16 h-16 mb-5"
-            style={{ background: 'var(--accent)' }}
-          >
-            <svg className="w-8 h-8 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-              <path d="M14.5 4l-5 6-3 5 6.5 6L20 10l-5.5-6z"/>
-            </svg>
+        {/* Decorative diagonal stripe */}
+        <div
+          className="absolute top-0 right-0 w-32 h-full"
+          style={{ background: 'var(--accent)', opacity: 0.08 }}
+        />
+
+        {/* Top logo */}
+        <div className="relative z-10 p-10">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ background: 'var(--accent)' }}
+            >
+              <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                <path d="M14.5 4l-5 6-3 5 6.5 6L20 10l-5.5-6z"/>
+              </svg>
+            </div>
+            <span
+              className="font-bold text-white"
+              style={{ fontFamily: 'Syne, sans-serif', fontSize: '1rem', letterSpacing: '0.05em' }}
+            >
+              FitTrack
+            </span>
           </div>
-          <h1
-            className="text-4xl font-extrabold text-white tracking-tighter"
-            style={{ fontFamily: 'Syne, sans-serif' }}
-          >
-            FitTrack
-          </h1>
-          <p
-            className="text-sm mt-3 font-medium"
-            style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
-          >
-            {mode === 'login' ? '— Sign in —' : '— Create account —'}
-          </p>
         </div>
 
-        <div
-          className="p-8"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-        >
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Centered vertical text block */}
+        <div className="relative z-10 px-10">
+          <div
+            className="font-extrabold text-white leading-none"
+            style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(4rem, 8vw, 7rem)', letterSpacing: '-0.04em', lineHeight: 0.85 }}
+          >
+            <div>TRAIN</div>
+            <div style={{ color: 'var(--accent)' }}>YOUR</div>
+            <div>WAY.</div>
+          </div>
+          <div
+            className="mt-8 text-sm font-medium leading-relaxed max-w-xs"
+            style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1.6 }}
+          >
+            AI-powered programming built around your goals, experience, and available equipment.
+          </div>
+          <div className="mt-12 flex items-center gap-4">
+            <div className="w-8 h-px" style={{ background: 'var(--accent)' }} />
+            <span
+              className="text-[10px] font-bold uppercase tracking-widest"
+              style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.2em' }}
+            >
+              Free forever
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom decorative */}
+        <div className="relative z-10 p-10">
+          <div className="flex items-center gap-6">
+            {['Strength', 'Hypertrophy', 'Endurance'].map(g => (
+              <div key={g} className="text-center">
+                <div
+                  className="text-2xl font-extrabold text-white"
+                  style={{ fontFamily: 'Syne, sans-serif' }}
+                >
+                  —
+                </div>
+                <div
+                  className="text-[10px] font-bold uppercase tracking-widest mt-1"
+                  style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}
+                >
+                  {g}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-3 mb-10">
+            <div className="w-10 h-10 flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+              <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                <path d="M14.5 4l-5 6-3 5 6.5 6L20 10l-5.5-6z"/>
+              </svg>
+            </div>
+            <span className="font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>FitTrack</span>
+          </div>
+
+          <div className="mb-8">
+            <h1
+              className="text-3xl font-extrabold text-white tracking-tight"
+              style={{ fontFamily: 'Syne, sans-serif' }}
+            >
+              {mode === 'login' ? 'Sign in' : 'Create account'}
+            </h1>
+            <p
+              className="text-sm font-medium mt-2"
+              style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.03em', textTransform: 'uppercase' }}
+            >
+              {mode === 'login' ? 'Welcome back to FitTrack' : 'Start your training journey'}
+            </p>
+          </div>
+
+          <div className="space-y-3">
             {mode === 'signup' && (
               <div>
                 <label className="label">Full Name</label>
@@ -151,6 +227,7 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading}
+              onClick={handleSubmit}
               className="btn-primary w-full"
               style={{
                 background: 'var(--accent)',
@@ -160,7 +237,7 @@ export default function Auth() {
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 fontSize: '1rem',
-                padding: '14px 24px',
+                padding: '16px 24px',
                 border: 'none',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 opacity: loading ? 0.6 : 1,
@@ -168,7 +245,7 @@ export default function Auth() {
             >
               {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
-          </form>
+          </div>
 
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center">
@@ -177,7 +254,7 @@ export default function Auth() {
             <div className="relative flex justify-center">
               <span
                 className="px-3 text-xs font-bold uppercase tracking-widest"
-                style={{ background: 'var(--surface)', color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
+                style={{ background: 'var(--bg)', color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif' }}
               >
                 or
               </span>
@@ -196,7 +273,7 @@ export default function Auth() {
               setLoading(false);
             }}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-3.5 font-bold text-sm transition-all hover:opacity-80"
+            className="w-full flex items-center justify-center gap-3 py-3.5 font-bold text-sm transition-all"
             style={{
               background: 'var(--surface-2)',
               color: 'var(--text)',
@@ -228,13 +305,6 @@ export default function Auth() {
             </button>
           </div>
         </div>
-
-        <p
-          className="text-center text-xs mt-6"
-          style={{ color: 'var(--text-dim)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}
-        >
-          By continuing, you agree to our Terms of Service
-        </p>
       </div>
     </div>
   );
